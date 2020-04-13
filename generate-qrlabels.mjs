@@ -2,6 +2,7 @@
  * Generates a PDF file of QR Codes, each containing a randomly generated UUID.
  *
  * npm install qrcode pdfkit svg-to-pdfkit uuidjs
+ * node --experimental_modules ./generate-qrlabels.mjs
  **/
 'use strict';
 
@@ -10,9 +11,10 @@ import PDFDocument from 'pdfkit';
 import SVGtoPDF from 'svg-to-pdfkit';
 import uuid from 'uuidjs';
 import fs from 'fs';
+import path from 'path';
 
 (()=>{
-    const QRCODE_SHEET_FILEPATH = './qrcode-sheet-pdf';
+    const QRCODE_SHEET_FILEPATH = './out/qrlabel-sheet.pdf';
     const pdfdoc = new PDFDocument();
     let promises = [];
 
@@ -23,6 +25,7 @@ import fs from 'fs';
     }
     
     Promise.all(promises).then(()=> {
+        fs.mkdirSync(path.dirname(QRCODE_SHEET_FILEPATH), { recursive: true });
         pdfdoc.pipe(fs.createWriteStream(QRCODE_SHEET_FILEPATH));
         pdfdoc.end();
     });
