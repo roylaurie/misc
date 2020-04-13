@@ -1,7 +1,7 @@
 /**
  * Generates a PDF file of QR Codes, each containing a randomly generated UUID.
  *
- * npm install qrcode pdfkit svg-to-pdfkit uuidjs
+ * npm install qrcode pdfkit svg-to-pdfkit uuidjs sprintf
  * node --experimental_modules ./generate-qrlabels.mjs
  **/
 'use strict';
