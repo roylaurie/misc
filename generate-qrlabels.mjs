@@ -15,8 +15,8 @@ import uuid from 'uuidjs';
 import sprintf from 'sprintf';
 
 (()=>{
-    const SVG_WIDTH = 72;
-    const SVG_HEIGHT = 72;
+    const SVG_WIDTH = 72; // scaled up to
+    const SVG_HEIGHT = 72; // scaled up to
     const SVG_MARGIN = 3;
     const QRCODE_SHEET_FILEPATH = './out/qrlabel-sheet.pdf';
 
@@ -41,8 +41,8 @@ import sprintf from 'sprintf';
     }
     
     Promise.all(promises).then(()=>{
-        fs.mkdirSync(path.dirname(QRCODE_SHEET_FILEPATH), { recursive: true });
-        pdfdoc.pipe(fs.createWriteStream(QRCODE_SHEET_FILEPATH));
+        fs.mkdirSync(path.dirname(QRCODE_SHEET_FILEPATH), { recursive: true }); // create dirs if necessary
+        pdfdoc.pipe(fs.createWriteStream(QRCODE_SHEET_FILEPATH)); // save to file
         pdfdoc.end();
     });
 
@@ -59,7 +59,7 @@ function createSVG(width, margin) {
     .then((svg) => {
         // split the uuid in half
         let uuidTop = qruuid.hexString.substring(0, 17); // aaaaaaaa-bbbb-cccc 
-        let uuidBottom = qruuid.hexString.substring(19); // dddd-eeeeeeeeeeee ; skips the first - char
+        let uuidBottom = qruuid.hexString.substring(19); // dddd-eeeeeeeeeeee ; skips the preceding - char
             
         // add the uuid halves to the top and bottom margins of the svg
         svg = svg.substring(0, svg.length - 7) // trim </svg>
