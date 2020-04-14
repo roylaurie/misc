@@ -58,7 +58,7 @@ function createSVG(width, margin) {
     let promise = QRCode.toString(qruuid.hexNoDelim, { type: 'svg', width: width, margin: margin })
     .then((svg) => {
         // split the uuid in half
-        let uuidTop = qruuid.hexString.substring(0, 17); // aaaaaaaa-bbbb-cccc 
+        let uuidTop = qruuid.hexString.substring(0, 18); // aaaaaaaa-bbbb-cccc 
         let uuidBottom = qruuid.hexString.substring(19); // dddd-eeeeeeeeeeee ; skips the preceding - char
             
         // add the uuid halves to the top and bottom margins of the svg
