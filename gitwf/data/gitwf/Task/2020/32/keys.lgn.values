@@ -1,0 +1,14 @@
+id: 202032
+type: feature
+open: true
+title: Create a new network system
+status: assigned
+assignmentType: manage
+assignedEmail: jimp@foo.company
+assignedTimestamp: 32423422
+devVersion: 1.42.322
+releaseVersion: null
+devBranch: task/20200032
+createdTimestamp: 234123412
+closedTimestamp: null
+estimateTimestamp: 1241234112

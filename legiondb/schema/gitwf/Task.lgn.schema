@@ -1,0 +1,69 @@
+schema 'gitwf/Task' Task:
+//schema 'gitwf/Task' Task extends('gitwf/AbstractTask' AbstractTask)
+//schema 'gitwf/Task' Task clones('gitwf/AbstractTask' AbstractTask)
+    import 'gitwf/Repo' Repo
+    import 'gitwf/Task/Log' TaskLog
+
+    key id <id> identifier(prefix(year) pad(3))
+    //key id <uuid> identifier
+    key type <enum([feature,bug])>
+    key open <boolean> default(true)
+    key parentId <Task.id> relate(parent cascade(update delete)) null
+    key parentRepoName <Repo.name> relate(parentRepo) cascade(update)) null
+    key title <string(64)> valid(/^[A-Z]/) default('This is a Title')
+    key status <enum([created,accepted,rejected,assigned,developed,stalled,blocked,cancelled,tested,reviewed,approved,staged,released])> default(created)
+    key assignmentType <enum([accept,assign,manage,research,design,develop,test,review,document,approve,stage,release])> default(accept)
+    key assignedEmail <string> format(email) null
+    key assignedTimestamp <timestamp> null
+    key devVersion <string> null
+    key releaseVersion <string> null
+    key devBranch <string> null
+    key createdTimestamp <timestamp> default(time)
+    key closedTimestamp <timestamp> null
+    key estimateTimestamp <timestamp> null
+    key description <string(max)> format(md) default('This is a description.')
+
+    // overrides an inherited key. throws error otherwise.
+    //key foo <string> override null
+
+    // removes a definition inherited from extends() or clones()
+    //omit key myKey
+    //omit relation children
+    //omit index 'index-emails'
+    //omit selection 'assignee'
+
+    relation children child Task.parentId Task.id cascade(update delete)
+    relation blockers blocker Task.parentId Task.id cascade(update delete)
+    relation log logEntry TaskLog.taskId Task.id cascade(update delete)
+
+    index [Task.open]
+    index [Task.assignedEmail] name('emails')
+    index [Task.devBranch]
+
+    trigger after server update script('create.server.before')
+    trigger before client create script(lib 'update-all')
+
+    selection default:
+        hide [Task.logs]
+
+    selection public:
+        hide [Task.*]
+        show [Task.id]
+
+    selection 'no-blockers' extends(public):
+        hide [Task.blockers,Task.createdTimestamp]
+
+    selection 'no-blockers-or-children' extends('no-blockers')
+        hide [Task.children]
+
+    role public:
+        allow r [Task.id]
+
+    role 'assignee' extends(public):
+        allow rw [Task.*]
+        allow rl [Task.children]
+        deny rwxcdl [selection('no-blockers')]
+
+    config shard annually
+    //config shard script(lib 'shard-often');
+    //config shard script('shard-weird')

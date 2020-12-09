@@ -1,0 +1,12 @@
+schema 'gitwf/task/Log' TaskLog:
+    import 'gitwf/Task' as Task
+
+    key id <id(annual)> identifier
+    key taskId <link(task TaskLog.taskId Task.id)>
+    key type <enum([comment,commit,update])>
+    key timestamp <timestamp> default(time)
+    key userEmail <string> format(email)
+    key text <string> format(md) null
+
+    config default:
+        shard annual

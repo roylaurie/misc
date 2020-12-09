@@ -1,0 +1,6 @@
+schema 'lgndb/lastid' lastid:
+    key schema <schema> identifier
+    key lastId <id>
+
+    config default:
+        shard split('/')

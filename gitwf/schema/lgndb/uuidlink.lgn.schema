@@ -1,0 +1,10 @@
+schema 'lgbdb/uuidlink' uuidlink:
+    key uuid <uuid> identifier
+    key schema <schema>
+    key id <id>
+    key entry <virtual(uuidlink.schema uuidlink.id)> unique
+
+    index [schema,id] unique name('index-entries')
+
+    config default:
+        shard split('-')
