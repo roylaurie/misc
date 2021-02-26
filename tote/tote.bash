@@ -14,7 +14,7 @@ case $action in
         bash $totebin/tote-notes.bash
         ;;
     *)
-        echo "Unknown command"
+        echo "error: Unknown command. Available: notes, note, setup, refresh"
         exit 1
         ;;
 esac
