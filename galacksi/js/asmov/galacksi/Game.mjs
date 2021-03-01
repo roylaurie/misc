@@ -1,6 +1,7 @@
 'use strict';
 
 import Character from './Character.mjs';
+import SystemCharacter from './SystemCharacter.mjs';
 import Round from './Round.mjs';
 import Energy from './Energy.mjs';
 
@@ -10,8 +11,8 @@ export default class Game {
     #currentRound = null;
 
     constructor() {
-        const p1 = new Character('Player 1');
-        const p2 = new Character('Player 2');
+        const p1 = new SystemCharacter('Player 1');
+        const p2 = new SystemCharacter('Player 2');
 
         this.#characters.push(p1);
         this.#characters.push(p2);
