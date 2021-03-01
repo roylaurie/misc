@@ -1,21 +1,15 @@
 'use strict';
 
-import ItemTemplate from './ItemTemplate.mjs';
-
 export default class Item {
-    #itemTemplate = null;
+    #name = null;
     #exhausted = false;
 
-    constructor(itemTemplate) {
-        this.#itemTemplate = itemTemplate;
-    }
-
-    getTemplate() {
-        return this.#itemTemplate;
+    constructor(name) {
+        this.#name = name;
     }
 
     getName() {
-        return this.#itemTemplate.getName();
+        return this.#name;
     }
 
     exhaust() {

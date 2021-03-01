@@ -1,6 +1,7 @@
 'use strict';
 
 import Item from './Item.mjs';
+import Energy from './Energy.mjs';
 import WeaponItem from './WeaponItem.mjs';
 import RechargeItem from './RechargeItem.mjs';
 import ItemTemplate from './ItemTemplate.mjs';

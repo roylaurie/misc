@@ -2,6 +2,7 @@
 
 import Character from './Character.mjs';
 import Round from './Round.mjs';
+import Energy from './Energy.mjs';
 
 export default class Game {
     #characters = [];
