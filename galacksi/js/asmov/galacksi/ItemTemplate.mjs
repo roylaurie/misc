@@ -33,11 +33,11 @@ export default class ItemTemplate {
     create() {
         switch(this.#itemClass) {
         case WeaponItem:
-            return new WeaponItem(this);
+            return new WeaponItem(this.#name);
         case RechargeItem:
-            return new RechargeItem(this);
+            return new RechargeItem(this.#name);
         default:
-            return new Item(this);
+            return new Item(this.#name);
         }
     }
 }
