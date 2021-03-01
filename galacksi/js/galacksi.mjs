@@ -20,34 +20,35 @@ export default class Game {
         return this.#characters;
     }
 
-    getCharactersAlive() {
-        const aliveCharacters = [];
+    getConsciousCharacters() {
+        const consciousCharacters = [];
         for (let i = 0; i < this.#characters.length; ++i) {
-            if (this.#characters[i].alive()) {
-                aliveCharacters.push(this.#characters[i]);
+            if (this.#characters[i].conscious()) {
+                consciousCharacters.push(this.#characters[i]);
             }
         }
 
-        return aliveCharacters;
+        return consciousCharacters;
     }
 
-    getNumCharactersAlive() {
-        let alive = 0;
+    numConscious() {
+        let conscious = 0;
         for (let i = 0; i < this.#characters.length; ++i) {
-            if (this.#characters[i].alive()) {
-                ++alive; 
+            if (this.#characters[i].conscious()) {
+                ++conscious; 
             }
         }
 
-        return alive;
+        return conscious;
     }
 
     start() {
-        while (this.getNumCharactersAlive() > 1) {
+        let roundNum = 0;
+        while (this.numConscious() > 1) {
             this.#currentRound = new Round(this);
             this.#rounds.push(this.#currentRound);
 
-            console.log('Round starting ...');
+            console.log('Round #' + ++roundNum + ' starting ...');
             for (let i = 0; i < this.#characters.length; ++i) {
                 const c = this.#characters[i];
                 c.initRound(this.#currentRound);
@@ -58,6 +59,9 @@ export default class Game {
 
             this.#currentRound.start();
         }
+
+        console.log(this.getConsciousCharacters()[0].getName(), 'wins!');
+        console.log('Game over');
     }
 };
 
@@ -66,24 +70,32 @@ class Energy {
         gamma: 0,
         chi: 1
     };
+
+    static names = {
+        0: 'gamma',
+        1: 'chi'
+    };
 }
 
 class Character {
     #name = null;
     #omegaPoints = 4;
     #numActions = 2;
-    #itemsUsed = [];
     #energy = {};
     #inventory = new Inventory();
-    #activeInventory = new ActiveInventory();
+    #equipment = new Equipment();
     #targetCharacter = null;
 
     constructor(name) {
         this.#name = name;
+
         this.#energy[Energy.types.gamma] = 6;
         this.#energy[Energy.types.chi] = 6;
-        this.#activeInventory.add(ActiveInventory.places.leftHand, new Item(Assets.items.pistol));
-        this.#activeInventory.add(ActiveInventory.places.rightHand, new Item(Assets.items.pistol));
+
+        this.#equipment.add(Equipment.slots.left, ItemTemplate.weapons.pistol.create());
+        this.#equipment.add(Equipment.slots.right, ItemTemplate.weapons.pistol.create());
+
+        this.#inventory.add(ItemTemplate.rechargers.energy.create());
     }
 
     getName() {
@@ -98,6 +110,10 @@ class Character {
         return this.#energy[energyType];
     }
 
+    hasEnergy(energyType, minimum) {
+        return this.#energy[energyType] >= minimum;
+    }
+
     setTarget(character) {
         this.#targetCharacter = character;
     }
@@ -106,63 +122,75 @@ class Character {
         return this.#targetCharacter;
     }
 
-    itemUsed(item) {
-        return ( typeof this.#itemsUsed[item] !== 'undefined' && this.#itemsUsed[item] > 0 );
-    }
-
     inputAction() {
-        const leftHand = this.#activeInventory.get(ActiveInventory.places.leftHand);
-        const rightHand = this.#activeInventory.get(ActiveInventory.places.rightHand);
+        const left = this.#equipment.get(Equipment.slots.left);
+        const right = this.#equipment.get(Equipment.slots.right);
 
-        let item = null;
-        if (!this.itemUsed(leftHand)) {
-            item = leftHand;
-        } else if (!this.itemUsed(rightHand)) {
-            item = rightHand;
-        } else {
+        let energyOptions = [];
+        if (this.hasEnergy(Energy.types.gamma, 1)) {
+            energyOptions.push(Energy.types.gamma);
+        }
+        if (this.hasEnergy(Energy.types.chi, 1)) {
+            energyOptions.push(Energy.types.chi);
+        }
+    
+        let hasEnergy = (energyOptions.length > 0);
+
+        let itemOptions = [];
+        if (!left.isExhausted() && ( (hasEnergy && left instanceof WeaponItem) || !hasEnergy && left instanceof RechargerItem) ) {
+            itemOptions.push(left);
+        }
+        if (!right.isExhausted() && ( (hasEnergy && right instanceof WeaponItem) || !hasEnergy && right instanceof RechargerItem) ) {
+            itemOptions.push(right);
+        }
+
+        let hasItem = (itemOptions.length > 0);
+
+        if (!hasItem) {
+            if (!hasEnergy) {
+                if (!(left instanceof WeaponItem || right instanceof WeaponItem)) {
+                    return new EquipAction(this, Equipment.slots.left, this.#inventory.findType(RechargerItem)[0]);
+                }
+            }
+
             return new ActionPass(this);
         }
 
+        const item = Shuffle.randomOption(itemOptions);
 
-        let energyType = null;
-        if (this.#energy[Energy.types.gamma] > 0) {
-            energyType = Energy.types.gamma;
-        } else if (this.#energy[Energy.types.chi] > 0) {
-            energyType = Energy.types.chi;
+        if (item instanceof WeaponItem) {
+            const energyType = Shuffle.randomOption(energyOptions);
+            return new ActionAttack(this, this.getTarget(), item, energyType);
+        } else if (item instanceof RechargeItem) {
+            return new RechargeAction(this, item, Shuffle.randomOption([Energy.types.gamma, Energy.types.chi]));
         } else {
             return new ActionPass(this);
         }
-
-        return new ActionAttack(this, this.getTarget(), this.#activeInventory.get(ActiveInventory.places.leftHand), energyType);
     }
 
     inputReaction(action) {
-        let shieldEnergyType = null;
-        if (this.#energy[Energy.types.gamma] > 0) {
-            shieldEnergyType = Energy.types.gamma;
-        } else if (this.#energy[Energy.types.chi] > 0) {
-            shieldEnergyType = Energy.types.chi;
-        } else {
+        let energyOptions = [];
+        if (this.hasEnergy(Energy.types.gamma, 1)) {
+            energyOptions.push(Energy.types.gamma);
+        }
+        if (this.hasEnergy(Energy.types.chi, 1)) {
+            energyOptions.push(Energy.types.chi);
+        }
+        if (energyOptions.length === 0) {
             return new ReactionPass(action, this);
         }
 
-        return new ReactionShield(action, this, shieldEnergyType);
+        const energyType = Shuffle.randomOption(energyOptions);
+
+        return new ReactionShield(action, this, energyType);
     }
 
     consumeEnergy(energyType, amount) {
-        if (this.#energy[energyType] < amount) {
+        if (!this.hasEnergy(energyType, amount)) {
             throw new Error('Not enough energy.');
         }
 
         this.#energy[energyType] -= amount;
-    }
-
-    consumeItemUse(item) {
-        if (typeof this.#itemsUsed[item] !== 'undefined' || this.#itemsUsed[item] > 0) {
-            throw new Error('Item already used this round.');
-        }
-
-        this.#itemsUsed[item] = 1;
     }
 
     consumeAction() {
@@ -170,48 +198,111 @@ class Character {
     }
 
     initRound(round) {
-        this.#itemsUsed = [];
         this.#numActions = 2;
+        this.#equipment.initRound();
     }
 
     damage(amount) {
-        if (this.dead()) {
-            throw new Error('Character is already dead.');
+        if (this.unconscious()) {
+            throw new Error('Character is already unconscious.');
         }
 
         this.#omegaPoints = ( this.#omegaPoints - amount < 0 ? 0 : this.#omegaPoints - amount );
     }
 
-    alive() {
+    conscious() {
         return this.#omegaPoints > 0;
     }
 
-    dead() {
+    unconscious() {
         return this.#omegaPoints < 1;
+    }
+
+    inventory() {
+        return this.#inventory;
+    }
+
+    equipment() {
+        return this.#equipment;
     }
 }
 
-class ItemType {
+class Item {
+    #itemTemplate = null;
+    #exhausted = false;
+
+    constructor(itemTemplate) {
+        this.#itemTemplate = itemTemplate;
+    }
+
+    getTemplate() {
+        return this.#itemTemplate;
+    }
+
+    getName() {
+        return this.#itemTemplate.getName();
+    }
+
+    exhaust() {
+        this.#exhausted = true;
+    }
+
+    restore() {
+        this.#exhausted = false;
+    }
+
+    isExhausted() {
+        return this.#exhausted;
+    }
+}
+
+class WeaponItem extends Item {
+    constructor(itemTemplate) {
+        super(itemTemplate);
+    }
+}
+
+class RechargeItem extends Item {
+    constructor(itemTemplate) {
+        super(itemTemplate);
+    }
+}
+
+class ItemTemplate {
+    static weapons = {
+        pistol: new ItemTemplate(WeaponItem, 'pistol'),
+    };
+
+    static rechargers = {
+        energy: new ItemTemplate(RechargerItem, 'energy recharger')
+        omega: new ItemTemplate(RechargerItem, 'omega recharger')
+    };
+
+    #itemClass = null;
     #name = null;
 
-    constructor(name) {
+    constructor(itemClass, name) {
+        this.#itemClass = itemClass;
         this.#name = name;
     }
 
     getName() {
         return this.#name;
     }
-}
 
-class Item {
-    #itemType = null;
-
-    constructor(itemType) {
-        this.#itemType = itemType;
+    getItemClass() {
+        return this.#itemClass;
     }
 
-    getName() {
-        return this.#itemType.getName();
+    create() {
+        switch(this.#itemClass) {
+        case WeaponItem:
+            return new WeaponItem(this);
+        case RechargeItem:
+            return new RechargeWeapon(this);
+        default:
+            return new Item(this);
+        }
     }
 }
 
@@ -222,53 +313,66 @@ class Inventory {
         this.#items.push(item);
     }
 
-    getItems() {
+    remove(item) {
+        const i = this.#items.indexOf(item);
+        this.#items.splice(i, 1);
+        return item;
+    }
+
+    items() {
         return this.#items;
     }
 }
 
-class ActiveInventory {
-    static places = {
-        leftHand: 0,
-        rightHand: 1
+class Equipment {
+    static slots = {
+        left:   0x00,
+        right:  0x01
     };
 
     #items = [];
 
     constructor() {
-        for (const place in ActiveInventory.places) {
-            this.#items[ActiveInventory.places[place]] = null;
+        for (const slot in Equipment.slots) {
+            this.#items[Equipment.slots[slot]] = null;
         }
     }
 
-    add(place, item) {
-        if (this.#items[place] !== null) {
-            throw new Error('Item already in place.');
+    add(slot, item) {
+        if (this.#items[slot] !== null) {
+            throw new Error('Item already in slot.');
         }
 
-        this.#items[place] = item; 
+        this.#items[slot] = item; 
     }
 
-    remove(place) {
-        if (this.#items[place] === null) {
-            throw new Error('No item in place.');
+    remove(slot) {
+        if (this.#items[slot] === null) {
+            throw new Error('No item in slot.');
         }
 
-        const item = this.#items[place];
-        this.#items[place] = null;
+        const item = this.#items[slot];
+        this.#items[slot] = null;
         return item;
     }
 
-    get(place) {
-        if (this.#items[place] === null) {
-            throw new Error('No item in place.');
+    get(slot) {
+        if (this.#items[slot] === null) {
+            throw new Error('No item in slot.');
         }
 
-        return this.#items[place];
+        return this.#items[slot];
     }
-}
 
-class Weapon extends Item {
+    occupied(slot) {
+        return this.#items[slot] === null;
+    }
+
+    initRound() {
+        for (let i = 0; i < this.#items.length; ++i) {
+            this.#items[i].restore();
+        }
+    }
 }
 
 class Position {
@@ -288,23 +392,23 @@ class Round {
         const characters = this.#game.getCharacters();
         for (let i = 0; i < characters.length; ++i) {
             const character = characters[i];
-            if (!character.alive()) {
+            if (!character.conscious()) {
                 continue;
             }
 
             const action1 = character.inputAction();
-            const action2 = character.inputAction();
 
             action1.act();
 
-            if (this.#game.getNumCharactersAlive() == 1) {
+            if (this.#game.numConscious() == 1) {
                 this.end();
                 return;
             }
 
+            const action2 = character.inputAction();
             action2.act();
 
-            if (this.#game.getNumCharactersAlive() == 1) {
+            if (this.#game.numConscious() == 1) {
                 this.end();
                 return;
             }
@@ -322,14 +426,14 @@ class Turn {
 }
 
 class Action {
-    #actionCharacter = null;
+    #actor = null;
 
-    constructor(actionCharacter) {
-        this.#actionCharacter = actionCharacter;
+    constructor(actor) {
+        this.#actor = actor;
     }
 
-    getActionCharacter() {
-        return this.#actionCharacter;
+    getActor() {
+        return this.#actor;
     }
 
     act() {
@@ -338,15 +442,15 @@ class Action {
 
 class Reaction {
     #action = null;
-    #reactionCharacter = null;
+    #reactor = null;
 
-    constructor(action, reactionCharacter) {
+    constructor(action, reactor) {
         this.#action = action;
-        this.#reactionCharacter = reactionCharacter;
+        this.#reactor = reactor;
     }
 
-    getReactionCharacter() {
-        return this.#reactionCharacter;
+    getReactor() {
+        return this.#reactor;
     }
     
     getAction() {
@@ -358,18 +462,23 @@ class Reaction {
 }
 
 class ReactionPass extends Reaction {
-    constructor(action, reactionCharacter) {
-        super(action, reactionCharacter);
+    constructor(action, reactor) {
+        super(action, reactor);
     }
 
     react() {
         super.react();
         const action = this.getAction();
-        const reactor = this.getReactionCharacter();
+        const reactor = this.getReactor();
 
         if (action instanceof ActionAttack) {
-            reactor.damage(1, action.getWeaponItem(), action.getActionCharacter());
-            console.log(reactor.getName(), 'was hit!');
+            reactor.damage(1, action.getWeaponItem(), action.getActor());
+
+            if (reactor.unconscious()) {
+                console.log(reactor.getName(), 'passed and was knocked unconscious');
+            } else {
+                console.log(reactor.getName(), 'passed and was hit');
+            }
         }
     }
 }
@@ -377,28 +486,32 @@ class ReactionPass extends Reaction {
 class ReactionShield extends Reaction {
     #shieldEnergyType = null;
 
-    constructor(action, reactionCharacter, shieldEnergyType) {
-        super(action, reactionCharacter);
+    constructor(action, reactor, shieldEnergyType) {
+        super(action, reactor);
         this.#shieldEnergyType = shieldEnergyType;
     }
 
     react() {
         super.react();
         const action = this.getAction();
-        const reactor = this.getReactionCharacter();
+        const reactor = this.getReactor();
 
         if (action instanceof ActionAttack) {
             if (this.#shieldEnergyType === action.getEnergyType()) {
                 try {
                     reactor.consumeEnergy(this.#shieldEnergyType, 1);
-                    console.log(reactor.getName(), 'blocked the shot.');
+                    console.log(reactor.getName(), 'blocked the shot with a', Energy.names[this.#shieldEnergyType], 'shield');
                 } catch(e) {
-                    reactor.damage(1, action.getWeaponItem(), action.getActionCharacter());
-                    console.log(reactor.getName(), 'was hit!');
+                    reactor.damage(1, action.getWeaponItem(), action.getActor());
+                    console.log(reactor.getName(), 'was hit, failing to raise a', Energy.names[this.#shieldEnergyType], 'shield');
                 }
             } else {
-                reactor.damage(1, action.getWeaponItem(), action.getActionCharacter());
-                console.log(reactor.getName(), 'was hit!');
+                reactor.damage(1, action.getWeaponItem(), action.getActor());
+                console.log(reactor.getName(), 'was hit, penetrating a', Energy.names[this.#shieldEnergyType], 'shield');
+            }
+
+            if (reactor.unconscious()) {
+                console.log(reactor.getName(), 'was knocked unconscious');
             }
         }
     }
@@ -409,8 +522,8 @@ class ActionAttack extends Action {
     #weaponItem = null;
     #energyType = null;
 
-    constructor(actionCharacter, targetCharacter, weaponItem, energyType) {
-        super(actionCharacter);
+    constructor(actor, targetCharacter, weaponItem, energyType) {
+        super(actor);
 
         this.#targetCharacter = targetCharacter;
         this.#weaponItem = weaponItem;
@@ -427,33 +540,88 @@ class ActionAttack extends Action {
 
     act() {
         super.act();
-        const actor = this.getActionCharacter();
+        const actor = this.getActor();
 
         actor.consumeAction();
+        this.#weaponItem.exhaust();
         actor.consumeEnergy(this.#energyType, 1);
 
-        console.log(actor.getName(), 'fires', this.#weaponItem.getName(), 'at', this.#targetCharacter.getName());
+        console.log(actor.getName(), 'fires', this.#weaponItem.getName(), 'at', this.#targetCharacter.getName(), 'with', Energy.names[this.#energyType], 'energy');
 
         const targetReaction = this.#targetCharacter.inputReaction(this);
         targetReaction.react();
     }
 }
 
-class ActionPass extends Action {
-    constructor(actionCharacter) {
-        super(actionCharacter);
+class ActionRecharge extends Action {
+    #rechargeItem = null;
+    #energyType = null;
+
+    constructor(actor, rechargeItem, energyType) {
+        super(actor);
+        this.#rechargeItem = rechargeItem;
+        this.#energyType = energyType;
     }
 
     act() {
+        if (this.#rechargeItem.isExhausted()) {
+            throw new Error('Item is exhausted');
+        }
+
+        this.#rechargeItem.exhaust();
+        const actor = this.getActor();
+        actor.rechargeEnergy(this.#energyType, 1);
+        console.log(actor.getName(), 'recharged 1', Energy.names[this.#energyType]);
+    }
+}
+
+class ActionEquip extends Action {
+    #activeSlot = null;
+    #inventoryItem = null;
+
+    constructor(actor, equipmentSlot, inventoryItem) {
+        super(actor);
+        this.#activeSlot = activeSlot;
+        this.#inventoryItem = inventoryItem;
+    }
+
+    act() {
+        const actor = this.getActor();
+        const equipment = actor.equipment();
+        const inventory = actor.inventory();
+
+        if (equipment.occupied(equipmentSlot)) {
+            const equippedItem = equipment.remove(equipmentSlot);
+            inventory.add(equippedItem);
+        }
+        
+        inventory.remove(inventoryItem);
+        equipment.add(equipmentSlot, inventoryItem);
+
+        console.log(actor.getName(), 'wielded', inventoryItem.getName());
+    }
+}
+
+class ActionPass extends Action {
+    constructor(actor) {
+        super(actor);
+    }
+
+    act() {
+        console.log(this.getActor().getName(), 'passes');
     }
 }
 
 class GamePhase {
 }
 
-class Assets {
-    static items = {
-        pistol: new ItemType('pistol')
+class Shuffle {
+    static randomOption(options) {
+        if (options.length === 1) {
+            return options[0];
+        }
+
+        return options[Math.floor(Math.random() * Math.floor(options.length))];
     }
 }
 
