@@ -137,10 +137,10 @@ class Character {
         let hasEnergy = (energyOptions.length > 0);
 
         let itemOptions = [];
-        if (!left.isExhausted() && ( (hasEnergy && left instanceof WeaponItem) || !hasEnergy && left instanceof RechargerItem) ) {
+        if (!left.isExhausted() && ( (hasEnergy && left instanceof WeaponItem) || (!hasEnergy && left instanceof RechargeItem)) ) {
             itemOptions.push(left);
         }
-        if (!right.isExhausted() && ( (hasEnergy && right instanceof WeaponItem) || !hasEnergy && right instanceof RechargerItem) ) {
+        if (!right.isExhausted() && ( (hasEnergy && right instanceof WeaponItem) || (!hasEnergy && right instanceof RechargeItem)) ) {
             itemOptions.push(right);
         }
 
@@ -149,7 +149,7 @@ class Character {
         if (!hasItem) {
             if (!hasEnergy) {
                 if (!(left instanceof WeaponItem || right instanceof WeaponItem)) {
-                    return new EquipAction(this, Equipment.slots.left, this.#inventory.findType(RechargerItem)[0]);
+                    return new EquipAction(this, Equipment.slots.left, this.#inventory.findTemplate(ItemTemplate.rechargers.energy)[0]);
                 }
             }
 
@@ -270,12 +270,12 @@ class RechargeItem extends Item {
 
 class ItemTemplate {
     static weapons = {
-        pistol: new ItemTemplate(WeaponItem, 'pistol'),
+        pistol: new ItemTemplate(WeaponItem, 'pistol')
     };
 
     static rechargers = {
-        energy: new ItemTemplate(RechargerItem, 'energy recharger')
-        omega: new ItemTemplate(RechargerItem, 'omega recharger')
+        energy: new ItemTemplate(RechargeItem, 'energy recharger'),
+        omega: new ItemTemplate(RechargeItem, 'omega recharger')
     };
 
     #itemClass = null;
@@ -299,7 +299,7 @@ class ItemTemplate {
         case WeaponItem:
             return new WeaponItem(this);
         case RechargeItem:
-            return new RechargeWeapon(this);
+            return new RechargeItem(this);
         default:
             return new Item(this);
         }
@@ -321,6 +321,10 @@ class Inventory {
 
     items() {
         return this.#items;
+    }
+
+    findTemplate(itemTemplate) {
+        return this.#items.filter(item => { item.getTemplate() === itemTemplate });
     }
 }
 
