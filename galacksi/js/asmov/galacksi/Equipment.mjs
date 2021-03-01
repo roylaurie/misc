@@ -43,7 +43,7 @@ export default class Equipment {
     }
 
     occupied(slot) {
-        return this.#items[slot] === null;
+        return this.#items[slot] !== null;
     }
 
     initRound() {

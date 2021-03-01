@@ -6,12 +6,12 @@ import Inventory from './Inventory.mjs';
 import Equipment from './Equipment.mjs';
 
 export default class ActionEquip extends Action {
-    #activeSlot = null;
+    #equipmentSlot = null;
     #inventoryItem = null;
 
     constructor(actor, equipmentSlot, inventoryItem) {
         super(actor);
-        this.#activeSlot = activeSlot;
+        this.#equipmentSlot = equipmentSlot;
         this.#inventoryItem = inventoryItem;
     }
 
@@ -21,15 +21,15 @@ export default class ActionEquip extends Action {
         const equipment = actor.equipment();
         const inventory = actor.inventory();
 
-        if (equipment.occupied(equipmentSlot)) {
-            const equippedItem = equipment.remove(equipmentSlot);
+        if (equipment.occupied(this.#equipmentSlot)) {
+            const equippedItem = equipment.remove(this.#equipmentSlot);
             inventory.add(equippedItem);
         }
         
-        inventory.remove(inventoryItem);
-        equipment.add(equipmentSlot, inventoryItem);
+        inventory.remove(this.#inventoryItem);
+        equipment.add(this.#equipmentSlot, this.#inventoryItem);
 
-        console.log(actor.getName(), 'wielded', inventoryItem.getName());
+        console.log(actor.getName(), 'wielded', this.#inventoryItem.getName());
     }
 }
 

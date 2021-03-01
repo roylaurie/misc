@@ -4,8 +4,11 @@ export default class Item {
     #name = null;
     #exhausted = false;
 
+    name = null;
+
     constructor(name) {
         this.#name = name;
+        this.name = name;
     }
 
     getName() {

@@ -52,21 +52,24 @@ export default class Character {
         return this.#energy[energyType] >= minimum;
     }
 
-    setTarget(character) {
-        this.#targetCharacter = character;
-    }
-
-    getTarget() {
-        return this.#targetCharacter;
-    }
-
-
     consumeEnergy(energyType, amount) {
         if (!this.hasEnergy(energyType, amount)) {
             throw new Error('Not enough energy.');
         }
 
         this.#energy[energyType] -= amount;
+    }
+
+    rechargeEnergy(energyType, amount) {
+        this.#energy[energyType] += amount;
+    }
+
+    setTarget(character) {
+        this.#targetCharacter = character;
+    }
+
+    getTarget() {
+        return this.#targetCharacter;
     }
 
     consumeAction() {

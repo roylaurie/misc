@@ -15,6 +15,7 @@ import ActionPass from './ActionPass.mjs';
 import ReactionShield from './ReactionShield.mjs';
 import ReactionPass from './ReactionPass.mjs';
 import Shuffle from './Shuffle.mjs';
+import EnergyRechargerItem from './EnergyRechargerItem.mjs';
 
 export default class SystemCharacter extends Character {
     constructor(name) {
@@ -34,7 +35,7 @@ export default class SystemCharacter extends Character {
             energyOptions.push(Energy.types.chi);
         }
     
-        let hasEnergy = (energyOptions.length > 0);
+        const hasEnergy = (energyOptions.length > 0);
 
         let itemOptions = [];
         if (!left.isExhausted() && ( (hasEnergy && left instanceof WeaponItem) || (!hasEnergy && left instanceof RechargeItem)) ) {
@@ -44,15 +45,21 @@ export default class SystemCharacter extends Character {
             itemOptions.push(right);
         }
 
-        let hasItem = (itemOptions.length > 0);
+        const hasItem = (itemOptions.length > 0);
 
-        if (!hasItem) {
-            if (!hasEnergy) {
-                if (!(left instanceof WeaponItem || right instanceof WeaponItem)) {
-                    return new ActionEquip(this, Equipment.slots.left, this.inventory().findTemplate(ItemTemplate.rechargers.energy)[0]);
+        if (!hasEnergy) {
+            // equip a recharger if one isn't available
+            if (!(left instanceof RechargeItem || right instanceof RechargeItem)) {
+                return new ActionEquip(this, Equipment.slots.left, this.inventory().findByClass(EnergyRechargerItem));
+            } else {
+                const rechargeItem = itemOptions.find(item => item instanceof EnergyRechargerItem);
+                if (typeof rechargeItem !== 'undefined') {
+                    return new ActionRecharge(this, rechargeItem, Shuffle.randomOption([Energy.types.gamma, Energy.types.chi]));
+                } else {
+                    return new ActionPass(this);
                 }
             }
-
+        } else if (!hasItem) {
             return new ActionPass(this);
         }
 
@@ -62,7 +69,7 @@ export default class SystemCharacter extends Character {
             const energyType = Shuffle.randomOption(energyOptions);
             return new ActionAttack(this, this.getTarget(), item, energyType);
         } else if (item instanceof RechargeItem) {
-            return new RechargeAction(this, item, Shuffle.randomOption([Energy.types.gamma, Energy.types.chi]));
+            return new ActionRecharge(this, item, Shuffle.randomOption([Energy.types.gamma, Energy.types.chi]));
         } else {
             return new ActionPass(this);
         }

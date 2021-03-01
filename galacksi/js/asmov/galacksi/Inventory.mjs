@@ -2,6 +2,7 @@
 
 import Item from './Item.mjs';
 import ItemTemplate from './ItemTemplate.mjs';
+import EnergyRechargerItem from './EnergyRechargerItem.mjs';
 
 export default class Inventory {
     #items = [];
@@ -20,8 +21,8 @@ export default class Inventory {
         return this.#items;
     }
 
-    findTemplate(itemTemplate) {
-        return this.#items.filter(item => { item.getTemplate() === itemTemplate });
+    findByClass(itemClass) {
+        return this.#items.find(item => item instanceof itemClass);
     }
 }
 

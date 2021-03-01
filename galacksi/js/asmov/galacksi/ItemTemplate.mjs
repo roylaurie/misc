@@ -3,6 +3,7 @@
 import Item from './Item.mjs';
 import WeaponItem from './WeaponItem.mjs';
 import RechargeItem from './RechargeItem.mjs';
+import EnergyRechargerItem from './EnergyRechargerItem.mjs';
 
 export default class ItemTemplate {
     static weapons = {
@@ -10,7 +11,7 @@ export default class ItemTemplate {
     };
 
     static rechargers = {
-        energy: new ItemTemplate(RechargeItem, 'energy recharger'),
+        energy: new ItemTemplate(EnergyRechargerItem, 'energy recharger'),
         omega: new ItemTemplate(RechargeItem, 'omega recharger')
     };
 
@@ -34,8 +35,8 @@ export default class ItemTemplate {
         switch(this.#itemClass) {
         case WeaponItem:
             return new WeaponItem(this.#name);
-        case RechargeItem:
-            return new RechargeItem(this.#name);
+        case EnergyRechargerItem:
+            return new EnergyRechargerItem(this.#name);
         default:
             return new Item(this.#name);
         }

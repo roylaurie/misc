@@ -22,8 +22,8 @@ export default class ActionRecharge extends Action {
 
         this.#rechargeItem.exhaust();
         const actor = this.getActor();
-        actor.rechargeEnergy(this.#energyType, 1);
-        console.log(actor.getName(), 'recharged 1', Energy.names[this.#energyType]);
+        actor.rechargeEnergy(this.#energyType, 2);
+        console.log(actor.getName(), 'recharged 2', Energy.names[this.#energyType]);
     }
 }
 
