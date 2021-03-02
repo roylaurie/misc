@@ -34,6 +34,7 @@ export default class Character {
         this.#equipment.add(Equipment.slots.right, ItemTemplate.weapons.pistol.create());
 
         this.#inventory.add(ItemTemplate.rechargers.energy.create());
+        this.#inventory.add(ItemTemplate.rechargers.omega.create());
     }
 
     getName() {
