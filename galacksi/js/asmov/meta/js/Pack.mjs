@@ -26,6 +26,7 @@ export default class Pack {
     #copyright = null;
     #license = null;
     #pubkey = null;
+    #id = null;
 
     constructor(data) {
         this.#namespace = data[MetaPackage.dataKeys.namespace];
@@ -34,10 +35,17 @@ export default class Pack {
         this.#copyright = data[MetaPackage.dataKeys.copyright];
         this.#license = data[MetaPackage.dataKeys.license];
         this.#pubkey = data[MetaPackage.dataKeys.pubkey];
+        this.#id = data[ModelMeta.dataKeys.id] || ModelMeta.id32(this, [this.#namespace, this.#version]);
+    }
+
+    id() {
+        return this.#id;
     }
 
     data() {
         return {
+            ModelMeta.dataKeys.namepath = Pack.namepath,
+            ModelMeta.dataKeys.id = this.#id,
             MetaPackage.dataKeys.namespace: this.#namespace,
             MetaPackage.dataKeys.version: this.#version,
             MetaPackage.dataKeys.organisation: this.#organisation,
