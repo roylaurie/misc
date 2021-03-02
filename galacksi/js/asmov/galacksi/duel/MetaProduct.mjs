@@ -2,16 +2,16 @@
 
 import Meta from '../../asmov/meta/js/Meta.mjs';
 import MetaProduct from '../../asmov/meta/js/Product.mjs';
-import GalacksiDuelProduct from '../../asmov/galacksi/duel/MetaProduct.mjs';
+import GalacksiProduct from '../../asmov/galacksi/MetaProduct.mjs';
 
-export default class GalacksiDuelCoreProduct extends MetaProduct {
-    static namepath = 'asmov/galacksi/duel/cor/MetaProduct';
-    static namespace = 'asmov/galacksi/duel/core/';
+export default class GalacksiDuelProduct extends MetaProduct {
+    static namepath = 'asmov/galacksi/duel/MetaProduct';
+    static namespace = 'asmov/galacksi/duel/';
 
     constructor() {
         super({
-            MetaProduct.dataKeys.namespace:     'asmov/galacksi/duel/core/',
-            MetaProduct.dataKeys.parent:        GalacksiDuelProduct,
+            MetaProduct.dataKeys.namespace:     'asmov/galacksi/duel/',
+            MetaProduct.dataKeys.parent:        GalacksiProduct,
             MetaProduct.dataKeys.version:       '2021.0.0',
             MetaProduct.dataKeys.organisation:  'Asmov LLC',
             MetaProduct.dataKeys.copyright:     '2021',
@@ -21,5 +21,6 @@ export default class GalacksiDuelCoreProduct extends MetaProduct {
     }
 }
 
-Meta.linkProduct(GalacksiDuelCoreProduct);
+Meta.linkProduct(GalacksiDuelProduct);
+
 
