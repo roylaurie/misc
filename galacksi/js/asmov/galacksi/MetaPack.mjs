@@ -2,14 +2,15 @@
 
 import Meta from '../../asmov/meta/Meta.mjs';
 import MetaPack from '../../asmov/meta/Pack.mjs';
+import GalacksiDuelProduct from '../../asmov/galacksi/duel/MetaProduct.mjs';
 
-export default class GalacksiPack extends MetaPack {
-    static namepath = 'asmov/galacksi/MetaPack';
-    static namespace = 'asmov/galacksi';
+export default class GalacksiDuelPack extends MetaPack {
+    static namepath = 'asmov/galacksi/duel/MetaPack';
+    static namespace = 'asmov/galacksi/duel';
 
     constructor() {
         super({
-            MetaPackage.dataKeys.namespace:     'asmov/galacksi';
+            MetaPackage.dataKeys.namespace:     'asmov/galacksi/duel';
             MetaPackage.dataKeys.version:       '2021.1.0';
             MetaPackage.dataKeys.organisation:  'Asmov LLC';
             MetaPackage.dataKeys.copyright:     '2021',
@@ -20,4 +21,4 @@ export default class GalacksiPack extends MetaPack {
     }
 }
 
-Meta.linkPackage(GalacksiPackage);
+Meta.linkPack(GalacksiDuelProduct, GalacksiDuelPack);

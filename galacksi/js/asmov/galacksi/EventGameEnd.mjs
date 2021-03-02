@@ -8,10 +8,10 @@ export default class EventGameEnd extends EventGameState {
     static namepath = 'asmov/galacksi/EventGameEnd';
 
     static from(data, datasource) {
-        return new EventGameEnd(datasource.get(Game, data[EventGame.dataKeys.game]), data[Event.dataKeys.timestamp]);
+        return new EventGameEnd(datasource.get(Game, data[EventGame.dataKeys.game]), data[Event.dataKeys.timestamp], data[ModelMeta.dataKeys.id]);
     }
 
-    constructor(game, timestamp) {
-        super(game, timestamp);
+    constructor(game, timestamp, id) {
+        super(game, timestamp, id);
     }
 }

@@ -4,6 +4,7 @@ import Meta from '../asmov/meta/Meta.mjs';
 import MetaModel from '../asmov/meta/Model.mjs';
 import GalacksiPack from '../asmov/galacksi/MetaPack.mjs';
 
+/** @abstract **/
 export default class Event {
     static namepath = 'asmov/galacksi/Event';
 
