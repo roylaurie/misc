@@ -16,11 +16,15 @@ export default class Event {
 
     constructor(timestamp, id) {
         this.#timestamp = timestamp || Date.UTC();
-        this.#id = id || ModelMeta.id32(this, [ this.#timestamp ]);
+        this.#id = id || this.identify();
     }
 
     id() {
         return this.#id;
+    }
+
+    identify() {
+        return ModelMeta.id32(this, [ this.#timestamp ]);
     }
 
     getTimestamp() {
