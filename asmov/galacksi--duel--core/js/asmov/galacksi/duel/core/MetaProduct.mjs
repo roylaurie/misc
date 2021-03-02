@@ -1,11 +1,11 @@
 'use strict';
 
-import Meta from '../../asmov/meta/js/Meta.mjs';
-import MetaProduct from '../../asmov/meta/js/Product.mjs';
-import GalacksiDuelProduct from '../../asmov/galacksi/duel/MetaProduct.mjs';
+import Meta from '../../../../ext/asmov--meta--js/Meta.mjs';
+import MetaProduct from '../../../../ext/asmov--meta--js/Product.mjs';
+import GalacksiDuelProduct from '../../../asmov/galacksi/duel/core/GalacksiDuelMetaProduct.mjs';
 
 export default class GalacksiDuelCoreProduct extends MetaProduct {
-    static namepath = 'asmov/galacksi/duel/cor/MetaProduct';
+    static namepath = 'asmov/galacksi/duel/core/MetaProduct';
     static namespace = 'asmov/galacksi/duel/core/';
 
     constructor() {

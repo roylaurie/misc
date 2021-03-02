@@ -1,7 +1,7 @@
 'use strict';
 
-import Meta from '../../asmov/meta/Meta.mjs';
-import MetaProduct from '../../asmov/meta/Product.mjs';
+import Meta from '../../ext/asmov--meta--js/Meta.mjs';
+import MetaProduct from '../../ext/asmov--meta--js/Product.mjs';
 
 export default class GalacksiProduct extends MetaProduct {
     static namepath = 'asmov/galacksi/MetaProduct';

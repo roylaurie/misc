@@ -1,8 +1,8 @@
 'use strict';
 
-import Meta from '../../asmov/meta/Meta.mjs';
-import MetaPack from '../../asmov/meta/Pack.mjs';
-import GalacksiDuelCoreProduct from '../../asmov/galacksi/duel/core/MetaProduct.mjs';
+import Meta from '../../../../asmov--meta--js/Meta.mjs';
+import MetaPack from '../../../../asmov--meta--js/Pack.mjs';
+import GalacksiDuelCoreProduct from '../../../asmov/galacksi/duel/core/GalacksiDuelCoreMetaProduct.mjs';
 
 export default class GalacksiDuelCorePack extends MetaPack {
     static namepath = 'asmov/galacksi/duel/core/MetaPack';
@@ -10,6 +10,7 @@ export default class GalacksiDuelCorePack extends MetaPack {
 
     constructor() {
         super({
+            MetaPackage.dataKeys.codebase:      'asmov--galacksi--duel--core',
             MetaPackage.dataKeys.namespace:     'asmov/galacksi/duel/core/',
             MetaPackage.dataKeys.product:       GalacksiDuelCoreProduct,
             MetaPackage.dataKeys.version:       '2021.1.0',
