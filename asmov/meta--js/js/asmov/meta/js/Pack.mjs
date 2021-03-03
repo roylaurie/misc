@@ -12,8 +12,46 @@ export default class Pack {
         organisation: 'organisation',
         copyright: 'copyright',
         license: 'license',
-        pubkey: 'pubkey'
- 
+        pubkey: 'pubkey',
+        product: 'product',
+        codebase: 'codebase',
+        subpacks: 'subpacks',
+        platform: 'plastform',
+    };
+
+    static languages = {
+        js: 'js',
+        rust: 'rust',
+        python: 'python',
+        java: 'java',
+        bash: 'bash'
+    };
+
+    static platforms = {
+        js: 'js',
+        rust: 'rust',
+        python: 'python',
+        java: 'java',
+        nodejs: 'nodejs',
+        browser: 'browser',
+        electron: 'electron',
+        dapp: 'dapp',
+        linux: 'linux',
+        osx: 'osx',
+        windows: 'windows',
+        android: 'android',
+        ios: 'ios',
+        xbox: 'xbox',
+        playstation: 'playstation',
+        nintendo: 'nintendo',
+    };
+        
+    static architectures = {
+        any: 'any',
+        x32: 'x32',
+        x64: 'x64',
+        arm32: 'arm32',
+        arm64: 'arm64'
     };
 
     static from(data, datasource) {
