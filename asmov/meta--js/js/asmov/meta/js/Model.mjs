@@ -1,11 +1,13 @@
 'use strict';
 
-import MetaTrait from './Type.mjs';
-import murmur3 from '../../../ext/murmurhash3_gc.js';
+import MetaTrait from './Trait.mjs';
+import MetaType from './Type.mjs';
 
 export default class MetaModel {
     static namepath = 'asmov/meta/js/Model';
     static traitname = 'Model';
+
+    static staticTraits = {}; // best typo ever: staticTreats
 
     static staticMethodTraits = {
         from: 'from'
@@ -21,8 +23,7 @@ export default class MetaModel {
         id: 'id',
     }
 
-    static #dot = new MetaModel();
-    static get dot { return MetaModel.#dot; };
+    static dot = new MetaModel();
 
     #modeltypes = new Map();
 
@@ -32,9 +33,15 @@ export default class MetaModel {
         }
     }
 
-    link(modeltype) {
-        this.conforms(modeltype);
-        MetaTrait.conformsLink(modeltype);
+    confirm(modeltype) {
+        MetaTrait.dot.confirm(modeltype);
+        MetaTrait.dot.confirmTrait(modeltype, MetaModel);
+        return;
+    }
+
+   link(modeltype) {
+        this.confirm(modeltype);
+        MetaTrait.dot.confirmLink(modeltype);
         this.#modeltypes.set(modeltype.namepath, modeltype.constructor.from);
     }
 
@@ -42,15 +49,29 @@ export default class MetaModel {
         return this.#modeltypes.has([modeltype[MetaTrait.staticTraits.namepath]]);
     }
 
-    conforms(modeltype) {
-        MetaTrait.dot.conforms(modeltype);
-        MetaTrait.conformsTrait(modeltype, MetaTrait.dot.schemas.staticMethodTrait, MetaModel.staticMethodTraits.from);
-        MetaTrait.conformsTrait(modeltype, MetaTrait.dot.schemas.methodTrait, MetaModel.methodTraits.data);
-        MetaTrait.conformsTrait(modeltype, MetaTrait.dot.schemas.methodTrait, MetaModel.methodTraits.id);
+    confirmLink(modeltype) {
+        if (!this.linked(modeltype)) {
+            throw new Error(`${modeltype.namepath} is not link()'ed to MetaType`);
+        }
+
         return;
     }
 
-    conformsDataTrait(data, trait) {
+    conform(modeltype) {
+        this.confirm();
+        this.confirmLink(modeltype);
+        return;
+    }
+
+    get(namepath) {
+        if (!this.#modeltypes.has(namepath)) {
+            throw new Error(`${namepath} namepath unknown`);
+        }
+
+        return this.#modeltypes.get(namepath);
+    }
+
+    confirmDataTrait(data, trait) {
         if (typeof data[trait] === 'undefined') {
             throw new Error(`Data '${data[MetaModel.dataTraits.namepath]}' + ' lacks a '${trait}' key`);
         }
@@ -58,9 +79,9 @@ export default class MetaModel {
         return;
     }
 
-    conformsDataIdentity(data) {
-        this.conformsDataTrait(data, MetaModel.dataTraits.namepath);
-        this.conformsDataTrait(data, MetaModel.dataTraits.id);
+    confirmDataIdentity(data) {
+        this.confirmDataTrait(data, MetaModel.dataTraits.namepath);
+        this.confirmDataTrait(data, MetaModel.dataTraits.id);
     }
 
     from(data, datasource) {
@@ -74,26 +95,26 @@ export default class MetaModel {
     }
 
     data(modeltype) {
-        this.conformsLink(modeltype);
+        this.confirmLink(modeltype);
         return modeltype.data();
     }
 
     identity(modeltype) {
-        this.conformsLink(modeltype);
+        this.confirmLink(modeltype);
         return Object.freeze({
-            MetaModel.dataTraits.namepath: modeltype.namepath, 
-            MetaModel.dataTraits.id: modeltype.id()
+            namepath: modeltype.namepath, 
+            id: modeltype.id()
         });
     }
 
     dataIdentity(data) {
-        this.conformsDataIdentity(data);
+        this.confirmDataIdentity(data);
         return Object.freeze({
-            MetaModel.dataTraits.namepath: data.namepath, 
-            MetaModel.dataTraits.id: data.id
+            namepath: data.namepath, 
+            id: data.id
         });
     }
 }
 
 MetaTrait.dot.link(MetaModel);
-MetaTType.dot.link(MetaModel);
+MetaType.dot.link(MetaModel);

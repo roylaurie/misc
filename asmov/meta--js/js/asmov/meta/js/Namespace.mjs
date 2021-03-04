@@ -1,9 +1,11 @@
 'use strict';
 
+import MetaTrait from './Trait.mjs';
 import MetaType from './Type.mjs';
 
 export default class MetaNamespace {
     static namepath = 'asmov/meta/js/Namespace';
+    static traitname = 'Namespace';
 
     static staticTraits = {
         namespace: 'namespace'
@@ -13,8 +15,10 @@ export default class MetaNamespace {
         parent: 'parent'
     };
 
-    static #dot = new MetaNamespace();
-    static get dot { return Metanamespace.#dot; } 
+    static staticMethodTraits = {};
+    static dataTraits = {};
+
+    static dot = new MetaNamespace();
 
     #nametypes= new Map();
     #metatypes = new Map();
@@ -25,8 +29,14 @@ export default class MetaNamespace {
         }
     }
 
+    confirm(nametype) {
+        MetaType.dot.confirm(nametype);
+        MetaTrait.dot.confirmTrait(nametype, MetaNamespace);
+        return;
+    }
+
     link(nametype) {
-        this.conforms(nametype);
+        this.confirm(nametype);
         if (this.linked(nametype)) {
             throw new Error(`${namespace.namepath} already has link() to MetaNamespace`);
         } else if (this.scoped(nametype)) {
@@ -42,7 +52,7 @@ export default class MetaNamespace {
         return this.#nametypes.has(nametype[MetaType.staticTraits.namepath]);
     }
 
-    conformsLink(nametype) {
+    confirmLink(nametype) {
         if (!this.linked(nametype)) {
             throw new Error(`${nametype.namepath} is not link()'ed to MetaType`);
         }
@@ -50,10 +60,9 @@ export default class MetaNamespace {
         return;
     }
 
-    conforms(nametype) {
-        MetaType.dot.conforms(nametype);
-        MetaType.dot.conformsTrait(nametype, MetaType.dot.traitScopes.staticTrait, MetaNamespace.staticTraits.namespace);
-        MetaType.dot.conformsTrait(nametype, MetaType.dot.traitScopes.methodTrait, MetaNamespace.methodTraits.parent);
+    conform(nametype) {
+        this.confirm(nametype);
+        this.confirmLink(nametype);
         return;
     }
 
@@ -66,8 +75,8 @@ export default class MetaNamespace {
     }
 
     use(metatype, nametype) {
-        MetaType.dot.conformsLink(metatype);
-        this.conformsLink(nametype);
+        MetaType.dot.confirmLink(metatype);
+        this.confirmLink(nametype);
             
         if (this.scoped(metatype, nametype)) {
             throw new Error(`${metatype.namepath} already has link() to MetaNamespace`);
@@ -87,12 +96,9 @@ export default class MetaNamespace {
 
         return this.#metatypes.get(metatype[MetaType.staticTraits.namepath]);
     }
-
-    conform(nametype) {
-        this.conformsLink(nametype);
-        return;
-    }
 }
 
-MetaType.dot.link(Meta);
+MetaTrait.dot.link(MetaNamespace);
+MetaType.dot.link(MetaNamespace);
+
 

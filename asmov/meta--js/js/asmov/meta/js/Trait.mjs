@@ -5,14 +5,13 @@ export default class MetaTrait {
     static traitname = 'Trait';
 
     /* singleton */
-    static #dot = new MetaTrait();
-    static get dot { return MetaTrait.#dot; }
+    static dot = new MetaTrait();
 
     static schemas = {
-        staticTrait: 'staticTrait',
-        staticMethodTrait: 'staticMethodTrait',
-        methodTrait: 'methodTrait',
-        dataTrait: 'dataTrait'
+        staticTraits: 'staticTraits',
+        staticMethodTraits: 'staticMethodTraits',
+        methodTraits: 'methodTraits',
+        dataTraits: 'dataTraits'
     };
 
     /* Meta Convention: Static variables, typically immutable. e.g.; MyClass.namepath */
@@ -22,19 +21,18 @@ export default class MetaTrait {
         staticTraits: 'staticTraits',
         staticMethodTraits: 'staticMethodTraits',
         methodTraits: 'methodTraits',
+        dot: 'dot'
     };
 
     /* Meta Convention: Static method names. e.g.; MyClass.from() */
-    static staticMethodTraits = {
-        dot: 'dot',
-    };
+    static staticMethodTraits = {};
 
     /* Meta Convention: Method names that exist in a prototype */
     static methodTraits = {
         link: 'link',
         linked: 'linked',
-        conforms: 'conforms',
-        conformsLink: 'conformsLink'
+        confirm: 'confirm',
+        confirmLink: 'confirmLink',
         conform: 'conform',
         get: 'get'
     };
@@ -68,7 +66,7 @@ export default class MetaTrait {
         map: 'map', // map<utf8, metatrait<MyClass>>
         array: 'array', // array<metatrait<MyClass>>
         metatrait: 'metatrait', // metatrait<Emitter>
-        metatype: 'metatype'  // metatrait<MyClass> == metatrait<Emitter<MyClass>>
+        metatype: 'metatype',  // metatrait<MyClass> == metatrait<Emitter<MyClass>>
         metamodel: 'metamodel'  
     };
 
@@ -80,35 +78,19 @@ export default class MetaTrait {
         }
     }
 
-    conforms(metatrait) {
+    confirm(metatrait) {
         for (let schema in MetaTrait.schemas) {
             if (typeof metatrait[schema] !== 'object') {
                 throw new Error(`Trait schema '${schema}' missing in ${metatrait.namepath}`);
             }
         }
 
-        for (let staticTrait in MetaTrait.staticTraits) {
-            if (typeof metatrait[staticTrait] === 'undefined') {
-                throw new Error(`Static trait '${staticTrait}' missing in ${metatrait.namepath}`);
-            }
-        }
-
-        for (let staticMethodTrait in MetaTrait.staticMethodTraits) {
-            if (typeof metatrait[staticMethodTrait] !== 'function') {
-                throw new Error(`Static method trait '${staticMethodTrait}' missing in ${metatrait.namepath}`);
-            }
-        }
-
-        for (let methodTrait in MetaTrait.methodTraits) {
-            if (typeof metatrait.prototype[methodTrait] !== 'function) {
-                throw new Error(`Method trait '${methodTrait}' missing in ${metatrait.namepath}`);
-            }
-        }
+        this.confirmTrait(metatrait, MetaTrait);
     }
 
     /** Registers a class with the MetaTrait library. Validates basic interace. Linked against a namespace defining MetaTraitPack. **/
     link(metatrait) {
-        this.conforms(metatrait);
+        this.confirm(metatrait);
         if (this.linked(metatrait)) {
             throw new Error(`${metatrait.namepath} already linked'`);
         }
@@ -121,7 +103,7 @@ export default class MetaTrait {
         return this.#traits.has(metatrait[MetaTrait.staticTraits.namepath]);
     }
 
-    conformsLink(metatrait) {
+    confirmLink(metatrait) {
         if (!this.linked(metatrait)) {
             throw new Error(`${metatrait.namepath} is not link()'ed to MetaTrait`);
         }
@@ -129,31 +111,57 @@ export default class MetaTrait {
         return;
     }
 
-    /** Retrieves the class linked for the given namespace **/
-    get(namepath) { 
-        return this.#traits[namepath]
-    }
-
     conform(metatrait) {
-        this.conformsLink(metatrait);
+        this.confirm();
+        this.confirmLink(metatrait);
         return;
     }
 
-    conformsTrait(metatrait, traitschema, trait) {
+    /** Retrieves the class linked for the given namespace **/
+    get(namepath) {
+        if (!this.#traits.has(namepath)) {
+            throw new Error(`${namepath} namepath unknown`);
+        }
+
+        return this.#traits.get(namepath);
+    }
+
+    confirmTrait(metatype, metatrait) {
+        for (let staticTrait in metatrait.staticTraits) {
+            if (typeof metatype[staticTrait] === 'undefined') {
+                throw new Error(`Static trait '${staticTrait}' missing in ${metatype.namepath}`);
+            }
+        }
+
+        for (let staticMethodTrait in metatrait.staticMethodTraits) {
+            if (typeof metatype[staticMethodTrait] !== 'function') {
+                throw new Error(`Static method trait '${staticMethodTrait}' missing in ${metatype.namepath}`);
+            }
+        }
+
+        for (let methodTrait in metatrait.methodTraits) {
+            if (typeof metatype.prototype[methodTrait] !== 'function') {
+                throw new Error(`Method trait '${methodTrait}' missing in ${metatype.namepath}`);
+            }
+        }
+
+    }
+
+    confirmTraitField(metatype, traitschema, trait) {
         switch(traitschema) {
-        case MetaTrait.schemas.staticTrait:
-            if (typeof metatrait[trait] === 'undefined') {
-                throw new Error(`${metatrait[MetaTrait.staticTraits.namepath]} + ' lacks a static ${trait}() variable`);
+        case MetaTrait.schemas.staticTraits:
+            if (typeof metatype[trait] === 'undefined') {
+                throw new Error(`${metatype[MetaTrait.staticTraits.namepath]} lacks a static ${trait}() variable`);
             }
             break;
-        case MetaTrait.schemas.staticMethodTrait:
-            if (typeof metatrait[trait] !== 'function') {
-                throw new Error(`${metatrait[MetaTrait.staticTraits.namepath]} + ' lacks a static ${trait}() function`);
+        case MetaTrait.schemas.staticMethodTraits:
+            if (typeof metatype[trait] !== 'function') {
+                throw new Error(`${metatype[MetaTrait.staticTraits.namepath]} lacks a static ${trait}() function`);
             }
             break;
-        case MetaTrait.schemas.methodTrait:
-            if (if typeof metatrait.prototype === 'undefined' || typeof metatrait.prototype.[trait] !== 'function') {
-                throw new Error(`${metatrait[MetaTrait.staticTraits.namepath]} + ' lacks a ${trait}() method`);
+        case MetaTrait.schemas.methodTraits:
+            if (typeof metatype.prototype === 'undefined' || typeof metatype.prototype[trait] !== 'function') {
+                throw new Error(`${metatype[MetaTrait.staticTraits.namepath]} lacks a ${trait}() method`);
             }
             break;
         default:

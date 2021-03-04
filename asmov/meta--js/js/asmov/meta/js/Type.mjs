@@ -1,12 +1,13 @@
 'use strict';
 
+import MetaTrait from './Trait.mjs';
+
 export default class MetaType {
     static namepath = 'asmov/meta/js/Type';
     static traitname = 'Type';
 
     /* singleton */
-    static #dot = new MetaType();
-    static get dot { return MetaType.#dot; }
+    static dot = new MetaType();
 
     static staticTraits = {
         namepath: 'namepath',
@@ -27,7 +28,7 @@ export default class MetaType {
         }
     }
 
-    conforms(metatype) {
+    confirm(metatype) {
         if (typeof metatype[MetaType.staticTraits.namepath] !== 'string') {
             throw new Error(metatype, 'missing namepath');
         } 
@@ -35,7 +36,7 @@ export default class MetaType {
 
     /** Registers a class with the MetaType library. Validates basic interace. Linked against a namespace defining MetaTypePack. **/
     link(metatype) {
-        this.conforms(metatype);
+        this.confirm(metatype);
         if (this.linked(metatype)) {
             throw new Error(`${metatype.namepath} already linked'`);
         }
@@ -45,10 +46,10 @@ export default class MetaType {
 
     /** Determines whethere a class has been linked to the MetaType library or not. **/
     linked(metatype) {
-        return this.#types.has(metatype[MetaType.dataKeys.namepath]);
+        return this.#types.has(metatype[MetaType.staticTraits.namepath]);
     }
 
-    conformsLink(metatype) {
+    confirmLink(metatype) {
         if (!this.linked(metatype)) {
             throw new Error(`${metatype.namepath} is not link()'ed to MetaType`);
         }
@@ -56,14 +57,18 @@ export default class MetaType {
         return;
     }
 
-    /** Retrieves the class linked for the given namespace **/
-    get(namepath) { 
-        return this.#types[namepath]
+    conform(metatype) {
+        this.confirm();
+        this.confirmLink(metatype);
+        return;
     }
 
-    conform(metatype) {
-        this.conformsLink(metatype);
-        return;
+    get(namepath) {
+        if (!this.#types.has(namepath)) {
+            throw new Error(`${namepath} metatype unknown`);
+        }
+
+        return this.#types.get(namepath);
     }
 }
 

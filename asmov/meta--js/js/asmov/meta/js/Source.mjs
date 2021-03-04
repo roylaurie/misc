@@ -18,8 +18,7 @@ export default class MetaSource {
         get: 'get'
     }
 
-    static #dot = new MetaSource();
-    static get dot { return MetaSource.#dot; };
+    static dot = new MetaSource();
 
     #sourcetypes = new Map();
 
@@ -29,22 +28,42 @@ export default class MetaSource {
         }
     }
 
+    confirm(sourcetype) {
+        MetaType.dot.confirm(sourcetype);
+        MetaTrait.dot.confirmTrait(sourcetype, MetaSource);
+        return;
+    }
+
     link(sourcetype) {
-        this.conforms(sourcetype);
-        MetaType.conformsLink(sourcetype);
+        this.confirm(sourcetype);
+        MetaType.dot.confirmLink(sourcetype);
         this.#sourcetypes.set(sourcetype.namepath, sourcetype);
     }
 
     linked(sourcetype) {
-        return this.#sourcetypes.has([sourcetype[MetaType.staticTraits.namepath]]);
+        return this.#sourcetypes.has(sourcetype[MetaType.staticTraits.namepath]);
     }
 
-    conforms(sourcetype) {
-        MetaType.dot.conforms(sourcetype);
-        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaSource.methodTraits.context);
-        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaSource.methodTraits.store);
-        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaSource.methodTraits.get);
+    confirmLink(nametype) {
+        if (!this.linked(nametype)) {
+            throw new Error(`${nametype.namepath} is not link()'ed to MetaType`);
+        }
+
         return;
+    }
+
+    conform(sourcetype) {
+        this.confirm(sourcetype);
+        this.confirmLink(sourcetype);
+        return;
+    }
+
+    get(namepath) {
+        if (!this.#sourcetypes.has(namepath)) {
+            throw new Error(`${namepath} namepath unknown`);
+        }
+
+        return this.#sourcetypes.get(namepath);
     }
 }
 

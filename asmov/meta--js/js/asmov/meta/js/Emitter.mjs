@@ -1,171 +1,68 @@
 'use strict';
 
-import Meta from '../../../asmov/meta/js/Meta.mjs';
-import MetaJSPack from '../../../asmov/meta/js/MetaPack.mjs';
+import MetaTrait from './Trait.mjs';
+import MetaType from './Type.mjs';
+import MetaModel from './Model.mjs';
 
-export default class MetaEmit {
-    static namepath = 'asmov/meta/js/Emit';
+export default class MetaEmitter {
+    static namepath = 'asmov/meta/js/Emitter';
+    static traitname = 'Emitter';
 
-    static dot = new MetaEmit();
+    static staticTraits = {};
+    static staticMethodTraits = {};
+    static methodTraits = {
+        listen: 'listen'
+    };
+    static dataTraits = {};
 
-    #providers = new Map();
+    static dot = new MetaEmitter();
+
+    #emittertypes = new Map();
 
     constructor() {
-        // singleton enforcement
-        if (typeof Meta.dot !== 'undefined') {
-            throw new Error('Meta already initialized.');
+        if (typeof MetaEmitter.dot !== 'undefined') {
+            throw new Error('MetaEmitter already initialized.');
         }
     }
 
-    link(metaclass) {
-        this.conforms(metaclass);
-        this.#providers.set(metaclass.namepath, metaclass);
+    confirm(emittertype) {
+        MetaType.dot.confirm(emittertype);
+        MetaModel.dot.confirm(emittertype);
+        MetaTrait.dot.confirmTrait(emittertype, MetaEmitter);
     }
 
-    static link(metaclass) { return MetaEmit.dot.link(metaclass); }
-
-    linked(metaclass) {
-        return this.#providers.has(metaclass.namepath);
+    link(emittertype) {
+        this.confirm(emittertype);
+        this.#emittertypes.set(emittertype.namepath, emittertype);
     }
 
-    static linked(metaclass) { return MetaEmit.dot.linked(metaclass); }
 
-    conforms(metaclass) {
-        Meta.conforms(metaclass);
-
-        if (typeof metaclass.prototype.listener === 'undefined') {
-            throw new Error(`${metaclass.namepath} lacks a listener() method`);
-        }
+    linked(emittertype) {
+        return this.#emittertypes.has(emittertype.namepath);
     }
 
-    static conforms(metaclass) { return MetaEmit.dot.conforms(metaclass); }
-}
-
-Meta.Class.link(MetaEmit);
-Meta.Codebase.link(MetaEmit, MetaJSPack);
-
-class MetaEmitter {
-    static namepath = 'asmov/meta/js/Emitter';
-
-    static emissions = {
-        object: 'object'
-        data: 'data',
-    };
-
-    #listeners = new Map();
-    #provider = null;
-    #emissionType =  null;
-    #defaultSubscriber = null;
-    #defaultListener = null;
-
-    constructor(provider, emissionType = MetaEmitter.emissions.object) {
-        MetaEmitter.validateProvider(provider);
-        this.#provider = new WeakRef(provider);
-        this.#emissionType = Meta.select(emissionType, emissions);
-        this.#defaultListener = new Listener(this);
-        this.#defaultPublisher = new Publisher(this);
-    }
-
-    listen(subscriber, metaclass, callback) {
-        const namepath = metaclass.namepath;
-
-        if (typeof this.#provider === 'undefined') {
-            return this.destroy();
+    confirmLink(nametype) {
+        if (!this.linked(nametype)) {
+            throw new Error(`${nametype.namepath} is not link()'ed to MetaType`);
         }
 
-        if (!this.#listeners.has(namepath)) {
-            this.#listeners.set(namepath, new WeakMap());
-        }
-
-        if (!this.#listeners.get(namepath).has(subscriber)) {
-            this.#listeners.get(namepath).set(subscriber, callback);
-        } else {
-            throw new Error(subscriber.namepath + 'is already listening to ' + metaclass.namepath);
-        }
-    }
-
-    unsubscribe(subscriber, metaclass = null) {
-        if (metaclass !== null) {
-            this.#listeners.get(metaclass.namepath).delete(subscriber) {
-        } else {
-            for (let namepath in this.#listeners) {
-                this.#listeners.get(namepath).delete(subscriber);
-            }
-        }
-    }
-
-    emit(emission) {
-        const namepath = emission.namepath;
-        const listeners = this.#listeners.get(namepath);
-
-        if (typeof this.#provider === 'undefined') {
-            return this.destroy();
-        } else if (typeof listeners === 'undefined') {
-            return;
-        }
-
-        for (let listener in listeners) {
-            let callback = listeners[listener];
-            callback.call(listener, emission, this.#provider.deref(), emissionType); 
-        }
-    }
-
-    destroy() {
-        this.#listeners = null;
-        this.#provider = null;
-        this.#emissionType = null;
-        this.#defaultPublisher = null;
-        this.#defaultSubscriber = null;
         return;
     }
 
-    subscriber() {
-        return this.#defaultSubscriber;
+    conform(emittertype) {
+        this.confirm(emittertype);
+        this.confirmLink(emittertype);
+        return;
     }
 
-    publisher() {
-        return this.#defaultPublisher;
-    }
-}
+    get(namepath) {
+        if (!this.#emittertypes.has(namepath)) {
+            throw new Error(`${namepath} namepath unknown`);
+        }
 
-Meta.link(MetaJSPack, Emitter);
-
-
-class Publisher {
-    static namepath = 'asmov/meta/js/Emitter//Publisher';
-        
-    this.#emitter = emitter;
-
-    constructor(emitter) {
-        this.#emitter = emitter;
-    }
-
-    emit(emission) {
-        this.#emitter.emit(emission);
+        return this.#emittertypes.get(namepath);
     }
 }
 
-Meta.link(MetaJSPack, Publisher);
-
-
-class Subscriber {
-    static namepath = 'asmov/meta/js/Emitter//Subscriber';
-
-    this.#emitter = emitter;
-
-    constructor(emitter) {
-        this.#emitter = emitter;
-    }
-
-    listen(listener, metaclass) {
-        return this.#emitter.listen (listener, metaclass);
-    }
-
-    unsubscribe(listener, metaclass = null) {
-        this.#emitter.unsubscribe(listener, metaclass);
-    }
-}
-
-Meta.link(MetaJSPack, Subscriber);
-
-Meta.link(MetaJSPack, MetaEmitter);
+MetaTrait.dot.link(MetaEmitter);
+MetaType.dot.link(MetaEmitter);

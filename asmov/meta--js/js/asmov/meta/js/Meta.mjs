@@ -15,8 +15,7 @@ export default class Meta {
     };
 
 
-    static #dot = new Meta();
-    static get dot { return Meta.#dot; } 
+    static dot = new Meta();
 
     Type = MetaClass.dot;
     Namespace = Namespace.dot;
