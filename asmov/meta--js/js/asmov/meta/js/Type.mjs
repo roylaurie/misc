@@ -54,8 +54,10 @@ export default class MetaType {
         utf8: 'utf8',
         utf16: 'utf16',
         utf32: 'utf32',
-        map: 'map',
-        array: 'array'
+        map: 'map', // map<utf8, metatype<MyClass>>
+        array: 'array', // array<metatype<MyClass>>
+        metatrait: 'metatrait', // metatrait<Emitter>
+        metatype: 'metatype'  // metatype<MyClass> == metatrait<Emitter<MyClass>>
     };
 
     #types = new Map();
