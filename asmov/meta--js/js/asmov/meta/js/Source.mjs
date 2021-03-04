@@ -1,13 +1,20 @@
 'use strict';
 
+import MetaTrait from './Trait.mjs';
 import MetaType from './Type.mjs';
 
 export default class MetaSource {
     static namepath = 'asmov/meta/js/Model';
+    static traitname = 'Source';
+
+    static staticTraits = {};
+    static staticMethodTraits = {};
+    static dataTraits = {};
 
     static methodTraits = {
         context: 'context',
         store: 'store',
+        retrieve: 'retrieve',
         get: 'get'
     }
 
@@ -41,5 +48,6 @@ export default class MetaSource {
     }
 }
 
+MetaTrait.dot.link(MetaSource);
 MetaType.dot.link(MetaSource);
 

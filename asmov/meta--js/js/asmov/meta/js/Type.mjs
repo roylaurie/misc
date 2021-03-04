@@ -2,6 +2,7 @@
 
 export default class MetaType {
     static namepath = 'asmov/meta/js/Type';
+    static traitname = 'Type';
 
     /* singleton */
     static #dot = new MetaType();

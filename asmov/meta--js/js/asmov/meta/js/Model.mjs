@@ -5,6 +5,7 @@ import murmur3 from '../../../ext/murmurhash3_gc.js';
 
 export default class MetaModel {
     static namepath = 'asmov/meta/js/Model';
+    static traitname = 'Model';
 
     static staticMethodTraits = {
         from: 'from'

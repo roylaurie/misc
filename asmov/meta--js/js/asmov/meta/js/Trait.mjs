@@ -2,6 +2,7 @@
 
 export default class MetaTrait {
     static namepath = 'asmov/meta/js/Trait';
+    static traitname = 'Trait';
 
     /* singleton */
     static #dot = new MetaTrait();
@@ -17,6 +18,7 @@ export default class MetaTrait {
     /* Meta Convention: Static variables, typically immutable. e.g.; MyClass.namepath */
     static staticTraits = {
         namepath: 'namepath',
+        traitname: 'traitname',
         staticTraits: 'staticTraits',
         staticMethodTraits: 'staticMethodTraits',
         methodTraits: 'methodTraits',
