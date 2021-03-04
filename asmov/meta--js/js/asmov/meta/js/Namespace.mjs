@@ -2,8 +2,8 @@
 
 import MetaType from './Type.mjs';
 
-export default class MetaCodebase {
-    static namepath = 'asmov/meta/js/Codebase';
+export default class MetaNamespace {
+    static namepath = 'asmov/meta/js/Namespace';
 
     static staticTraits = {
         namespace: 'namespace'
@@ -13,83 +13,83 @@ export default class MetaCodebase {
         parent: 'parent'
     };
 
-    static #dot = new MetaCodebase();
-    static get dot { return Metacodebase.#dot; } 
+    static #dot = new MetaNamespace();
+    static get dot { return Metanamespace.#dot; } 
 
-    #codebases = new Map();
+    #nametypes= new Map();
     #metatypes = new Map();
 
     constructor() {
-        if (typeof MetaCodebase.dot !== 'undefined') {
-            throw new Error('MetaCodebase already initialized.');
+        if (typeof MetaNamespace.dot !== 'undefined') {
+            throw new Error('MetaNamespace already initialized.');
         }
     }
 
-    link(codebase) {
-        this.conforms(codebase);
-        if (this.linked(codebase)) {
-            throw new Error(`${codebase.namepath} already has link() to MetaCodebase`);
-        } else if (this.scoped(codebase)) {
-            throw new Error(`${codebase.namepath} already join()'ed to a codebase`);
+    link(nametype) {
+        this.conforms(nametype);
+        if (this.linked(nametype)) {
+            throw new Error(`${namespace.namepath} already has link() to MetaNamespace`);
+        } else if (this.scoped(nametype)) {
+            throw new Error(`${namespace.namepath} already join()'ed to a namespace`);
         }
 
 
-        this.#codebases.set(codebase.namespace, codebase);
-        this.#metatypes.set(codebase.namepath, codebase);
+        this.#nametypes.set(nametype.namespace, nametype);
+        this.#metatypes.set(nametype.namepath, nametype);
     }
 
-    linked(codebase) {
-        return this.#codebases.has(codebase[MetaType.staticTraits.namepath]);
+    linked(nametype) {
+        return this.#nametypes.has(nametype[MetaType.staticTraits.namepath]);
     }
 
-    conformsLink(codebase) {
-        if (!this.linked(codebase)) {
-            throw new Error(`${codebase.namepath} is not link()'ed to MetaType`);
+    conformsLink(nametype) {
+        if (!this.linked(nametype)) {
+            throw new Error(`${nametype.namepath} is not link()'ed to MetaType`);
         }
 
         return;
     }
 
-    conforms(codebase) {
-        MetaType.dot.conforms(codebase);
-        MetaType.dot.conformsTrait(codebase, MetaType.dot.traitScopes.staticTrait, MetaCodebase.staticTraits.namespace);
-        MetaType.dot.conformsTrait(codebase, MetaType.dot.traitScopes.methodTrait, MetaCodebase.methodTraits.parent);
+    conforms(nametype) {
+        MetaType.dot.conforms(nametype);
+        MetaType.dot.conformsTrait(nametype, MetaType.dot.traitScopes.staticTrait, MetaNamespace.staticTraits.namespace);
+        MetaType.dot.conformsTrait(nametype, MetaType.dot.traitScopes.methodTrait, MetaNamespace.methodTraits.parent);
         return;
     }
 
     get(namespace) {
-        if (!this.#codebases.has(namespace)) {
-            throw new Error(`${codebase} codebase unknown`);
+        if (!this.#nametypes.has(namespace)) {
+            throw new Error(`${namespace} namespace unknown`);
         }
 
-        return this.#codebases.get(namespace);
+        return this.#nametypes.get(namespace);
     }
 
-    use(metatype, codebase) {
+    use(metatype, nametype) {
         MetaType.dot.conformsLink(metatype);
-        this.conformsLink(codebase);
+        this.conformsLink(nametype);
             
-        if (this.scoped(metatype, codebase)) {
-            throw new Error(`${metatype.namepath} already has link() to MetaCodebase`);
+        if (this.scoped(metatype, nametype)) {
+            throw new Error(`${metatype.namepath} already has link() to MetaNamespace`);
         }
 
-        this.#metatypes.set(metatype.namepath, codebase); 
+        this.#metatypes.set(metatype.namepath, nametype); 
     }
 
     scoped(metatype) {
         return this.#metatypes.has(metatype[MetaType.staticTraits.namepath]);
     }
 
-    codebase(metatype) {
+    namespace(metatype) {
         if(!this.#metatypes.has(metatype[MetaType.staticTraits.namepath])) {
-            throw new Error(`${metatype[MetaType.staticTraits.namepath]} does not use() a codebase`);
+            throw new Error(`${metatype[MetaType.staticTraits.namepath]} does not use() a namespace`);
         }
 
         return this.#metatypes.get(metatype[MetaType.staticTraits.namepath]);
     }
 
-    conform(codebase) {
-        this.conformsLink(codebase);
+    conform(nametype) {
+        this.conformsLink(nametype);
         return;
     }
 }
