@@ -1,12 +1,11 @@
 'use strict';
 
-import Meta from '../../asmov/meta/Meta.mjs';
-import MetaModel from '../../asmov/meta/Model.mjs';
+import Meta from '../Meta.mjs';
 
 export default class Pack {
-    static namepath = 'asmov/meta/Pack';
+    static namepath = 'asmov/meta/js/codebase/Pack';
 
-    static dataKeys = {
+    static dataTraits = {
         namespace: 'namespace',
         version: 'version',
         organisation: 'organisation',
@@ -67,13 +66,13 @@ export default class Pack {
     #id = null;
 
     constructor(data) {
-        this.#namespace = data[MetaPackage.dataKeys.namespace];
-        this.#version = data[MetaPackage.dataKeys.version];
-        this.#organisation = data[MetaPackage.dataKeys.organisation];
-        this.#copyright = data[MetaPackage.dataKeys.copyright];
-        this.#license = data[MetaPackage.dataKeys.license];
-        this.#pubkey = data[MetaPackage.dataKeys.pubkey];
-        this.#id = data[ModelMeta.dataKeys.id] || ModelMeta.id32(this, [this.#namespace, this.#version]);
+        this.#namespace = data[MetaPackage.dataTraits.namespace];
+        this.#version = data[MetaPackage.dataTraits.version];
+        this.#organisation = data[MetaPackage.dataTraits.organisation];
+        this.#copyright = data[MetaPackage.dataTraits.copyright];
+        this.#license = data[MetaPackage.dataTraits.license];
+        this.#pubkey = data[MetaPackage.dataTraits.pubkey];
+        this.#id = data[Meta.Model.dataTraits.id] || ModelMeta.id32(this, [this.#namespace, this.#version]);
     }
 
     id() {
@@ -81,15 +80,15 @@ export default class Pack {
     }
 
     data() {
-        return {
-            ModelMeta.dataKeys.namepath = Pack.namepath,
-            ModelMeta.dataKeys.id = this.#id,
-            MetaPackage.dataKeys.namespace: this.#namespace,
-            MetaPackage.dataKeys.version: this.#version,
-            MetaPackage.dataKeys.organisation: this.#organisation,
-            MetaPackage.dataKeys.copyright: this.#copyright,
-            MetaPackage.dataKeys.license: this.#license,
-            MetaPackage.dataKeys.pubkey: this.#pubkey
-        };
+        return Object.freeze({
+            Meta.Model.dataTraits.namepath = Pack.namepath,
+            Meta.Model.dataTraits.id = this.#id,
+            MetaPackage.dataTraits.namespace: this.#namespace,
+            MetaPackage.dataTraits.version: this.#version,
+            MetaPackage.dataTraits.organisation: this.#organisation,
+            MetaPackage.dataTraits.copyright: this.#copyright,
+            MetaPackage.dataTraits.license: this.#license,
+            MetaPackage.dataTraits.pubkey: this.#pubkey
+        });
     }
 }

@@ -2,7 +2,7 @@
 
 import MetaType from './Type.mjs';
 
-export default class MetaDatasource {
+export default class MetaSource {
     static namepath = 'asmov/meta/js/Model';
 
     static methodTraits = {
@@ -11,14 +11,14 @@ export default class MetaDatasource {
         get: 'get'
     }
 
-    static #dot = new MetaDatasource();
-    static get dot { return MetaDatasource.#dot; };
+    static #dot = new MetaSource();
+    static get dot { return MetaSource.#dot; };
 
     #sourcetypes = new Map();
 
     constructor() {
         if (typeof dot !== 'undefined') {
-            throw new Error('MetaDatasource already initialized');
+            throw new Error('MetaSource already initialized');
         }
     }
 
@@ -34,12 +34,12 @@ export default class MetaDatasource {
 
     conforms(sourcetype) {
         MetaType.dot.conforms(sourcetype);
-        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaDatasource.methodTraits.context);
-        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaDatasource.methodTraits.store);
-        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaDatasource.methodTraits.get);
+        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaSource.methodTraits.context);
+        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaSource.methodTraits.store);
+        MetaType.conformsTrait(sourcetype, MetaType.dot.staticScopes.methodTrait, MetaSource.methodTraits.get);
         return;
     }
 }
 
-MetaType.dot.link(MetaDatasource);
+MetaType.dot.link(MetaSource);
 
