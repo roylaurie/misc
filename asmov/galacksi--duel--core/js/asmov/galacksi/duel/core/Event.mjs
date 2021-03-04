@@ -1,6 +1,6 @@
 'use strict';
 
-import Meta from '../asmov/meta/Meta.mjs';
+import Meta from '../../../../../packs/asmov--meta--js/js/asmov/meta/js/Meta.mjs';
 import MetaModel from '../asmov/meta/Model.mjs';
 import GalacksiPack from '../asmov/galacksi/MetaPack.mjs';
 
