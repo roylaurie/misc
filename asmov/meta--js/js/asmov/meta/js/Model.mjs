@@ -1,6 +1,6 @@
 'use strict';
 
-import MetaType from './Type.mjs';
+import MetaTrait from './Type.mjs';
 import murmur3 from '../../../ext/murmurhash3_gc.js';
 
 export default class MetaModel {
@@ -33,19 +33,19 @@ export default class MetaModel {
 
     link(modeltype) {
         this.conforms(modeltype);
-        MetaType.conformsLink(modeltype);
+        MetaTrait.conformsLink(modeltype);
         this.#modeltypes.set(modeltype.namepath, modeltype.constructor.from);
     }
 
     linked(modeltype) {
-        return this.#modeltypes.has([modeltype[MetaType.staticTraits.namepath]]);
+        return this.#modeltypes.has([modeltype[MetaTrait.staticTraits.namepath]]);
     }
 
     conforms(modeltype) {
-        MetaType.dot.conforms(modeltype);
-        MetaType.conformsTrait(modeltype, MetaType.dot.staticScopes.staticMethodTrait, MetaModel.staticMethodTraits.from);
-        MetaType.conformsTrait(modeltype, MetaType.dot.staticScopes.methodTrait, MetaModel.methodTraits.data);
-        MetaType.conformsTrait(modeltype, MetaType.dot.staticScopes.methodTrait, MetaModel.methodTraits.id);
+        MetaTrait.dot.conforms(modeltype);
+        MetaTrait.conformsTrait(modeltype, MetaTrait.dot.schemas.staticMethodTrait, MetaModel.staticMethodTraits.from);
+        MetaTrait.conformsTrait(modeltype, MetaTrait.dot.schemas.methodTrait, MetaModel.methodTraits.data);
+        MetaTrait.conformsTrait(modeltype, MetaTrait.dot.schemas.methodTrait, MetaModel.methodTraits.id);
         return;
     }
 
@@ -94,4 +94,5 @@ export default class MetaModel {
     }
 }
 
-MetaType.dot.link(MetaModel);
+MetaTrait.dot.link(MetaModel);
+MetaTType.dot.link(MetaModel);

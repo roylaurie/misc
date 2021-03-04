@@ -137,25 +137,25 @@ export default class MetaTrait {
         return;
     }
 
-    conformsTrait(metatrait, traitscope, trait) {
-        switch(traitscope) {
-        case MetaTrait.scopes.staticTrait:
+    conformsTrait(metatrait, traitschema, trait) {
+        switch(traitschema) {
+        case MetaTrait.schemas.staticTrait:
             if (typeof metatrait[trait] === 'undefined') {
                 throw new Error(`${metatrait[MetaTrait.staticTraits.namepath]} + ' lacks a static ${trait}() variable`);
             }
             break;
-        case MetaTrait.scopes.staticMethodTrait:
+        case MetaTrait.schemas.staticMethodTrait:
             if (typeof metatrait[trait] !== 'function') {
                 throw new Error(`${metatrait[MetaTrait.staticTraits.namepath]} + ' lacks a static ${trait}() function`);
             }
             break;
-        case MetaTrait.scopes.methodTrait:
+        case MetaTrait.schemas.methodTrait:
             if (if typeof metatrait.prototype === 'undefined' || typeof metatrait.prototype.[trait] !== 'function') {
                 throw new Error(`${metatrait[MetaTrait.staticTraits.namepath]} + ' lacks a ${trait}() method`);
             }
             break;
         default:
-            throw new Error(`Invalid traitscope '${traitscope}' for operation`);
+            throw new Error(`Invalid traitschema '${traitschema}' for operation`);
         }
 
         return;
