@@ -18,20 +18,22 @@ export default class MetaNamespace {
     static staticMethodTraits = {};
     static dataTraits = {};
 
-    static dot = new MetaNamespace();
-
     #nametypes= new Map();
     #metatypes = new Map();
+    #MetaTrait = null;
+    #MetaType = null;
 
-    constructor() {
-        if (typeof MetaNamespace.dot !== 'undefined') {
-            throw new Error('MetaNamespace already initialized.');
-        }
+    constructor(metaTrait, metaType) {
+        this.#MetaTrait = metaTrait;
+        this.#MetaType = metaType;
+
+        metaTrait.link(MetaNamespace);
+        metaType.link(MetaNamespace);
     }
 
     confirm(nametype) {
-        MetaType.dot.confirm(nametype);
-        MetaTrait.dot.confirmTrait(nametype, MetaNamespace);
+        this.#MetaType.confirm(nametype);
+        this.#MetaTrait.confirmTrait(nametype, MetaNamespace);
         return;
     }
 
@@ -75,7 +77,7 @@ export default class MetaNamespace {
     }
 
     use(metatype, nametype) {
-        MetaType.dot.confirmLink(metatype);
+        this.#MetaType.confirmLink(metatype);
         this.confirmLink(nametype);
             
         if (this.scoped(metatype, nametype)) {
@@ -97,8 +99,4 @@ export default class MetaNamespace {
         return this.#metatypes.get(metatype[MetaType.staticTraits.namepath]);
     }
 }
-
-MetaTrait.dot.link(MetaNamespace);
-MetaType.dot.link(MetaNamespace);
-
 

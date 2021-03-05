@@ -23,25 +23,27 @@ export default class MetaModel {
         id: 'id',
     }
 
-    static dot = new MetaModel();
-
     #modeltypes = new Map();
+    #MetaTrait = null;
+    #MetaType = null;
 
-    constructor() {
-        if (typeof dot !== 'undefined') {
-            throw new Error('MetaModel already initialized');
-        }
+    constructor(metaTrait, metaType) {
+        this.#MetaTrait = metaTrait;
+        this.#MetaType = metaType;
+
+        metaTrait.link(MetaModel);
+        metaType.link(MetaModel);
     }
 
     confirm(modeltype) {
-        MetaTrait.dot.confirm(modeltype);
-        MetaTrait.dot.confirmTrait(modeltype, MetaModel);
+        this.#MetaTrait.confirm(modeltype);
+        this.#MetaTrait.confirmTrait(modeltype, MetaModel);
         return;
     }
 
    link(modeltype) {
         this.confirm(modeltype);
-        MetaTrait.dot.confirmLink(modeltype);
+        this.#MetaTrait.confirmLink(modeltype);
         this.#modeltypes.set(modeltype.namepath, modeltype.constructor.from);
     }
 
@@ -116,5 +118,4 @@ export default class MetaModel {
     }
 }
 
-MetaTrait.dot.link(MetaModel);
-MetaType.dot.link(MetaModel);
+

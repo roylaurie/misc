@@ -4,8 +4,6 @@ export default class MetaTrait {
     static namepath = 'asmov/meta/js/Trait';
     static traitname = 'Trait';
 
-    /* singleton */
-    static dot = new MetaTrait();
 
     static schemas = {
         staticTraits: 'staticTraits',
@@ -21,7 +19,6 @@ export default class MetaTrait {
         staticTraits: 'staticTraits',
         staticMethodTraits: 'staticMethodTraits',
         methodTraits: 'methodTraits',
-        dot: 'dot'
     };
 
     /* Meta Convention: Static method names. e.g.; MyClass.from() */
@@ -73,9 +70,7 @@ export default class MetaTrait {
     #traits = new Map();
 
     constructor() {
-        if (typeof MetaTrait.dot !== 'undefined') {
-            throw new Error('MetaTrait already initialized.');
-        }
+        this.link(MetaTrait);
     }
 
     confirm(metatrait) {
@@ -171,6 +166,3 @@ export default class MetaTrait {
         return;
     }
 }
-
-MetaTrait.dot.link(MetaTrait);
-

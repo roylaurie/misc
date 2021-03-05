@@ -1,11 +1,10 @@
 'use strict';
 
+import MetaTrait from './Trait.mjs';
 import MetaType from './Type.mjs';
 import MetaNamespace from './Namespace.mjs';
 import MetaModel from './Model.mjs';
-import MetaInterface from './Interface.mjs';
-import MetaEmit from './Emit.mjs';
-import MetaJSPack from './MetaPack.mjs';
+import MetaEmitter from './Emitter.mjs';
 
 export default class Meta {
     static namepath = 'asmov/meta/js/Meta';
@@ -14,34 +13,21 @@ export default class Meta {
         freeze: 'freeze'
     };
 
-
-    static dot = new Meta();
-
-    Type = MetaClass.dot;
-    Namespace = Namespace.dot;
-    Interface = Interface.dot;
-    Model = Model.dot;
-    Emit = Emit.dot;
-
-    constructor() {
-        if (typeof Meta.dot !== 'undefined') {
-            throw new Error('Meta already initialized.');
-        }
-    }
+    static Trait = new MetaTrait();
+    static Type = new MetaType(Meta.Trait);
+    static Namespace = new MetaNamespace(Meta.Trait, Meta.Type);
+    static Model = new MetaModel(Meta.Trait, Meta.Type);
+    static Emitter = new MetaEmitter(Meta.Trait, Meta.Type, Meta.Model);
 
     /** Post-processing for types that have been linked to a convention */
-    conform(metatype, conformance = {}) {
-        this.Type.conform(metatype);
-        this.Namespace.conform(metatype);
+    static conform(metatype, conformance = {}) {
+        Meta.Type.conform(metatype);
 
-        if (this.Interface.linked(metatype)) {
-            this.Interface.conform(metatype);
+        if (Meta.Model.linked(metatype)) {
+            Meta.Model.conform(metatype);
         }
-        if (this.Model.linked(metatype)) {
-            this.Model.conform(metatype);
-        }
-        if (this.Emit.linked(metatype)) {
-            this.Emit.conform(metatype);
+        if (Meta.Emitter.linked(metatype)) {
+            Meta.Emitter.conform(metatype);
         }
 
         if (typeof conformance[Meta.conformance.freeze] !== 'undefined' && conformance.freeze === false) {
@@ -53,10 +39,19 @@ export default class Meta {
         return;
     }
 
-    static conform(metatype, conformance = {}) { return Meta.conform(metatype, conformance); }
+    constructor() {
+        if (Meta.Type.linked(Meta)) {
+            throw new Error('Meta already initialized.');
+        }
+
+        Meta.Type.link(Meta);
+
+        Meta.conform(MetaTrait);
+        Meta.conform(MetaType);
+        Meta.conform(MetaNamespace);
+        Meta.conform(MetaModel);
+        Meta.conform(MetaEmitter);
+        Meta.conform(Meta);
+    }
+
 }
-
-Meta.Type.link(Meta);
-Meta.Namespace.use(Meta, MetaJSPack);
-Meta.conform(Meta);
-

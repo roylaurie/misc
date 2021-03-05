@@ -5,6 +5,9 @@ import Meta from '../Meta.mjs';
 export default class Pack {
     static namepath = 'asmov/meta/js/codebase/Pack';
 
+    static staticTraits = {};
+    static staticMethodTraits = {}
+    static methodTraits = {};
     static dataTraits = {
         namespace: 'namespace',
         version: 'version',

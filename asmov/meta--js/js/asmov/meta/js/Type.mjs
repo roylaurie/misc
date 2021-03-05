@@ -6,9 +6,6 @@ export default class MetaType {
     static namepath = 'asmov/meta/js/Type';
     static traitname = 'Type';
 
-    /* singleton */
-    static dot = new MetaType();
-
     static staticTraits = {
         namepath: 'namepath',
     };
@@ -21,16 +18,17 @@ export default class MetaType {
 
 
     #types = new Map();
+    #MetaTrait = null;
 
-    constructor() {
-        if (typeof MetaType.dot !== 'undefined') {
-            throw new Error('MetaType already initialized.');
-        }
+    constructor(metaTrait) {
+        metaTrait.link(MetaType);
+        this.link(MetaTrait);
+        this.link(MetaType);
     }
 
     confirm(metatype) {
         if (typeof metatype[MetaType.staticTraits.namepath] !== 'string') {
-            throw new Error(metatype, 'missing namepath');
+            throw new Error(`${metatype.namepath} missing namepath`);
         } 
     }
 
@@ -58,7 +56,7 @@ export default class MetaType {
     }
 
     conform(metatype) {
-        this.confirm();
+        this.confirm(metatype);
         this.confirmLink(metatype);
         return;
     }
@@ -71,6 +69,3 @@ export default class MetaType {
         return this.#types.get(namepath);
     }
 }
-
-MetaTrait.dot.link(MetaType);
-MetaType.dot.link(MetaType);

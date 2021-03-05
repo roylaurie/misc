@@ -15,20 +15,24 @@ export default class MetaEmitter {
     };
     static dataTraits = {};
 
-    static dot = new MetaEmitter();
-
     #emittertypes = new Map();
+    #MetaTrait = null;
+    #MetaType = null;
+    #MetaModel = null;
 
-    constructor() {
-        if (typeof MetaEmitter.dot !== 'undefined') {
-            throw new Error('MetaEmitter already initialized.');
-        }
+    constructor(metaTrait, metaType, metaModel) {
+        this.#MetaTrait = metaTrait;
+        this.#MetaType = metaType;
+        this.#MetaModel = metaModel;
+            
+        this.#MetaTrait.link(MetaEmitter);
+        this.#MetaType.link(MetaEmitter);
     }
 
     confirm(emittertype) {
-        MetaType.dot.confirm(emittertype);
-        MetaModel.dot.confirm(emittertype);
-        MetaTrait.dot.confirmTrait(emittertype, MetaEmitter);
+        this.#MetaType.confirm(emittertype);
+        this.#MetaModel.confirm(emittertype);
+        this.#MetaTrait.confirmTrait(emittertype, MetaEmitter);
     }
 
     link(emittertype) {
@@ -64,5 +68,3 @@ export default class MetaEmitter {
     }
 }
 
-MetaTrait.dot.link(MetaEmitter);
-MetaType.dot.link(MetaEmitter);
