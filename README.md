@@ -2,4 +2,4 @@ Copyright 2021 Roy Laurie
 
 All rights are reserved.
 
-What goes on in misc/ stays in misc/
+This is a generic development environment and should not be cloned.
