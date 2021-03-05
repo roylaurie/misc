@@ -13,11 +13,13 @@ export default class Meta {
         freeze: 'freeze'
     };
 
-    static Trait = new MetaTrait();
-    static Type = new MetaType(Meta.Trait);
-    static Namespace = new MetaNamespace(Meta.Trait, Meta.Type);
-    static Model = new MetaModel(Meta.Trait, Meta.Type);
-    static Emitter = new MetaEmitter(Meta.Trait, Meta.Type, Meta.Model);
+    static Trait = MetaTrait;
+    static Type = MetaType;
+    static Namespace = MetaNamespace;
+    //static Interface = MetaInterface;
+    //static Datasource = Datasource;
+    static Model = MetaModel;
+    static Emitter = MetaEmitter;
 
     /** Post-processing for types that have been linked to a convention */
     static conform(metatype, conformance = {}) {

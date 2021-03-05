@@ -1,9 +1,10 @@
 'use strict';
 
+import MetaLibrary from './Library.mjs';
+
 export default class MetaTrait {
     static namepath = 'asmov/meta/js/Trait';
     static traitname = 'Trait';
-
 
     static schemas = {
         staticTraits: 'staticTraits',
@@ -22,7 +23,9 @@ export default class MetaTrait {
     };
 
     /* Meta Convention: Static method names. e.g.; MyClass.from() */
-    static staticMethodTraits = {};
+    static staticMethodTraits = {
+        init: 'init'
+    };
 
     /* Meta Convention: Method names that exist in a prototype */
     static methodTraits = {
@@ -67,10 +70,15 @@ export default class MetaTrait {
         metamodel: 'metamodel'  
     };
 
-    #traits = new Map();
+    static #librarySecret = Symbol();
+
+    static init() {
+        MetaMetaLibrary.dot.reserve(librarySecret, MetaTrait);
+        MetaTrait.link(MetaTrait);
+    }
 
     constructor() {
-        this.link(MetaTrait);
+        throw new Error('MetaTrait cannot be instantiated.');
     }
 
     confirm(metatrait) {
@@ -80,45 +88,54 @@ export default class MetaTrait {
             }
         }
 
-        this.confirmTrait(metatrait, MetaTrait);
+        MetaTrait.confirmTrait(metatrait, MetaTrait);
     }
 
     /** Registers a class with the MetaTrait library. Validates basic interace. Linked against a namespace defining MetaTraitPack. **/
     link(metatrait) {
-        this.confirm(metatrait);
-        if (this.linked(metatrait)) {
+        MetaTrait.confirm(metatrait);
+        if (MetaTrait.linked(metatrait)) {
             throw new Error(`${metatrait.namepath} already linked'`);
         }
 
-        this.#traits.set(metatrait.namepath, metatrait);
+        MetaLibrary.dot.link(MetaTrait.#librarySecret, metatrait);
     }
 
     /** Determines whethere a class has been linked to the MetaTrait library or not. **/
     linked(metatrait) {
-        return this.#traits.has(metatrait[MetaTrait.staticTraits.namepath]);
+        return MetaLibrary.dot.has(MetaTrait, metatrait[MetaTrait.staticTraits.namepath]);
     }
 
     confirmLink(metatrait) {
-        if (!this.linked(metatrait)) {
+        if (!MetaTrait.linked(metatrait)) {
             throw new Error(`${metatrait.namepath} is not link()'ed to MetaTrait`);
         }
 
         return;
     }
 
+    // link MyClass to OtherClass by way of MyTrait
+    // e.g., NamespaceTrait.linkTo(NamespaceClass, MyClass)
+    //       ModelTrait.linkTo(ModelClass, FactoryClass)
+    decorate(metatypeChild, metatrait, metatypeParent) {
+        MetaLibrary.dot.decorate(MetaTrait.#librarySecret, metatype, metatrait);
+    }
+
+    decorate(metatype, metatrait) {} // e.g., FinalClassTrait.link(MyClass);
+
     conform(metatrait) {
-        this.confirm();
-        this.confirmLink(metatrait);
+        MetaTrait.confirm();
+        MetaTrait.confirmLink(metatrait);
         return;
     }
 
     /** Retrieves the class linked for the given namespace **/
     get(namepath) {
-        if (!this.#traits.has(namepath)) {
+        if (!MetaLibrary.dot.has(MetaTrait, namepath)) {
             throw new Error(`${namepath} namepath unknown`);
         }
 
-        return this.#traits.get(namepath);
+        return MetaLibrary.dot.get(MetaTrait, namepath);
     }
 
     confirmTrait(metatype, metatrait) {
@@ -139,7 +156,6 @@ export default class MetaTrait {
                 throw new Error(`Method trait '${methodTrait}' missing in ${metatype.namepath}`);
             }
         }
-
     }
 
     confirmTraitField(metatype, traitschema, trait) {
