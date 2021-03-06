@@ -9,15 +9,20 @@ export default class Library {
 
     const #definitions = new Map();
 
-    const #secrets = new Map([
-        [ 'asmov/meta/js/Trait', null ]
-        [ 'asmov/meta/js/Type', null ]
-        [ 'asmov/meta/js/Namespace', null ]
-        [ 'asmov/meta/js/Interface', null ]
-        [ 'asmov/meta/js/Model', null ]
+    const reserved = [
+        'asmov/meta/js/Trait',
+        'asmov/meta/js/Type',
+        'asmov/meta/js/Namespace',
+        'asmov/meta/js/Interface',
+        'asmov/meta/js/Model'
     ];
 
+    const #secrets = new Map();
+
     constructor() {
+        if (typeof Library.dot !== 'undefined') {
+            throw new Error('MetaLibrary already initialized.');
+        }
     }
 
     reserve(secret, metatrait) {
@@ -26,10 +31,7 @@ export default class Library {
         }
         
         const namepath = metatrait[Library.#keys.namepath];
-        const secret = this.#secrets.get(namepath);
-        if (typeof secret !== null) {
-            throw new Error('Trait already reserved with Library');
-        } else if (this.#definitions.has(secret)) {
+        if (this.#definitions.has(secret)) {
             throw new Error(`Trait ${namepath} already linked to Library`); // shouldn't happen
         }
 
