@@ -21,9 +21,9 @@ export default class MetaType {
     #MetaTrait = null;
 
     constructor(metaTrait) {
-        metaTrait.link(MetaType);
-        this.link(MetaTrait);
-        this.link(MetaType);
+        metaTrait.entreat(MetaType);
+        this.classify(MetaTrait);
+        this.classify(MetaType);
     }
 
     confirm(metatype) {

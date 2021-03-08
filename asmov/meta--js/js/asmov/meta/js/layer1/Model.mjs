@@ -51,6 +51,10 @@ export default class MetaModel {
         return this.#modeltypes.has([modeltype[MetaTrait.staticTraits.namepath]]);
     }
 
+    define(modeltype) { this.link(modeltype); }
+
+    defined(modeltype) { return this.linked(modeltype); }
+
     confirmLink(modeltype) {
         if (!this.linked(modeltype)) {
             throw new Error(`${modeltype.namepath} is not link()'ed to MetaType`);
