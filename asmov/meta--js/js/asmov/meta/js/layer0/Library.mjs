@@ -9,14 +9,14 @@ export default class Library {
 
     const #definitions = new Map();
 
-    const reserved = [
+    const #reserved = [
         'asmov/meta/js/Trait',
         'asmov/meta/js/Type',
         'asmov/meta/js/Namespace',
         'asmov/meta/js/Interface',
         'asmov/meta/js/Model'
     ];
-
+    
     const #secrets = new Map();
 
     constructor() {
