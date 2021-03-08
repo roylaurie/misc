@@ -1,12 +1,15 @@
 'use strict';
 
-import Meta from '../../../../../packs/asmov--meta--js/js/asmov/meta/js/Meta.mjs';
-import MetaModel from '../asmov/meta/Model.mjs';
-import GalacksiPack from '../asmov/galacksi/MetaPack.mjs';
+import Meta from '.meta/asmov/meta/js/Meta.mjs';
+import GalacksiDuelCoreCodebase from '.meta/asmov/galacksi/duel/core/MetaCodebase.mjs';
 
 /** @abstract **/
 export default class Event {
-    static namepath = 'asmov/galacksi/Event';
+    static namepath = 'asmov/galacksi/duel/core/Event';
+    static meta = [
+        Meta.attrib.Abstract,
+        Meta.attrib.Model
+    ];
 
     static dataKeys = {
         timestamp: 'timestamp'
