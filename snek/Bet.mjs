@@ -18,7 +18,7 @@ export default class Bet {
         place: 'place'
     };
 
-    static wagers = {
+    static oddsRules = {
         establish_pass_come: 'establish_pass_come',
         establish_nopass_nocome: 'establish_nopass_nocome',
         pass_come_buy: 'pass_come_buy',
@@ -27,7 +27,7 @@ export default class Bet {
         place: 'place'
     };
 
-    static typeWager = {
+    static oddsRuleForType = {
         establish_pass: Bet.wagers.establish_pass_come,
         establish_come: Bet.wagers.establish_pass_come,
         establish_nopass: Bet.wagers.establish_nopass_nocome,
@@ -75,24 +75,26 @@ export default class Bet {
     };
 
     #type = null;
-    #wager = null;
     #odds = null;
+    #oddsRule = null;
     #number = null;
     #amount = null;
     #working = true;
 
-    constructor(type, number, amount) {
+    constructor(type, number, amount, working = true) {
         this.#type = type;
-        this.#wager = Bet.wagers[this.#type];
-        this.#odds = Bet.odds[this.#wager];
         this.#number = number;
         this.#amount = amount;
+        this.#working = working;
+        this.#oddsRule = Bet.oddsRuleForType[this.#type];
+        this.#odds = Bet.odds[this.#oddsRule];
     }
 
     payout(number) {
         return this.#amount * (this.#odds[number][0] / this.#odds[number][1]);
     }
 
-    next(number) {
+    nextBet(number) {
+        return self;
     }
 }

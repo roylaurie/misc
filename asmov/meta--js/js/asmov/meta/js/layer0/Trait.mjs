@@ -73,7 +73,7 @@ export default class MetaTrait {
     static #librarySecret = Symbol();
 
     static init() {
-        MetaMetaLibrary.dot.reserve(librarySecret, MetaTrait);
+        MetaLibrary.dot.reserve(MetaTrait.#librarySecret, MetaTrait);
         MetaTrait.link(MetaTrait);
     }
 
@@ -110,8 +110,6 @@ export default class MetaTrait {
         if (!MetaTrait.linked(metatrait)) {
             throw new Error(`${metatrait.namepath} is not link()'ed to MetaTrait`);
         }
-
-        return;
     }
 
     // link MyClass to OtherClass by way of MyTrait
@@ -121,12 +119,9 @@ export default class MetaTrait {
         MetaLibrary.dot.decorate(MetaTrait.#librarySecret, metatype, metatrait);
     }
 
-    decorate(metatype, metatrait) {} // e.g., FinalClassTrait.link(MyClass);
-
     conform(metatrait) {
         MetaTrait.confirm();
         MetaTrait.confirmLink(metatrait);
-        return;
     }
 
     /** Retrieves the class linked for the given namespace **/
@@ -178,7 +173,5 @@ export default class MetaTrait {
         default:
             throw new Error(`Invalid traitschema '${traitschema}' for operation`);
         }
-
-        return;
     }
 }

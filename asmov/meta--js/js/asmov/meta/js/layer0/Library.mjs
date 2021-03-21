@@ -7,9 +7,9 @@ export default class Library {
 
     static #keys = { namepath: 'namepath' };
 
-    const #definitions = new Map();
+    #definitions = new Map();
 
-    const #reserved = [
+    #reserved = [
         'asmov/meta/js/Trait',
         'asmov/meta/js/Type',
         'asmov/meta/js/Namespace',
@@ -17,7 +17,7 @@ export default class Library {
         'asmov/meta/js/Model'
     ];
     
-    const #secrets = new Map();
+    #secrets = new Map();
 
     constructor() {
         if (typeof Library.dot !== 'undefined') {
@@ -50,7 +50,6 @@ export default class Library {
         }
 
         definitionMap.set(namepath, new LibraryDefinition(secret, namepath, metatype));
-        return;
     }
 
     decorate(secret, metatype, metatrait, traitsecret) {
@@ -64,13 +63,12 @@ export default class Library {
         }
 
         const definition = definitionMap.get(metatype.namepath);
-        definition.decorate(secret, new LibraryDefinition(traitsecret, metatrait.namepath, metatrait); 
-        return;
+        definition.decorate(secret, new LibraryDefinition(traitsecret, metatrait.namepath, metatrait));
     }
 }
 
-static class LibraryDefinition {
-    const #decorators = new Map();
+class LibraryDefinition {
+    #decorators = new Map();
     #secret = null;
     #namepath = null;
     #metatype = null;
@@ -91,8 +89,7 @@ static class LibraryDefinition {
         }
 
         this.#decorators.set(definition.namepath(), definition);
-        return;
     }
-};
+}
 
 
