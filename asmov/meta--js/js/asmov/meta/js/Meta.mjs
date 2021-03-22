@@ -1,6 +1,6 @@
 'use strict';
 
-import MetaTrait from '.meta/asmov/meta/js/layer0/Trait.mjs';
+import MetaTrait from '../../../../js/asmov/meta/js/Trait.mjs';
 import MetaType from '.meta/asmov/meta/js/layer1/Type.mjs';
 import MetaNamespace from './Namespace.mjs';
 import MetaModel from './Model.mjs';
