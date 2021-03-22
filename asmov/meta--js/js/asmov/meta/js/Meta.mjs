@@ -8,10 +8,6 @@ import MetaEmitter from './Emitter.mjs';
 
 export default class Meta {
     static namepath = 'asmov/meta/js/Meta';
-    static meta = [
-        [ Meta.attrib.Namespace, MetaJsCodebase ] 
-        Meta.attrib.Final,
-    ];
 
     static conformance = {
         freeze: 'freeze'
@@ -25,15 +21,12 @@ export default class Meta {
     static Model = MetaModel;
     static Emitter = MetaEmitter;
 
-    static attrib = Object.freeze({
-        Namespace: null,
-        Implements: null,
-        Model: null,
-        Emitter: null,
-        Source: null,
-        Abstract: null,
-        Final: null,
-    }):
+    static meta = {
+        namespace: null,
+        implements: null,
+        models: null,
+        conforms: null
+    };
 
     /** Post-processing for types that have been linked to a convention */
     static conform(metatype, conformance = {}) {
