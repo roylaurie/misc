@@ -1,6 +1,6 @@
 'use strict';
 
-import MetaLibrary from '../../../../js/asmov/meta/js/Library.mjs';
+import MetaLibrary from './util/Library.mjs';
 
 export default class MetaTrait {
     static namepath = 'asmov/meta/js/Trait';

@@ -1,7 +1,7 @@
 'use strict';
 
-import Meta from '.meta/asmov/meta/js/Meta.mjs';
-import MetaJsCodebase from '.meta/asmov/meta/js/MetaCodebase.mjs';
+import Meta from '../Meta.mjs';
+import MetaJsCodebase from '../Codebase.mjs';
 import murmur3 from '.meta/asmov/meta/js/.external/garycourt/murmurhash3-js'; 
 
 export default class MetaTool {

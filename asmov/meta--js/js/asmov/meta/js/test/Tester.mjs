@@ -1,17 +1,17 @@
 'use strict';
 
-import TestCase from './Case.mjs';
+import TestCase from './Test.mjs';
 
 export default class Tester {
     static #testMethodPrefixRegex = /^test_/;
 
     testUnit(testpath) {
         const promise = import(testpath).then(module => {
-            let currentPromise = Promise.resolve();  // the promise for this test case
+            let currentPromise = Promise.resolve();  // the promise for this tests case
             const TestCase = module.default;
             const properties = Object.getOwnPropertyNames(TestCase.prototype);
 
-            // instantiate the test case and set it up
+            // instantiate the tests case and set it up
             const testCase = new TestCase();
             testCase.setup();
 
@@ -21,13 +21,13 @@ export default class Tester {
                     continue;
                 }
 
-                // run each test method sequentially
+                // run each tests method sequentially
                 currentPromise = currentPromise.then(value => {
                     return self.testMethod(testObject, property);
                 });
             }
 
-            // teardown the test case after all test methods have completed.
+            // teardown the tests case after all tests methods have completed.
             currentPromise.then(()=>{ testObject.teardown(); });
 
             return currentPromise;
@@ -57,11 +57,11 @@ testClass(namepath) {
     this._log.info('Testing with ' + namepath + ' ...');
 
     const promise = import(filepath).then(module => {
-        let currentPromise = Promise.resolve();  // the promise for this test case
+        let currentPromise = Promise.resolve();  // the promise for this tests case
         const testClass = module.default;
         const properties = Object.getOwnPropertyNames(testClass.prototype);
 
-        // instantiate the test case and set it up
+        // instantiate the tests case and set it up
         const testObject = new testClass();
         testObject.setup();
 
@@ -72,13 +72,13 @@ testClass(namepath) {
                 continue;
             }
 
-            // run each test method sequentially
+            // run each tests method sequentially
             currentPromise = currentPromise.then(value => {
                 return self.testMethod(testObject, property);
             });
         }
 
-        // teardown the test case after all test methods have completed.
+        // teardown the tests case after all tests methods have completed.
         currentPromise.then(()=>{ testObject.teardown(); });
 
         return currentPromise;
@@ -95,7 +95,7 @@ testMethod(testObject, methodName) {
 
         try {
             const retval = testObject[methodName]();
-            if (retval instanceof Promise) {  // then resolve the test asynchronously
+            if (retval instanceof Promise) {  // then resolve the tests asynchronously
                 retval.then(value => { resolve(); }).catch(e => { reject(e); });
             } else {
                 resolve();
@@ -109,7 +109,7 @@ testMethod(testObject, methodName) {
 };
 
 /**
- * Fires an event to the test case emitter.
+ * Fires an event to the tests case emitter.
  *
  * @param {String} subtopic
  * @param {obj} data
@@ -119,9 +119,9 @@ _emit(subtopic, data) {
 };
 
 /**
- * Fires a test case result event to the emitter. Conforms to xUnit XML result format.
+ * Fires a tests case result event to the emitter. Conforms to xUnit XML result format.
  *
- * @param {String} methodName The test method name.
+ * @param {String} methodName The tests method name.
  * @param {String} outcome 'Pass', 'Fail', 'Skip'
  * @param {number} time Elapsed time in milliseconds.
  */

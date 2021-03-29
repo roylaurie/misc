@@ -3,8 +3,8 @@ class ModelEmitter {
     static namepath = 'asmov/meta/js/Emitter';
 
     static emissions = {
-        object: 'object'
-        data: 'data',
+        object: 'object',
+        data: 'data'
     };
 
     #listeners = new Map();
@@ -122,5 +122,3 @@ class Subscriber {
 }
 
 Meta.link(MetaJSPack, Subscriber);
-
-M

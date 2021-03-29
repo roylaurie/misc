@@ -4,8 +4,8 @@ import path from 'path';
 import fileregex from 'file-regex';
 import Meta from '../../Meta.mjs';
 
-export default class TestFileApp {
-    static namepath = 'asmov/meta/js/test/nodejs/App';
+export default class TestApp {
+    static namepath = 'asmov/meta/js/nodejs/test/App';
 
     static modes = {
         case: 'case',
@@ -15,12 +15,12 @@ export default class TestFileApp {
     static #findRegex = /^(?:|.*\/)[a-z0-9_\-]+-tests\/.*[a-zA-Z0-9\-_]+Test\.mjs$/;
     static #extRegex = /^(.*)\.[^.]+$/;
 
-    namepath = TestFileApp.namepath;
+    namepath = TestApp.namepath;
 
     #mode = null;
     #rootdir = null;
 
-    constructor(path, mode = TestFileApp.modes.case) {
+    constructor(path, mode = TestApp.modes.case) {
         this.#mode = mode;
         this.#rootdir = path; // todo determine single file paths
     }
@@ -32,14 +32,14 @@ export default class TestFileApp {
     }
 
     async #findTestFiles(rootdir) {
-        const filepaths = await fileregex(rootdir, TestFileApp.#findRegex);
+        const filepaths = await fileregex(rootdir, TestApp.#findRegex);
         let testpaths = [];
 
         for (let filepath of filepaths) {
             // remove the module path root from the filepath, making it relative (like the namepath is)
             const relativeFilepath = filepath.substring(filepath.length - path.basename(filepath).length);
             // remove the extension from the name to form a valid namepath
-            const namepath = relativeFilepath.match(TestFileApp.#extRegex)[1];
+            const namepath = relativeFilepath.match(TestApp.#extRegex)[1];
             testpaths.push(namepath);
         }
 
@@ -47,4 +47,4 @@ export default class TestFileApp {
     }
 }
 
-Meta.link(TestFileApp, []);
+Meta.link(TestApp, []);

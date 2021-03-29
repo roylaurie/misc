@@ -1,36 +1,41 @@
 'use strict';
 
 import Meta from '../Meta.mjs';
-import MetaJSCodebase from '../MetaCodebase.mjs';
-import TestTrait from '../traits/Test.mjs';
+import MetaJSCodebase from '../Codebase.mjs';
+import TestTrait from 'Trait.mjs';
 
 export default class MetaTest {
-    static namepath = 'test/asmov/meta/js/test/Test';
+    static namepath = 'asmov/meta/js/test/Test';
 
-    static EventEnum = MetaEvent.enumerate(
-        { namepath: 'namepath', testMethod: 'testMethod', error: 'error' }, {
-        );
+    static types = {
+        unit: 'unit',
+        integration: 'integration',
+        system: 'system'
+    };
 
     static fixtures = {};
 
     static async testAll(test) {
         test.#emit(MetaUnitTestEvent.types.testingUnit);
 
-        // for each test function
+        // for each tests function
             test.#emit(MetaUnitTestEvent.testingMethod, testMethod);
-            //   call test function
+            //   call tests function
             test.#emit(MetaUnitTestEvent.types.methodTestPass, testMethod);
 
         test.#emit(MetaUnitTestEvent.types.unitTestPass);
     }
 
-    namepath = MetaUnitTest.namepath;
+    namepath = MetaTest.namepath;
     #emitter = null;
     #emitterChannel = Symbol();
-    #unit = MetaUnitTest;
+    #type = null;
+    #unit = null;
 
-    constructor() {
-        this.#emitter = new Emitter(this.#emitterChannel, [ MetaUnitTestEvent ]);
+    constructor(unitClass = null, type = MetaTest.types.unit) {
+        this.#type = type;
+        this.#unitclass = unitClass;
+        this.#emitter = new Emitter(this.#emitterChannel, [ MetaTestEvent ]);
     }
 
     listener() {
@@ -41,7 +46,7 @@ export default class MetaTest {
 
     async test() {
         this.setup();
-        const result = await MetaUnitTest.testAll(this);
+        const result = await MetaTest.testAll(this);
         this.teardown();
         return result;
     }
@@ -53,10 +58,6 @@ export default class MetaTest {
                 this.teardown();
             });
         });
-    }
-
-    async test_myFunction() {
-
     }
 
     teardown() {
