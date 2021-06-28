@@ -25,33 +25,56 @@ frog_basepath () {
     echo "$_FROG_BASEPATH"
 }
 
-frogl_bullet () {
+frog_common_path () {
+    echo "$_FROG_COMMON_PATH"
+}
+
+frog_local_path () {
+    echo "$_FROG_LOCAL_PATH"
+}
+
+frog_remote_path () {
+    echo "$_FROG_REMOTE_PATH"
+}
+
+frog_import_namespace () {
+    _jsonPath="$(realpath $1/namespace.json)"
+    _json="$(cat $_jsonPath | jq -c)" 
+
+    #_ifs=$IFS ; IFS='\r\n'
+    _FROG_IMPORTS+=("$_json")
+    #IFS=$_ifs
+}
+
+frogp_bullet () {
         printf "${FROGL_GRN}|=== ${1}%s*|${FROG_NC}" " " $(eval length $1 - 82 - 1) 
 }
 
-function frogl_start {
+function frogp_start {
     echo
     echo -e "${GRN}++---------------------------------------------------------------------------++${NC}"
     echo -e "${GRN}+-------------------------- ${1} -------------------------+${NC}"
     echo -e "${GRN}|                                                                             |${NC}"
 }
 
-function frogl_header {
+function frogp_header {
         echo
 }
 
-function frogl_footer {
+function frogp_footer {
         echo
 }
 
-function frogl_end {
+function frogp_end {
         echo
 }
 
 _FROG_BASEPATH="$(realpath $(frog_script_dir)/../../)"
-_FROG_COMMON_PATH="$(realpath $_FROG_BASEPATH/bullfrog-common)"
-_FROG_LOCAL_PATH="$(realpath $_FROG_BASEPATH/bullfrog-local)"
-_FROG_REMOTE_PATH="$(realpath $_FROG_BASEPATH/bullfrog-remote)"
+_FROG_COMMON_PATH="$(realpath $_FROG_BASEPATH/bullfrog-common)/bash/"
+_FROG_LOCAL_PATH="$(realpath $_FROG_BASEPATH/bullfrog-local)/bash/"
+_FROG_REMOTE_PATH="$(realpath $_FROG_BASEPATH/bullfrog-remote)/bash/"
+
+_FROG_IMPORTS=()
 
 _FROGL_GRN='\033[1;32m'
 _FROGL_NC='\033[0m' 

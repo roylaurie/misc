@@ -16,4 +16,19 @@ _script_dir () {
 
 source $(_script_dir)/bullfrog.lib.bash
 
-echo "BASE $(frog_basepath)"
+frog_import_namespace $(frog_common_path)
+
+main() {
+    _scriptNamespace="common.bullfrog"
+    _params="$(frog_parse_parameters $_scriptNamespace "default" $@)"
+    _cmdNamespace="$(echo $_params | jq -c ".namespace")"
+    _cmdOperation="$(echo $_params | jq -c ".operation")"
+    _cmdArguments="$(echo $_params | jq -c ".arguments")"
+
+    _cmd="$(frog_mkcmd $_cmdNamespace $_cmdOperation $_cmdArguments)"
+    echo $_cmd
+    #exec $_cmd
+}
+
+$(main $@)
+exit 0

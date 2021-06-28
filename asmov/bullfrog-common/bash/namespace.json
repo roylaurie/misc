@@ -1,0 +1,19 @@
+{
+    "baseNamespace": "common",
+    "namespaces": [
+        "common.bullfrog": {
+            "script": "bullfrog.bash",
+            "operations": {
+                "default": {
+                    "parameters": {
+                        "namespace": { "index": 0, "desc": "The namespace of the bullfrog operation to run. E.g., local.user" },
+                        "operation": { "index": 1, "default": "", "desc": "The operation to run against a namespace. Omission will run the default operation." },
+                        "arguments": { "index": 2, "default": "", "desc": "The arguments to be passed to the specified operation." }
+                    }
+                }
+            },
+            "desc": "Runs a bullfrog operation."
+        }
+    }
+}
+
