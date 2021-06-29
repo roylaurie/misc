@@ -9,16 +9,16 @@
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
 frog_script_dir () {
-     SOURCE="${BASH_SOURCE[0]}"
-     # While $SOURCE is a symlink, resolve it
-     while [ -h "$SOURCE" ]; do
-          DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-          SOURCE="$( readlink "$SOURCE" )"
-          # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
-          [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+     _src="${BASH_SOURCE[0]}"
+     # while _src is a symlink, resolve it
+     while [ -h "$_src" ]; do
+          _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
+          _src="$( readlink "$_src" )"
+          # if _src was a relative symlink (no '/' as prefix, resolve it relative to the symlink base directory
+          [[ $_src != /* ]] && _src="$_dir/$_src"
      done
-     DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-     echo "$DIR"
+     _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
+     echo "$_dir"
 }
 
 frog_basepath () {
@@ -38,7 +38,7 @@ frog_remote_path () {
 }
 
 frog_import_namespace () {
-    _jsonPath="$(realpath $1/namespace.json)"
+    _jsonPath="$(realpath "$1"/namespace.json)"
     _json="$(cat $_jsonPath | jq -c)" 
 
     #_ifs=$IFS ; IFS='\r\n'
@@ -46,26 +46,72 @@ frog_import_namespace () {
     #IFS=$_ifs
 }
 
-frogp_bullet () {
+##
+# Uses the jq tool to query json for data
+# @param string json
+# @param string query
+# @returns string data
+##
+frog_jq () {
+    _json="$1"
+    _query="$2"
+    _result="$(echo $_json | jq -c $_query)"
+    echo $_result
+}
+
+$_FROG_CMDLINE_OPTIONS=("help")
+
+
+frog_parse_cmdline () {
+    _cmdline="$@"
+
+    _options=()
+    _namespace=""
+    _operation=""
+    _params=""
+
+    while (("$#")); do
+        _token="$1"
+        if ((!$_namespace)); then
+            if [[ $_token =~ ^--.+ ]]; then  # it's an option
+
+            else
+               frogl_error 1 "Invalid parameter token: $_token"
+            fi 
+            
+        fi
+    done
+    
+
+}
+
+frogl_error () {
+    _exitCode="$1"
+    _errorMessage="$2"
+    1>&2 echo "bullfrog error: (${_exitCode}) $_errMessage"
+    exit $_exitCode
+}
+
+frogl_bullet () {
         printf "${FROGL_GRN}|=== ${1}%s*|${FROG_NC}" " " $(eval length $1 - 82 - 1) 
 }
 
-function frogp_start {
+function frogl_start {
     echo
     echo -e "${GRN}++---------------------------------------------------------------------------++${NC}"
     echo -e "${GRN}+-------------------------- ${1} -------------------------+${NC}"
     echo -e "${GRN}|                                                                             |${NC}"
 }
 
-function frogp_header {
+function frogl_header {
         echo
 }
 
-function frogp_footer {
+function frogl_footer {
         echo
 }
 
-function frogp_end {
+function frogl_end {
         echo
 }
 

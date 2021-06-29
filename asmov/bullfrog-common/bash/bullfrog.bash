@@ -20,8 +20,8 @@ frog_import_namespace $(frog_common_path)
 
 main() {
     _scriptNamespace="common.bullfrog"
-    _params="$(frog_parse_parameters $_scriptNamespace "default" $@)"
-    _cmdNamespace="$(echo $_params | jq -c ".namespace")"
+    _params="$(frog_parse_cmdline $@)"
+    _cmdNamespace="$(frog_jq $_params ".namespace")"
     _cmdOperation="$(echo $_params | jq -c ".operation")"
     _cmdArguments="$(echo $_params | jq -c ".arguments")"
 
