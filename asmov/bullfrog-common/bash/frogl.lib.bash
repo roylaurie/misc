@@ -24,5 +24,4 @@ function frogl_end {
         echo
 }
 
-_FROGL_GRN='\033[1;32m'
-_FROGL_NC='\033[0m' 
+

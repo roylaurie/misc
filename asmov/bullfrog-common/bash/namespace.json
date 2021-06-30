@@ -1,6 +1,6 @@
 {
     "baseNamespace": "common",
-    "namespaces": [
+    "namespaces": {
         "common.bullfrog": {
             "script": "bullfrog.bash",
             "operations": {

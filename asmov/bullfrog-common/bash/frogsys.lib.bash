@@ -2,9 +2,10 @@
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
 frogsys_adduser () {
-    local $_username="$1"
-    local $_groups="$2"
-    sudo adduser --disabled-password --gecos "" "$_username")
+    local _username _groups
+    _username="$1"
+    _groups="$2"
+    sudo adduser --disabled-password --gecos "" "$_username"
 
     frogsys_usermod_groups "$_groups"
     frogsh_sudo_chown_recurse $_username $_username /home/$_username
