@@ -1,63 +1,41 @@
 #!/bin/bash
-set -oue pipefail
+set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
-GRN='\033[1;32m'
-NC='\033[0m' 
+__script_dir () {
+     local _src="${BASH_SOURCE[0]}"
+     # while _src is a symlink, resolve it
+     while [ -h "$_src" ]; do
+          local _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
+          local _src="$( readlink "$_src" )"
+          # if _src was a relative symlink (no '/' as prefix, resolve it relative to the symlink base directory
+          [[ $_src != /* ]] && _src="$_dir/$_src"
+     done
+     local _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
+     echo "$_dir"
+}
 
-FROG_ROOT="$(frog_rootpath)"
+FROG_ROOT="$(__script_dir)"
+
+# install all required package managers and packages for init
+source $FROG_ROOT/bullfrog-local/bash/vm/package/init.bash
+
+source $FROG_ROOT/bullfrog.lib.bash
+
 PARAMS=@(recovery-user vm-type)
 
 # Script parameters
 RECOVERY_USER="$(frog_param $PARAMS recovery-user)"
 VM_TYPE="$(frog_param $PARAMS vm-type)"
 
-function frog_param {
-
-}
-
-function frog_rootpath {
-    "$(cd "$(dirname "$1")"; pwd -P)/$(basename "$1")"
-}
-
-function frogl_bullet {
-    echo -e "${GRN}|=== ${1} ...                                                        |${NC}"
-}
-
-function frogl_start {
-    echo
-    echo -e "${GRN}++---------------------------------------------------------------------------++${NC}"
-    echo -e "${GRN}+-------------------------- ${1} -------------------------+${NC}"
-    echo -e "${GRN}|                                                                             |${NC}"
-}
-
-function frogl_header {
-}
-
-function frogl_footer {
-}
-
-function frogl_end {
-}
-
 echo
 echo -e "${GRN}++---------------------------------------------------------------------------++${NC}"
 echo -e "${GRN}+-------------------------- bullfrog / system / init -------------------------+${NC}"
 echo -e "${GRN}|                                                                             |${NC}"
 
-source $FROG_ROOT/bin/system/package/_init.bash
-
 # amazon only ...
 echo -e "${GRN}|=== Creating recovery user '${RECOVERY_USER}' ...                                                 |${NC}"
-#frog_user_add $RECOVER_USER sudo,ssh
-sudo adduser --disabled-password --gecos "" $RECOVERY_USER 
-sudo usermod -aG sudo,ssh $RECOVERY_USER
-sudo chown -R $RECOVERY_USER:$RECOVERY_USER /home/$RECOVERY_USER
+frogsys_adduser $RECOVERY_USER sudo,ssh
 # end of amazon only
-
-# Finish
-#frog_dir_secure /home/$RECOVERY_USER $RECOVERY_USER
-sudo chown -R $RECOVERY_USER:$RECOVERY_USER /home/$RECOVERY_USER
-sudo chmod -R o-rwx /home/$RECOVERY_USER
 
 #frog_sshd_init
 #frog_user_sshkey $RECOVERY_USER /home/$RECOVERY_USER/bullfrog-recovery.key
@@ -65,10 +43,9 @@ sudo chmod -R o-rwx /home/$RECOVERY_USER
 echo -e "${GRN}|=== Altering motd ...                                                        |${NC}"
 #frog_system_motd_update
 frogl_bullet "Altering motd"
-sudo chmod 644 /etc/update-motd.d/*
-sudo cp $FROG_ROOT /config/system/motd/00-bullfrog /etc/update-motd.d
-sudo chown root:root /etc/update-motd.d/00-bullfrog
-sudo chmod 755 /etc/update-motd.d/00-bullfrog
+frogsh_sudo_cp "$FROG_ROOT/skeleton/local.vm/bullfrog.motd" /etc/update-motd.d
+frogsh_sudo_ch root root 644 /etc/update-motd.d/bullfrog.motd
+frogsh_sudo_ln /etc/update-motd.d/bullfrog /etc/update-motd.d/00.motd
 
 echo -e "${GRN}|=== Installation complete. Perform the following steps:                      |${NC}"
 echo -e "${GRN}|       * Set the maintenance user account's password:   sudo passwd frog     |${NC}"
