@@ -8,6 +8,8 @@
 #  - nounset: throw error on unset variable usage
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
+_FROG_IMPORTS=()
+
 frog_script_dir () {
      local _src _dir
      _src="${BASH_SOURCE[0]}"
@@ -88,6 +90,8 @@ frog_parse_cmdline () {
     echo "{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"parameters\": { \"toggle\": \"1\" } }"
 }
 
+_FROG_ERROR_CODE=64
+
 frog_error () {
     local _exitCode _errorMessage _subject="" _errorDetails="" _subjectStr=""
     _exitCode="$1"
@@ -144,16 +148,20 @@ frog_color () {
     echo "\\e[${_style}${_color}m"
 }
 
+frog_exec_operation () {
+    local _namespace _operation
+    _namespace="$1"
+    _operation="$2"
 
-_FROG_ERROR_CODE=64
+    #source file
+    #$(${_opFunction} ${_parameters})
+}
 
 _FROG_BASEPATH="$(realpath $(frog_script_dir)/../..)"
 
 _FROG_COMMON_PATH="$(realpath $_FROG_BASEPATH/bullfrog-common)/bash"
 _FROG_LOCAL_PATH="$(realpath $_FROG_BASEPATH/bullfrog-local)/bash"
 _FROG_REMOTE_PATH="$(realpath $_FROG_BASEPATH/bullfrog-remote)/bash"
-
-_FROG_IMPORTS=()
 
 source $_FROG_COMMON_PATH/frogl.lib.bash
 source $_FROG_COMMON_PATH/frogsh.lib.bash
