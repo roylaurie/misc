@@ -1,24 +1,27 @@
 #!/bin/bash
 set -o errexit -o pipefail -o privileged -o nounset 
 
-_script_dir () {
-     SOURCE="${BASH_SOURCE[0]}"
-     # While $SOURCE is a symlink, resolve it
-     while [ -h "$SOURCE" ]; do
-          DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-          SOURCE="$( readlink "$SOURCE" )"
-          # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
-          [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-     done
-     DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-     echo "$DIR"
-}
+source $( echo $(
+    _script_dir () {
+         local _src _dir
+         _src="${BASH_SOURCE[0]}"
+         while [ -h "$_src" ]; do
+              _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
+              _src="$( readlink "$_src" )"
+              [[ $_src != /* ]] && _src="$_dir/$_src"
+         done
+         _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
+         echo "$_dir"
+    }
+    
+    _script_dir
+) )/bullfrog.lib.bash
 
-source $(_script_dir)/bullfrog.lib.bash
+trap frog_error_trap EXIT
 
 frog_import_namespace $(frog_common_path)
 
-main() {
+main () {
     _cmdline="$(frog_parse_cmdline $@)"
     _cmdNamespace=$(frog_jq "$_cmdline" ".namespace")
     _cmdOperation="$(frog_jq "$_cmdline" ".operation")"
@@ -28,7 +31,7 @@ main() {
     'common')
         case $_cmdOperation in
         'version')
-            echo -e "${_FROGL_COLOR_LIGHT_GREEN}bullfrog ${_FROGL_COLOR_LIGHT_GRAY}v0.0.0${_FROGL_ENDCOLOR}"
+                echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v0.0.0$(frog_color end)"
             ;;
         *)
             frog_error 1 "Unknown operation" "$_cmdNamespace::$_cmdOperation"
@@ -43,6 +46,5 @@ main() {
     exit 0
 }
 
-trap frog_error_trap EXIT
 main $@
 exit 0

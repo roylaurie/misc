@@ -92,11 +92,11 @@ frog_error () {
     local _exitCode _errorMessage _subject="" _errorDetails="" _subjectStr=""
     _exitCode="$1"
     _errorMessage="$2"
-    [ -n "${3-}" ] && _subject="$3" && _subjectStr=" '${_FROGL_COLOR_LIGHT_CYAN}${_subject}${_FROGL_ENDCOLOR}'"
+    [ -n "${3-}" ] && _subject="$3" && _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
     [ -n "${4-}" ] && _errorDetails="$4"
 
-    $(1>&2 echo -e "${_FROGL_COLOR_RED}bullfrog error(${_FROGL_COLOR_LIGHT_GRAY}${_exitCode}${_FROGL_COLOR_RED}):${_FROGL_ENDCOLOR} ${_errorMessage}${_subjectStr}")
-    [ -n "$_errorDetails" ] && $(1>&2 echo -e "${_FROGL_COLOR_RED}::${_FROGL_ENDCOLOR}    ${_FROGL_COLOR_LIGHT_GRAY}${_errorDetails}${_FROGL_ENDCOLOR}")
+    $(1>&2 echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}")
+    [ -n "$_errorDetails" ] && $(1>&2 echo -e "$(frog_color red)::$(frog_color end)    $(frog_color lightgray)${_errorDetails}$(frog_color end)")
     exit $_FROG_ERROR_CODE 
 }
 
@@ -109,6 +109,42 @@ frog_error_trap () {
     frog_error $_exitCode "exited with error code of" $_exitCode
 }
 
+_FROG_COLOR_NAMES=( end black red green yellow blue magenta cyan lightgray gray lightred lightgreen lightyellow lightblue lightmagenta lightcyan white  ) 
+_FROG_COLORS=( 0 30 31 32 33 34 35 36 37 90 91 92 93 94 95 96 97 )
+_FROG_STYLE_NAMES=( normal bold faint italic underline )
+_FROG_STYLES=( 0 1 2 3 4 )
+
+frog_color () {
+    local _colorName _styleName _color="" _style="0"
+    _colorName="$1"
+    _styleName="${2:-normal}"
+    
+    for i in "${!_FROG_COLOR_NAMES[@]}"; do
+       if [[ "${_FROG_COLOR_NAMES[$i]}" = "$_colorName" ]]; then
+            _color="${_FROG_COLORS[$i]}"
+            break
+       fi
+    done 
+
+    [ -n "$_color" ] || frog_error 1 "Invalid color" "$_colorName" "frog_color"
+    [[ "$_color" = "0" ]] && {
+        echo '\e[0m'
+        return 0
+    }
+        
+    for i in "${!_FROG_STYLE_NAMES[@]}"; do
+       if [[ "${_FROG_STYLE_NAMES[$i]}" = "$_styleName" ]]; then
+            _style="${_FROG_STYLES[$i]}"
+            break
+       fi
+    done 
+
+    _style="${_style};"
+
+    echo "\\e[${_style}${_color}m"
+}
+
+
 _FROG_ERROR_CODE=64
 
 _FROG_BASEPATH="$(realpath $(frog_script_dir)/../..)"
@@ -118,25 +154,6 @@ _FROG_LOCAL_PATH="$(realpath $_FROG_BASEPATH/bullfrog-local)/bash"
 _FROG_REMOTE_PATH="$(realpath $_FROG_BASEPATH/bullfrog-remote)/bash"
 
 _FROG_IMPORTS=()
-
-_FROGL_COLOR_BLACK='\e[30m'
-_FROGL_COLOR_RED='\e[31m'
-_FROGL_COLOR_GREEN='\e[32m'
-_FROGL_COLOR_YELLOW='\e[33m'
-_FROGL_COLOR_BLUE='\e[34m'
-_FROGL_COLOR_MAGENTA='\e[35m'
-_FROGL_COLOR_CYAN='\e[36m'
-_FROGL_COLOR_LIGHT_GRAY='\e[37m'
-_FROGL_COLOR_GRAY='\e[90m'
-_FROGL_COLOR_LIGHT_RED='\e[91m'
-_FROGL_COLOR_LIGHT_GREEN='\e[92m'
-_FROGL_COLOR_LIGHT_YELLOW='\e[93m'
-_FROGL_COLOR_LIGHT_BLUE='\e[94m'
-_FROGL_COLOR_LIGHT_MAGENTA='\e[95m'
-_FROGL_COLOR_LIGHT_CYAN='\e[96m'
-_FROGL_COLOR_WHITE='\e[97m'
-
-_FROGL_ENDCOLOR='\e[0m' 
 
 source $_FROG_COMMON_PATH/frogl.lib.bash
 source $_FROG_COMMON_PATH/frogsh.lib.bash
