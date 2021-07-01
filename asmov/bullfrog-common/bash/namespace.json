@@ -1,32 +1,38 @@
 {
-    "namespace": "common",
-    "paths": {
+    "path": "bullfrog-common/bash",
+    "namespaces": {
         "common": {
-            "script": "common.module.bash",
-            "operations": {
-                "version": {
-                    "desc": "Displays bullfrog version",
-                    "parameters": {}
+            "namespace": "common",
+            "modules": {
+                "common": {
+                    "script": "common/common.module.bash",
+                    "operations": {
+                        "version": {
+                            "desc": "Displays bullfrog version",
+                            "function": "op_common_version",
+                            "parameters": {
+                            }
+                        }
+                    },
+                    "desc": "Runs a bullfrog operation."
                 },
-                "help": {
-                    "desc": "Displays help on a topic",
-                    "parameters": {
-                        "namespace": { "index": 0, "default": "", "desc": "The namespace of the bullfrog operation to run. E.g., local.user" },
-                        "operation": { "index": 1, "default": "", "desc": "The operation to run against a namespace. Omission will run the default operation." }
+                "common.stats": {
+                    "script": "common.module.bash",
+                    "operations": {
+                        "default": {
+                            "desc": "General statistics",
+                            "function": "op_common_stats_default",
+                            "parameters": {
+                            }
+                        }
                     }
-                }
-            },
-            "desc": "Runs a bullfrog operation."
-        },
-        "common.stats": {
-            "script": "common.module.bash",
-            "operations": {
-                "default": {
-                    "desc": "General statistics",
-                    "parameters": {}
                 }
             }
         }
+    },
+    "aliases": {
+        "help": "common.help"
     }
 }
+
 

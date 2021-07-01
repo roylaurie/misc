@@ -57,12 +57,25 @@ frog_jq () {
     local _json _query _result
     _json="$1"
     _query="$2"
-    _result="$(echo $_json | jq -rc $_query)"
+    _result="$(echo $_json | jq -rc $_query 2>&1)" || frog_error "$?" "Unable to parse js query" "$_query" "json> $_json\njq> $_result"
     echo $_result
 }
 
 #$_FROG_CMDLINE_OPTIONS=("help")
 
+##
+# Parses an entire command entered at the commandline 
+#
+# Determines and models options that have been set, the namespace and operation specified to run,
+# and parameters passed to that operation.
+#
+# Performs basic data validation based on the operation's imported namespace configuration.
+#
+# @param $@ _cmdline
+# @returns 0: cmdline json config to be executed.
+#       1: malformed command, unknown options or parameters, missing options or parameters,
+#               unknown namespace / operation, invalid values for options or parameters 
+##
 frog_parse_cmdline () {
     local _cmdline=($@) _forOption="" _options=() _optionVals=() _namespace="" _operation="" _params=""
 
@@ -87,12 +100,68 @@ frog_parse_cmdline () {
         _operation="default"
     fi
 
-    echo "{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"parameters\": { \"toggle\": \"1\" } }"
+    local _operationCfg
+    _operationCfg="$(frog_operation_cfg "$_namespace" "$_operation")" || frog_error $?
+
+    local _parameterJson
+    #_parameterJson="$(frog_parse_parameters "$_operationCfg")"
+
+    local _result
+    #merge _optionJson and _parameterJson into operationCfg
+    #echo "$_result"
+
+    echo "$(frog_jq "$_operationCfg" "")" || frog_error $?
+}
+
+frog_tty () {
+    echo "TTY] $@" > /dev/tty
+}
+
+##
+# Searches all imported namespace configs and returns a json config for the specified namespace and operation names.
+#
+# @param _namespace
+# @param _operation
+# @returns 0: json result, 1: operation config not found
+##
+frog_operation_cfg () {
+    local _namespace _operation
+    _namespace="$1"
+    _operation="$2"
+
+    for _import in "${_FROG_IMPORTS[@]}"; do
+        local _opJson
+        _opJson="$(frog_jq "${_import}" ".namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
+        if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
+            local _namespacePath _modulePath _opPath _result
+            _namespacePath="$(frog_jq "$_import" ".path")" || frog_error $?
+            _modulePath="$(frog_jq "$_import" ".namespaces[].modules[\"$_namespace\"].script")" || frog_error $?
+            _opPath="$(frog_basepath)/$_namespacePath/$_modulePath"
+            _result="{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"path\": \"$_opPath\", \"operationCfg\": $_opJson }"
+            echo "$_result"
+            return 0
+        fi
+    done
+
+    frog_error 1 "Invalid namespace / operation" "${_namespace}::${_operation}"
+}
+
+frog_run_operation () {
+    local _cmdCfg _scriptPath
+    _cmdCfg="$1"
+    _scriptPath="$(frog_jq "$_cmdCfg" ".path")" || frog_error $?
+    _opFunc="$(frog_jq "$_cmdCfg" ".operationCfg.function")" || frog_error $?
+    #_params="$(frog_jq "$_cmdCfg" ".parameters")"
+
+    source $_scriptPath
+    $_opFunc
 }
 
 _FROG_ERROR_CODE=64
 
 frog_error () {
+    [ "$1" -eq "$_FROG_ERROR_CODE" ] && exit $_FROG_ERROR_CODE
+
     local _exitCode _errorMessage _subject="" _errorDetails="" _subjectStr=""
     _exitCode="$1"
     _errorMessage="$2"
@@ -100,17 +169,22 @@ frog_error () {
     [ -n "${4-}" ] && _errorDetails="$4"
 
     $(1>&2 echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}")
-    [ -n "$_errorDetails" ] && $(1>&2 echo -e "$(frog_color red)::$(frog_color end)    $(frog_color lightgray)${_errorDetails}$(frog_color end)")
+    [ -n "$_errorDetails" ] && {
+        for _line in "$_errorDetails"; do
+            $(1>&2 echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_line}$(frog_color end)")
+        done
+    }
+
     exit $_FROG_ERROR_CODE 
 }
 
 frog_error_trap () {
     local _exitCode="$?"
     if [ "$_exitCode" -eq "0" ] || [ "$_exitCode" -eq "$_FROG_ERROR_CODE" ]; then
-        return $_exitCode
+        exit $_exitCode
     fi
 
-    frog_error $_exitCode "exited with error code of" $_exitCode
+    frog_error "$_exitCode" "exited with error code of" "$_exitCode"
 }
 
 _FROG_COLOR_NAMES=( end black red green yellow blue magenta cyan lightgray gray lightred lightgreen lightyellow lightblue lightmagenta lightcyan white  ) 

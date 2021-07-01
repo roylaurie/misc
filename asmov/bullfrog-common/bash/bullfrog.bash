@@ -22,28 +22,10 @@ trap frog_error_trap EXIT
 frog_import_namespace $(frog_common_path)
 
 main () {
-    _cmdline="$(frog_parse_cmdline $@)"
-    _cmdNamespace=$(frog_jq "$_cmdline" ".namespace")
-    _cmdOperation="$(frog_jq "$_cmdline" ".operation")"
-    _cmdParameters="$(frog_jq "$_cmdline" ".parameters")"
+    local _cmdline
+    _cmdline=$(frog_parse_cmdline "$@") || frog_error "$?"
 
-    case $_cmdNamespace in
-    'common')
-        case $_cmdOperation in
-        'version')
-                echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v0.0.0$(frog_color end)"
-            ;;
-        *)
-            frog_error 1 "Unknown operation" "$_cmdNamespace::$_cmdOperation"
-            ;;
-        esac
-        ;;
-    *)
-        frog_error 1 "Unknown namespace" "$_cmdNamespace"
-        ;;
-    esac
-
-    exit 0
+    frog_run_operation "$_cmdline"
 }
 
 main $@
