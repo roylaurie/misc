@@ -1,0 +1,9 @@
+Package: bullfrog-common
+Version: 0.0
+Section: custom
+Priority: optional
+Architecture: all
+Essential: no
+Installed-Size: 1024
+Maintainer: asmov.software
+Description: A library for creating bash command-line toolkits
