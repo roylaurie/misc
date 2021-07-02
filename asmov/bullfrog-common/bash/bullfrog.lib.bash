@@ -1,6 +1,30 @@
 #!/bin/bash
+# Bullfrog Bash Toolkit Library
+#
+# This library is intended for developers that wish to rapidly implement their own command-line toolkits and tools.
+#
+# Additional libraries included provide utilities for logging, common shell commands,
+# and common system administration.
+#
+# Sourcing this file (bullfrog.lib.bash) and setting the frog_error_trap are the only requisites for standalone use.
+#
+# All shell access is directed at the facade script (e.g., bullfrog.bash), which in turn 
+# runs the correct module script for the namespace and operation specified (e.g., my.foo add, my.bar view).
+#
+# Namespace configuration is imported at startup and used to determine what operations 
+# are available, how they are invoked, and how parameter data should be validated for them.
+#
+# Usage format is <facade.bash> <-options> <name.spa.ce> <operation> <positional parameters> <--paramaters>
+# E.g.,:
+#   bullfrog -xf common.test cmdline --param.1 "bool raw" --param.2 "string full.name" --raw true --full.name "earl gray"
+#   bullfrog help common.test cmdline
+#
+# Bullfrog uses JSON along with the jq and ajv commands to pass valid structured data between bash functions and scripts.
+#
+# Custom namespaces (with modules) may be installed and imported to enhance the functionality of a bullfrog toolkit.
+# Each namespace module may have one "default" operation which may be omitted from the command line, without any parameters.
 
-# configure bash options:
+# Configure bash options:
 #  - allexport: treat this script as a library and export all global variables and functions
 #  - errexit: fail on uncaught errors
 #  - privileged: do not inherit the environment
@@ -45,6 +69,20 @@ frog_import_namespace () {
     _jsonPath="$(realpath "$1"/namespace.json)"
     _json="$(cat $_jsonPath | jq -c 2>&1)" || frog_error $? "Unable to parse json file" $_jsonPath "jq> $_json"
     _FROG_IMPORTS+=("$_json")
+}
+
+frog_import_builtin () {
+    local _dirs
+    _dirs="$(find $(frog_basepath) -maxdepth 1 -name 'bullfrog-*' -type d | xargs realpath | xargs -n 1 -I '_path' find _path/bash -maxdepth 1 -name 'namespace.json' 2>/dev/null)" || {
+        local _exit=$?
+        [ $_exit -ne 0 ] && [ $_exit -ne 123 ] && {
+           frog_error 1 "Unable to search for namespaces" 
+        }
+    }
+
+    for _dir in "$_dirs"; do
+        frog_import_namespace "$(realpath $(dirname $_dir))" 
+    done
 }
 
 ##

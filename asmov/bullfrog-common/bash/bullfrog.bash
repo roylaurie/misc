@@ -19,7 +19,7 @@ source $( echo $(
 
 trap frog_error_trap EXIT
 
-frog_import_namespace $(frog_common_path)
+frog_import_builtin
 
 main () {
     local _cmdline
@@ -29,4 +29,3 @@ main () {
 }
 
 main $@
-exit 0
