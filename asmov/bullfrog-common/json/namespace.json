@@ -1,6 +1,6 @@
 {
-    "path": "..",
     "bashPath": "bash",
+    "bashLibPath": "bash/lib",
     "jsonPath": "json",
     "skeletonPath": "skeleton",
     "namespaces": {

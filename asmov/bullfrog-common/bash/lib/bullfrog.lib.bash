@@ -48,41 +48,60 @@ frog_script_dir () {
      echo "$_dir"
 }
 
-frog_basepath () {
-    echo "$_FROG_BASEPATH"
-}
-
 frog_common_path () {
     echo "$_FROG_COMMON_PATH"
 }
 
-frog_local_path () {
-    echo "$_FROG_LOCAL_PATH"
+frog_common_bash_path () {
+    echo "$_FROG_COMMON_BASH_PATH"
 }
 
-frog_remote_path () {
-    echo "$_FROG_REMOTE_PATH"
+frog_common_bashlib_path () {
+    echo "$_FROG_COMMON_BASHLIB_PATH"
+}
+
+frog_common_json_path () {
+    echo "$_FROG_COMMON_JSON_PATH"
+}
+
+frog_common_json_schema_path () {
+    echo "$_FROG_COMMON_JSON_SCHEMA_PATH"
+}
+
+frog_common_skeleton_path () {
+    echo "$_FROG_COMMON_SKELETON_PATH"
 }
 
 frog_import_namespace () {
-    local _json _jsonPath
-    _jsonPath="$(realpath "$1"/namespace.json)"
-    _json="$(cat $_jsonPath | jq -c 2>&1)" || frog_error $? "Unable to parse json file" $_jsonPath "jq> $_json"
+    local _filepath
+    _filepath="$1"
+
+    local _json
+    _json="$(cat $_filepath | jq -c 2>&1)" || frog_error $? "Unable to parse json file" "$_filepath" "jq> $_json"
+    _json="{ \"namespaceFilepath\": \"$_filepath\", \"import\": "$_json" }"
+    _json="$(cat "$_json" | jq -c 2>&1)" || frog_error $?
+    
     _FROG_IMPORTS+=("$_json")
 }
 
 frog_import_builtin () {
-    local _dirs
-    _dirs="$(find $(frog_basepath) -maxdepth 1 -name 'bullfrog-*' -type d | xargs realpath | xargs -n 1 -I '_path' find _path/bash -maxdepth 1 -name 'namespace.min.json' 2>/dev/null)" || {
-        local _exit=$?
-        [ $_exit -ne 0 ] && [ $_exit -ne 123 ] && {
-           frog_error 1 "Unable to search for namespaces" 
-        }
-    }
-
-    for _dir in "$_dirs"; do
-        frog_import_namespace "$(realpath $(dirname $_dir))" 
+    for _dirname in "$(ls -d $_FROG_COMMON_INSTALL_PATH/*/ | xargs -n 1 basename )"; do
+        if [ frog_inarray "$_FROG_COMMON_BUILTIN_PACKAGES" "$_dirname" ] ; then
+            frog_import_namespace "$(realpath $_FROG_COMMON_INSTALL_PATH/$_dirname/json/namespace.min.json)" 
+        fi
     done
+}
+
+frog_inarray () {
+    local _array _search
+    _array=($1)
+    _search="$2"
+    
+    for _x in "${_array[@]}"; do
+        [ "$_x" == "$_search" ] && return 0
+    done
+
+    return 1
 }
 
 ##
@@ -169,13 +188,15 @@ frog_operation_cfg () {
 
     for _import in "${_FROG_IMPORTS[@]}"; do
         local _opJson
-        _opJson="$(frog_jq "${_import}" ".namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
+        _opJson="$(frog_jq "${_import}" ".import.namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
         if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
-            local _namespacePath _bashPath _modulePath _opPath _result
-            _namespacePath="$(frog_jq "$_import" ".path")" || frog_error $?
-            _bashPath="$(frog_jq "$_import" ".bashPath")" || frog_error $?
-            _modulePath="$(frog_jq "$_import" ".namespaces[].modules[\"$_namespace\"].script")" || frog_error $?
-            _opPath="$(frog_basepath)/$_namespacePath/$_bashPath/$_modulePath"
+            local _namespaceFilepath _pkgRelPath _pkgPath _bashPath _scriptPath _opPath _result
+            _namespaceFilepath="$(frog_jq "$_import" ".namespaceFilepath")" || frog_error $?
+            _pkgRelPath="$(frog_jq "$_import" ".path"))" || frog_error $?
+            _pkgPath="$(realpath $(dirname "$_namespaceFilepath")/$_pkgRelPath)" || frog_error $?
+            _bashPath="$(realpath $_pkgPath/$(frog_jq "$_import" ".bashPath"))" || frog_error $?
+            _scriptPath="$(realpath $_pkgPath/$(frog_jq "$_import" ".namespaces[].modules[\"$_namespace\"].script"))" || frog_error $?
+            _opPath="$(realpath $_pkgPath/$_bashPath/$_scriptPath)"
             _result="{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"path\": \"$_opPath\", \"operationCfg\": $_opJson }"
             echo "$_result"
             return 0
@@ -270,12 +291,17 @@ frog_exec_operation () {
     #$(${_opFunction} ${_parameters})
 }
 
-_FROG_BASEPATH="$(realpath $(frog_script_dir)/../../..)"
+_FROG_COMMON_PATH="$(realpath $(frog_script_dir)/../..)"
+_FROG_COMMON_BASH_PATH="$(realpath $_FROG_COMMON_PATH)/bash"  # namespace.min.json lives here
+_FROG_COMMON_JSON_PATH="$(realpath $_FROG_COMMON_PATH)/json"
+_FROG_COMMON_SKELETON_PATH="$(realpath $_FROG_COMMON_PATH)/skeleton"
 
-_FROG_COMMON_PATH="$(realpath $_FROG_BASEPATH/bullfrog-common)/bash"
-_FROG_LOCAL_PATH="$(realpath $_FROG_BASEPATH/bullfrog-local)/bash"
-_FROG_REMOTE_PATH="$(realpath $_FROG_BASEPATH/bullfrog-remote)/bash"
+_FROG_COMMON_BASHLIB_PATH="$(realpath $_FROG_COMMON_PATH)/bash/lib"
+_FROG_COMMON_INSTALL_PATH="$(realpath $_FROG_COMMON_PATH)/.."  
+_FROG_COMMON_JSON_SCHEMA_PATH="$(realpath $_FROG_COMMON_PATH)/json/schema"
 
-source $_FROG_COMMON_PATH/lib/frogl.lib.bash
-source $_FROG_COMMON_PATH/lib/frogsh.lib.bash
-source $_FROG_COMMON_PATH/lib/frogsys.lib.bash
+_FROG_COMMON_BUILTIN_PACKAGES=$( "bullfrog-common" "bullfrog-local" "bullfrog-remote" )
+
+source $_FROG_COMMON_BASHLIB_PATH/frogl.lib.bash
+source $_FROG_COMMON_BASHLIB_PATH/frogsh.lib.bash
+source $_FROG_COMMON_BASHLIB_PATH/frogsys.lib.bash

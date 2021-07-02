@@ -17,12 +17,9 @@ ajv -s bash/json/namespace.schema.min.json -d bash/namespace.min.json
 
 mkdir ./dist
 cp -r ./bash ./dist
-cp -r ./config ./dist
-cp -r ./json ./dist
-cp -r ./skeleton ./dist
 
-rm ./dist/json/namespace.json
-rm ./dist/json/namespace.schema.json
+rm ./dist/bash/namespace.json
+rm ./dist/bash/json/namespace.schema.json
 
 echo
 echo "build successful"
