@@ -73,7 +73,7 @@ frog_import_namespace () {
 
 frog_import_builtin () {
     local _dirs
-    _dirs="$(find $(frog_basepath) -maxdepth 1 -name 'bullfrog-*' -type d | xargs realpath | xargs -n 1 -I '_path' find _path/bash -maxdepth 1 -name 'namespace.json' 2>/dev/null)" || {
+    _dirs="$(find $(frog_basepath) -maxdepth 1 -name 'bullfrog-*' -type d | xargs realpath | xargs -n 1 -I '_path' find _path/bash -maxdepth 1 -name 'namespace.min.json' 2>/dev/null)" || {
         local _exit=$?
         [ $_exit -ne 0 ] && [ $_exit -ne 123 ] && {
            frog_error 1 "Unable to search for namespaces" 
@@ -270,12 +270,12 @@ frog_exec_operation () {
     #$(${_opFunction} ${_parameters})
 }
 
-_FROG_BASEPATH="$(realpath $(frog_script_dir)/../..)"
+_FROG_BASEPATH="$(realpath $(frog_script_dir)/../../..)"
 
 _FROG_COMMON_PATH="$(realpath $_FROG_BASEPATH/bullfrog-common)/bash"
 _FROG_LOCAL_PATH="$(realpath $_FROG_BASEPATH/bullfrog-local)/bash"
 _FROG_REMOTE_PATH="$(realpath $_FROG_BASEPATH/bullfrog-remote)/bash"
 
-source $_FROG_COMMON_PATH/frogl.lib.bash
-source $_FROG_COMMON_PATH/frogsh.lib.bash
-source $_FROG_COMMON_PATH/frogsys.lib.bash
+source $_FROG_COMMON_PATH/lib/frogl.lib.bash
+source $_FROG_COMMON_PATH/lib/frogsh.lib.bash
+source $_FROG_COMMON_PATH/lib/frogsys.lib.bash

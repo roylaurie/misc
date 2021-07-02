@@ -15,7 +15,7 @@ source $( echo $(
     }
     
     _script_dir
-) )/bullfrog.lib.bash
+) )/lib/bullfrog.lib.bash
 
 trap frog_error_trap EXIT
 

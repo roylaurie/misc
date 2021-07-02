@@ -1,0 +1,23 @@
+{
+  "name": "bullfrog-common",
+  "version": "0.0.0",
+  "description": "A library for creating bash command-line toolkits.",
+  "main": "bullfrog",
+  "scripts": {
+    "build": "bash ./build.bash"
+  },
+  "keywords": [
+    "bullfrog",
+    "frog",
+    "bash",
+    "toolkit",
+    "library",
+    "automation",
+    "scripting",
+    "vm",
+    "cloud",
+    "stack"
+  ],
+  "author": "Roy Laurie <roy.laurie@gmail.com>",
+  "license": "GPL-3.0"
+}

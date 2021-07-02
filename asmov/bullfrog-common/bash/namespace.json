@@ -7,7 +7,7 @@
             "namespace": "common",
             "modules": {
                 "common": {
-                    "script": "common/common.module.bash",
+                    "script": "module/common/common.module.bash",
                     "operations": {
                         "version": {
                             "desc": "Displays bullfrog version",
@@ -19,7 +19,7 @@
                     "desc": "Runs a bullfrog operation."
                 },
                 "common.stats": {
-                    "script": "common/common.module.bash",
+                    "script": "module/common/common.module.bash",
                     "operations": {
                         "default": {
                             "desc": "General statistics",
