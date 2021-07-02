@@ -1,5 +1,7 @@
 {
-    "path": "bullfrog-common/bash",
+    "path": "bullfrog-common",
+    "bashPath": "bash",
+    "skeletonPath": "skeleton",
     "namespaces": {
         "common": {
             "namespace": "common",
@@ -17,7 +19,7 @@
                     "desc": "Runs a bullfrog operation."
                 },
                 "common.stats": {
-                    "script": "common.module.bash",
+                    "script": "common/common.module.bash",
                     "operations": {
                         "default": {
                             "desc": "General statistics",

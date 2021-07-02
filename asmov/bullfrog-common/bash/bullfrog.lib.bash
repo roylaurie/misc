@@ -171,10 +171,11 @@ frog_operation_cfg () {
         local _opJson
         _opJson="$(frog_jq "${_import}" ".namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
         if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
-            local _namespacePath _modulePath _opPath _result
+            local _namespacePath _bashPath _modulePath _opPath _result
             _namespacePath="$(frog_jq "$_import" ".path")" || frog_error $?
+            _bashPath="$(frog_jq "$_import" ".bashPath")" || frog_error $?
             _modulePath="$(frog_jq "$_import" ".namespaces[].modules[\"$_namespace\"].script")" || frog_error $?
-            _opPath="$(frog_basepath)/$_namespacePath/$_modulePath"
+            _opPath="$(frog_basepath)/$_namespacePath/$_bashPath/$_modulePath"
             _result="{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"path\": \"$_opPath\", \"operationCfg\": $_opJson }"
             echo "$_result"
             return 0
