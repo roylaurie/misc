@@ -5,13 +5,17 @@
   "main": "bash/bullfrog.bash",
   "scripts": {
     "prepare": "npm run build",
-    "build": "./tool/build.bash"
+    "build": "./tool/build.bash",
+    "frog": "./dist/bash/bin/bullfrog.bash"
   },
   "files": [
-    "dist/bash"
+    "dist/bash",
+    "dist/config",
+    "dist/json",
+    "dist/skeleton"
   ],
   "bin": {
-    "bullfrog": "dist/bash/bullfrog.bash"
+    "bullfrog": "dist/bash/bin/bullfrog.bash"
   },
   "preferGlobal": true,
   "keywords": [

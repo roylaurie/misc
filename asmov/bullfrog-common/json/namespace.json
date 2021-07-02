@@ -1,4 +1,5 @@
 {
+    "path": "..",
     "bashPath": "bash",
     "bashLibPath": "bash/lib",
     "jsonPath": "json",
