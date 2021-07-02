@@ -3,6 +3,8 @@
     "properties": {
         "path": { "type": "string" },
         "bashPath": { "type": "string" },
+        "configPath": { "type": "string" },
+        "jsonPath": { "type": "string" },
         "skeletonPath": { "type": "string" },
         "namespaces": {
             "type": "object",

@@ -1,6 +1,7 @@
 {
     "path": "..",
     "bashPath": "bash",
+    "configPath": "config",
     "jsonPath": "json",
     "skeletonPath": "skeleton",
     "namespaces": {
