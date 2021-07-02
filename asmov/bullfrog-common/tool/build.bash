@@ -17,17 +17,17 @@ cat ./json/namespace.json | jq -c > ./json/namespace.min.json
 # validate the minified namespace configuration against the minified schema
 ajv -s ./json/schema/namespace.schema.min.json -d ./json/namespace.min.json 
 
-mkdir ./dist
+mkdir -p ./dist/bullfrog-common
 
 _rsyncExcludes="--exclude "*.swp""
-rsync -a ./bash ./dist $_rsyncExcludes
-rsync -a ./config ./dist $_rsyncExcludes
-rsync -a ./json ./dist $_rsyncExcludes
-rsync -a ./skeleton ./dist $_rsyncExcludes
+rsync -a ./bash ./dist/bullfrog-common $_rsyncExcludes
+rsync -a ./config ./dist/bullfrog-common $_rsyncExcludes
+rsync -a ./json ./dist/bullfrog-common $_rsyncExcludes
+rsync -a ./skeleton ./dist/bullfrog-common $_rsyncExcludes
 
 # remove source json where minified
-rm ./dist/json/namespace.json
-rm ./dist/json/schema/namespace.schema.json
+rm ./dist/bullfrog-common/json/namespace.json
+rm ./dist/bullfrog-common/json/schema/namespace.schema.json
 
 echo
 echo "build successful"

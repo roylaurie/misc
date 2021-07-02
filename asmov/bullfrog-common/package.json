@@ -2,20 +2,19 @@
   "name": "bullfrog-common",
   "version": "0.0.0",
   "description": "A library for creating bash command-line toolkits.",
-  "main": "bash/bullfrog.bash",
+  "main": "bash/bin/bullfrog.bash",
   "scripts": {
-    "prepare": "npm run build",
     "build": "./tool/build.bash",
     "frog": "./dist/bash/bin/bullfrog.bash"
   },
   "files": [
-    "dist/bash",
-    "dist/config",
-    "dist/json",
-    "dist/skeleton"
+    "dist/bullfrog-common/bash",
+    "dist/bullfrog-common/config",
+    "dist/bullfrog-common/json",
+    "dist/bullfrog-common/skeleton"
   ],
   "bin": {
-    "bullfrog": "dist/bash/bin/bullfrog.bash"
+    "bullfrog": "dist/bullfrog-common/bash/bin/bullfrog.bash"
   },
   "preferGlobal": true,
   "keywords": [
