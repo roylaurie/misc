@@ -1,6 +1,8 @@
 #!/bin/bash
 set -o errexit -o pipefail -o privileged -o nounset 
 
+echo "[TTY $(date +%N)] start" > /dev/tty
+
 source $( echo $(
     _script_dir () {
          local _src _dir
@@ -18,12 +20,15 @@ source $( echo $(
 ) )/../lib/bullfrog.lib.bash
 
 trap frog_error_trap EXIT
+frog_tty "load trap"
 
 frog_import_builtin
+frog_tty "load import"
 
 main () {
     local _cmdline
     _cmdline=$(frog_parse_cmdline "$@") || frog_error "$?"
+frog_tty "load cmd"
 
     frog_run_operation "$_cmdline"
 }

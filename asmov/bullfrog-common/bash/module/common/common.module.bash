@@ -8,3 +8,5 @@ op_common_version () {
 op_common_stats_default () {
     echo ""    
 }
+
+frog_tty "load op"

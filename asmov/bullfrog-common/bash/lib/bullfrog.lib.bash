@@ -85,13 +85,11 @@ frog_import_namespace () {
 }
 
 frog_import_builtin () {
-    local _dirs
-    _dirs=($(ls -d $_FROG_COMMON_ROOT_PATH/*/ | xargs -n 1 basename )) || frog_error $? "$_dirs"
+    local _namespaceFilepath
 
-    for _dirname in "${_dirs[@]}"; do
-        if frog_inarray "${_FROG_COMMON_BUILTIN_PACKAGES[@]}" "$_dirname"; then
-            frog_import_namespace "$(realpath $_FROG_COMMON_ROOT_PATH/$_dirname/json/namespace.min.json)" 
-        fi
+    for _dirname in "${_FROG_COMMON_BUILTIN_PACKAGES[@]}"; do
+        _namespaceFilepath="$(realpath $_FROG_COMMON_ROOT_PATH/$_dirname/json/namespace.min.json 2>/dev/null)" || continue
+        [ -f "$_namespaceFilepath" ] && frog_import_namespace "$_namespaceFilepath" 
     done
 }
 
@@ -174,8 +172,12 @@ frog_parse_cmdline () {
     echo "$(frog_jq "$_operationCfg" "")" || frog_error $?
 }
 
+__lastty="$(date +%N)"
 frog_tty () {
-    echo "TTY] $@" > /dev/tty
+        local a=("$@") t="$(date +%N)"
+        local d=$(( t - __lastty ))
+        __lastty=$t
+        echo -e "[TTY $t $d] $a" > /dev/tty
 }
 
 ##
@@ -193,6 +195,7 @@ frog_operation_cfg () {
     for _import in "${_FROG_IMPORTS[@]}"; do
         local _opJson
         _opJson="$(frog_jq "${_import}" ".import.namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
+frog_tty "load big query"
         if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
             local _namespaceFilepath _pkgRelPath _pkgPath _bashPath _scriptPath _opPath _result
             _namespaceFilepath="$(frog_jq "$_import" ".namespaceFilepath")" || frog_error $?
@@ -201,6 +204,7 @@ frog_operation_cfg () {
             _bashPath="$(realpath $_pkgPath/$(frog_jq "$_import" ".import.bashPath"))" || frog_error $?
             _scriptPath="$(realpath $_bashPath/$(frog_jq "$_import" ".import.namespaces[].modules[\"$_namespace\"].script"))" || frog_error $?
             _result="{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"path\": \"$_scriptPath\", \"operationCfg\": $_opJson }"
+frog_tty "load many query"
             echo "$_result"
             return 0
         fi
@@ -303,8 +307,10 @@ _FROG_COMMON_ROOT_PATH="$(realpath $_FROG_COMMON_PATH/..)"
 _FROG_COMMON_BASHLIB_PATH="$(realpath $_FROG_COMMON_PATH/bash/lib)"
 _FROG_COMMON_JSON_SCHEMA_PATH="$(realpath $_FROG_COMMON_PATH/json/schema)"
 
-_FROG_COMMON_BUILTIN_PACKAGES=( "bullfrog-common" "bullfrog-local" "bullfrog-remote" )
+source $_FROG_COMMON_BASHLIB_PATH/builtins.lib.bash
 
 source $_FROG_COMMON_BASHLIB_PATH/frogl.lib.bash
 source $_FROG_COMMON_BASHLIB_PATH/frogsh.lib.bash
 source $_FROG_COMMON_BASHLIB_PATH/frogsys.lib.bash
+
+frog_tty "load lib"
