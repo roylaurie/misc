@@ -1,34 +1,21 @@
 {
-    "path": "..",
-    "bashPath": "bash",
-    "bashLibPath": "bash/lib",
-    "jsonPath": "json",
-    "skeletonPath": "skeleton",
-    "namespaces": {
+    "package": "bullfrog-common",
+    "namespace": {
         "common": {
-            "namespace": "common",
-            "modules": {
-                "common": {
-                    "script": "module/common/common.module.bash",
-                    "operations": {
-                        "version": {
-                            "desc": "Displays bullfrog version",
-                            "function": "op_common_version",
-                            "parameters": {
-                            }
-                        }
-                    },
-                    "desc": "Runs a bullfrog operation."
-                },
-                "common.stats": {
-                    "script": "module/common/common.module.bash",
-                    "operations": {
-                        "default": {
-                            "desc": "General statistics",
-                            "function": "op_common_stats_default",
-                            "parameters": {
-                            }
-                        }
+            "desc": "Runs a common bullfrog operation.",
+            "operations": {
+                "version": {
+                    "desc": "Displays bullfrog version",
+                    "parameters": {
+                    }
+                }
+            }
+        },
+        "common.stats": {
+            "operations": {
+                "default": {
+                    "desc": "General statistics",
+                    "parameters": {
                     }
                 }
             }

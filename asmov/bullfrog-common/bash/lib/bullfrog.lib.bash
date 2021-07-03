@@ -172,12 +172,13 @@ frog_parse_cmdline () {
     echo "$(frog_jq "$_operationCfg" "")" || frog_error $?
 }
 
-__lastty="$(date +%N)"
+_frog_lastty="$(date +%N | bc)"
+
 frog_tty () {
-        local a=("$@") t="$(date +%N)"
-        local d=$(( t - __lastty ))
-        __lastty=$t
-        echo -e "[TTY $t $d] $a" > /dev/tty
+    local a=("$@") t="$(date +%N | bc)"
+    local d="$(echo "$t - $_frog_lastty" | bc)"
+    _frog_lastty=$t
+    printf "[TTY %d %9d] %s\n" "$t" "$d" "$a" > /dev/tty
 }
 
 ##
@@ -194,6 +195,7 @@ frog_operation_cfg () {
 
     for _import in "${_FROG_IMPORTS[@]}"; do
         local _opJson
+frog_tty "before big query"
         _opJson="$(frog_jq "${_import}" ".import.namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
 frog_tty "load big query"
         if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
