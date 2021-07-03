@@ -28,3 +28,18 @@ touch \
     tool/build.bash \
     tool/test.bash
 
+touch \
+    bash/.gitignore \
+    bash/lib/.gitignore \
+    bash/bin/.gitignore \
+    bash/module/.gitignore \
+    config/.gitignore \
+    doc/.gitignore \
+    doc/design/.gitignore \
+    json/.gitignore \
+    json/schema/.gitignore \
+    skeleton/.gitignore \
+    test/.gitignore \
+    tool/.gitignore
+
+
