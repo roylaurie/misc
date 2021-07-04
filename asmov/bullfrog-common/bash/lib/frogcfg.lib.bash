@@ -34,7 +34,7 @@ frogcfg_key_index () {
 frogcfg_get_values() {
     IFS=$';;'
     _key="$1"
-    _i="$(find_key_index "$_key")" || return 1
+    _i="$(frogcfg_key_index "$_key")" || return 1
     _n="${_offsets[_$i]}"
     echo "i $_i n $_n" > /dev/tty
     echo "bal ${_values[*]:0:2}" > /dev/tty
@@ -51,6 +51,7 @@ frogcfg_set_key "package.bullfrog.common.namespaces.common.stats.desc" "Runs a c
 frogcfg_set_key "package.bullfrog.common.namespaces.common.stats.operations" "default"
 frogcfg_set_key "package.bullfrog.common.namespaces.common.stats.operations.default.desc" "General statistics"
 frogcfg_set_key "package.bullfrog.common.namespaces.common.stats.operations.default.parameter" ""
+frogcfg_set_key "package.bullfrog.common.aliases" ""
 
 echo "==="
 echo "${_values[*]}"

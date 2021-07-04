@@ -25,6 +25,12 @@
                             }
                         }
                     }
+                },
+                "aliases": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         }
