@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit -o pipefail -o privileged -o nounset 
 
-printf "[TTY %i %9i] %s\n" "$(date +%N | bc)" "0" "script start" > /dev/tty
+printf "[TTY %i %9i] %s\n" "$(date +%N | bc)" "0" "script start" > "$(tty)"
 
 source $( echo $(
     _script_dir () {
@@ -33,4 +33,4 @@ frog_tty "load cmd"
     frog_run_operation "$_cmdline"
 }
 
-main $@
+main "$@"

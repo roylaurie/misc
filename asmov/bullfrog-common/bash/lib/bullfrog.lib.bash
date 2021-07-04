@@ -78,7 +78,7 @@ frog_import_namespace () {
 
     local _json
     _json="$(cat $_filepath | jq -c 2>&1)" || frog_error $? "Unable to parse json file" "$_filepath" "jq> $_json"
-    _json="{ \"namespaceFilepath\": \"$_filepath\", \"import\": "$_json" }"
+    _json="{ \"namespaceFilepath\": \"$_filepath\", \"import\": $_json }"
     _json="$(echo "$_json" | jq -c 2>&1)" || frog_error $? "JSON parsing" "" "$_json"
     
     _FROG_IMPORTS+=("$_json")
@@ -88,7 +88,7 @@ frog_import_builtin () {
     local _namespaceFilepath
 
     for _dirname in "${_FROG_COMMON_BUILTIN_PACKAGES[@]}"; do
-        _namespaceFilepath="$(realpath $_FROG_COMMON_ROOT_PATH/$_dirname/json/namespace.min.json 2>/dev/null)" || continue
+        _namespaceFilepath="$(realpath "$_FROG_COMMON_ROOT_PATH/$_dirname"/json/namespace.min.json 2>/dev/null)" || continue
         [ -f "$_namespaceFilepath" ] && frog_import_namespace "$_namespaceFilepath" 
     done
 }
@@ -116,8 +116,8 @@ frog_jq () {
     local _json _query _result
     _json="$1"
     _query="$2"
-    _result="$(echo $_json | jq -rc $_query 2>&1)" || frog_error "$?" "Unable to parse js query" "$_query" "json> $_json\njq> $_result"
-    echo $_result
+    _result="$(echo "$_json" | jq -rc "$_query" 2>&1)" || frog_error "$?" "Unable to parse js query" "$_query" "json> $_json\njq> $_result"
+    echo "$_result"
 }
 
 #$_FROG_CMDLINE_OPTIONS=("help")
@@ -169,16 +169,16 @@ frog_parse_cmdline () {
     #merge _optionJson and _parameterJson into operationCfg
     #echo "$_result"
 
-    echo "$(frog_jq "$_operationCfg" "")" || frog_error $?
+    frog_jq "$_operationCfg" "" || frog_error $?
 }
 
 _frog_lastty="$(date +%N | bc)"
 
 frog_tty () {
-    local a=("$@") t="$(date +%N | bc)"
+    local a="$*" t="$(date +%N | bc)"
     local d="$(echo "$t - $_frog_lastty" | bc)"
     _frog_lastty=$t
-    printf "[TTY %d %9d] %s\n" "$t" "$d" "$a" > /dev/tty
+    printf "[TTY %d %9d] %s\n" "$t" "$d" "$a" > "$(tty)"
 }
 
 ##

@@ -1,34 +1,24 @@
 {
     "type": "object",
     "properties": {
-        "path": { "type": "string" },
-        "bashPath": { "type": "string" },
-        "configPath": { "type": "string" },
-        "jsonPath": { "type": "string" },
-        "skeletonPath": { "type": "string" },
-        "namespaces": {
+        "package": {
             "type": "object",
-            "additionalProperties": {
-                "type": "object",
-                "properties": {
-                    "namespace": { "type": "string" },
-                    "modules": {
+            "properties": {
+                "name": { "type": "string" },
+                "namespaces": {
+                    "type": "object",
+                    "additionalProperties": {
                         "type": "object",
-                        "additionalProperties": {
-                            "type": "object",
-                            "properties": {
-                                "script": { "type": "string" },
-                                "desc": { "type": "string" },
-                                "operations": {
-                                    "type": "object",
-                                    "properties": {
-                                        "desc": { "type": "string" },
-                                        "function": { "type": "string" },
-                                        "parameters": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "type": "string"
-                                            }
+                        "properties": {
+                            "desc": { "type": "string" },
+                            "operations": {
+                                "type": "object",
+                                "properties": {
+                                    "desc": { "type": "string" },
+                                    "parameters": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "type": "string"
                                         }
                                     }
                                 }

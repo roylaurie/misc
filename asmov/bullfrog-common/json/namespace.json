@@ -1,28 +1,30 @@
 {
-    "package": "bullfrog-common",
-    "namespace": {
-        "common": {
-            "desc": "Runs a common bullfrog operation.",
-            "operations": {
-                "version": {
-                    "desc": "Displays bullfrog version",
-                    "parameters": {
+    "package": {
+        "name": "bullfrog.common",
+        "namespaces": {
+            "common": {
+                "desc": "Runs a common bullfrog operation.",
+                "operations": {
+                    "version": {
+                        "desc": "Displays bullfrog version",
+                        "parameters": {
+                        }
+                    }
+                }
+            },
+            "common.stats": {
+                "operation": {
+                    "default": {
+                        "desc": "General statistics",
+                        "parameters": {
+                        }
                     }
                 }
             }
         },
-        "common.stats": {
-            "operations": {
-                "default": {
-                    "desc": "General statistics",
-                    "parameters": {
-                    }
-                }
-            }
+        "alias": {
+            "help": "common help"
         }
-    },
-    "aliases": {
-        "help": "common help"
     }
 }
 
