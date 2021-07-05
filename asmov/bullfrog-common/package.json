@@ -5,7 +5,7 @@
   "main": "bash/bin/bullfrog.bash",
   "scripts": {
     "build": "./tool/build.bash",
-    "frog": "./dist/bash/bin/bullfrog.bash"
+    "frog": "./bash/bin/bullfrog.bash"
   },
   "files": [
     "dist/bullfrog-common/bash",

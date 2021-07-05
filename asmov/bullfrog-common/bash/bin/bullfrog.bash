@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit -o pipefail -o privileged -o nounset 
 
-printf "[TTY %i %9i] %s\n" "$(date +%N | bc)" "0" "script start" > "$(tty)"
+echo "[TTY $(echo "$(date +%s)"."$(date +%N)" | bc)] script start" > "$(tty)"
 
 source $( echo $(
     _script_dir () {

@@ -77,7 +77,7 @@ frog_import_namespace () {
     _filepath="$1"
 
     local _json
-    _json="$(cat $_filepath | jq -c 2>&1)" || frog_error $? "Unable to parse json file" "$_filepath" "jq> $_json"
+    _json="$(jq -c 2>&1 < "$_filepath")" || frog_error $? "Unable to parse json file" "$_filepath" "jq> $_json"
     _json="{ \"namespaceFilepath\": \"$_filepath\", \"import\": $_json }"
     _json="$(echo "$_json" | jq -c 2>&1)" || frog_error $? "JSON parsing" "" "$_json"
     
@@ -136,7 +136,8 @@ frog_jq () {
 #               unknown namespace / operation, invalid values for options or parameters 
 ##
 frog_parse_cmdline () {
-    local _cmdline=($@) _forOption="" _options=() _optionVals=() _namespace="" _operation="" _params=""
+    local _cmdline _forOption="" _namespace="" _operation=""
+    IFS=" " read -r -a _cmdline <<< "$@"
 
     for _token in "${_cmdline[@]}"; do
         if [ -n "$_forOption" ]; then
@@ -162,23 +163,24 @@ frog_parse_cmdline () {
     local _operationCfg
     _operationCfg="$(frog_operation_cfg "$_namespace" "$_operation")" || frog_error $?
 
-    local _parameterJson
+    #local _parameterJson
     #_parameterJson="$(frog_parse_parameters "$_operationCfg")"
 
-    local _result
+    #local _result
     #merge _optionJson and _parameterJson into operationCfg
     #echo "$_result"
 
     frog_jq "$_operationCfg" "" || frog_error $?
 }
 
-_frog_lastty="$(date +%N | bc)"
+_frog_lastty="$(echo "$(date +%s).$(date +%N)" | bc)"
 
 frog_tty () {
-    local a="$*" t="$(date +%N | bc)"
-    local d="$(echo "$t - $_frog_lastty" | bc)"
-    _frog_lastty=$t
-    printf "[TTY %d %9d] %s\n" "$t" "$d" "$a" > "$(tty)"
+    local _a="$*" _t _d
+    _t="$( echo "$(date +%s).$(date +%N)" | bc)"
+    _d="$(echo "$_t - $_frog_lastty" | bc)"
+    _frog_lastty="$_t"
+    echo "[TTY $_t] $_a" > "$(tty)"
 }
 
 ##
@@ -199,12 +201,12 @@ frog_tty "before big query"
         _opJson="$(frog_jq "${_import}" ".import.namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
 frog_tty "load big query"
         if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
-            local _namespaceFilepath _pkgRelPath _pkgPath _bashPath _scriptPath _opPath _result
+            local _namespaceFilepath _pkgRelPath _pkgPath _bashPath _scriptPath _result
             _namespaceFilepath="$(frog_jq "$_import" ".namespaceFilepath")" || frog_error $?
             _pkgRelPath="$(frog_jq "$_import" ".import.path")" || frog_error $?
-            _pkgPath="$(realpath $(dirname "$_namespaceFilepath")/$_pkgRelPath)" || frog_error $?
-            _bashPath="$(realpath $_pkgPath/$(frog_jq "$_import" ".import.bashPath"))" || frog_error $?
-            _scriptPath="$(realpath $_bashPath/$(frog_jq "$_import" ".import.namespaces[].modules[\"$_namespace\"].script"))" || frog_error $?
+            _pkgPath="$(realpath "$(dirname "$_namespaceFilepath")"/"$_pkgRelPath")" || frog_error $?
+            _bashPath="$(realpath "$_pkgPath"/"$(frog_jq "$_import" ".import.bashPath")")" || frog_error $?
+            _scriptPath="$(realpath "$_bashPath"/"$(frog_jq "$_import" ".import.namespaces[].modules[\"$_namespace\"].script")")" || frog_error $?
             _result="{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"path\": \"$_scriptPath\", \"operationCfg\": $_opJson }"
 frog_tty "load many query"
             echo "$_result"
@@ -216,35 +218,35 @@ frog_tty "load many query"
 }
 
 frog_run_operation () {
-    local _cmdCfg _scriptPath
+    local _cmdCfg _scriptPath _opFunc
     _cmdCfg="$1"
     _scriptPath="$(frog_jq "$_cmdCfg" ".path")" || frog_error $?
     _opFunc="$(frog_jq "$_cmdCfg" ".operationCfg.function")" || frog_error $?
     #_params="$(frog_jq "$_cmdCfg" ".parameters")"
 
-    source $_scriptPath
+    # shellcheck disable=SC1090
+    source "$_scriptPath"
     $_opFunc
 }
 
 _FROG_ERROR_CODE=64
 
 frog_error () {
-    [ "$1" -eq "$_FROG_ERROR_CODE" ] && exit $_FROG_ERROR_CODE
+    [[ "$1" -eq "$_FROG_ERROR_CODE" ]] && exit "$_FROG_ERROR_CODE"
 
-    local _exitCode _errorMessage _subject="" _errorDetails="" _subjectStr=""
+    local _exitCode _errorMessage _errorDetails="" _subject="" _subjectStr=""
     _exitCode="$1"
     _errorMessage="${2-}"
-    [ -n "${3-}" ] && _subject="$3" && _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
-    [ -n "${4-}" ] && _errorDetails="$4"
+    [[ -n "${3-}" ]] && _subject="$3" && _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
+    [[ -n "${4-}" ]] && _errorDetails="$4"
 
-    $(1>&2 echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}")
-    [ -n "$_errorDetails" ] && {
-        for _line in "$_errorDetails"; do
-            $(1>&2 echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_line}$(frog_color end)")
-        done
+    1>&2 echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}"
+    [ -n "${_errorDetails}" ] && {
+        1>&2 echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_errorDetails}$(frog_color end)"
     }
 
-    exit $_FROG_ERROR_CODE 
+    exit "$_FROG_ERROR_CODE"
+
 }
 
 frog_error_trap () {
@@ -273,7 +275,7 @@ frog_color () {
        fi
     done 
 
-    [ -n "$_color" ] || frog_error 1 "Invalid color" "$_colorName" "frog_color"
+    [[ -n "$_color" ]] || frog_error 1 "Invalid color" "$_colorName" "frog_color"
     [[ "$_color" = "0" ]] && {
         echo '\e[0m'
         return 0
@@ -300,19 +302,23 @@ frog_exec_operation () {
     #$(${_opFunction} ${_parameters})
 }
 
-_FROG_COMMON_PATH="$(realpath $(frog_script_dir)/../..)"
-_FROG_COMMON_BASH_PATH="$(realpath $_FROG_COMMON_PATH/bash)"  
-_FROG_COMMON_JSON_PATH="$(realpath $_FROG_COMMON_PATH/json)"  # namespace.min.json lives here
-_FROG_COMMON_SKELETON_PATH="$(realpath $_FROG_COMMON_PATH/skeleton)"
-_FROG_COMMON_ROOT_PATH="$(realpath $_FROG_COMMON_PATH/..)"  
+_FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"
+_FROG_COMMON_BASH_PATH="$(realpath "$_FROG_COMMON_PATH"/bash)"
+_FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.min.json lives here
+_FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"
+_FROG_COMMON_ROOT_PATH="$(realpath "$_FROG_COMMON_PATH"/..)"
 
-_FROG_COMMON_BASHLIB_PATH="$(realpath $_FROG_COMMON_PATH/bash/lib)"
-_FROG_COMMON_JSON_SCHEMA_PATH="$(realpath $_FROG_COMMON_PATH/json/schema)"
+_FROG_COMMON_BASHLIB_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/lib)"
+_FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"
 
-source $_FROG_COMMON_BASHLIB_PATH/builtins.lib.bash
+# shellcheck source=./builtins.lib.bash
+source "$_FROG_COMMON_BASHLIB_PATH"/builtins.lib.bash
 
-source $_FROG_COMMON_BASHLIB_PATH/frogl.lib.bash
-source $_FROG_COMMON_BASHLIB_PATH/frogsh.lib.bash
-source $_FROG_COMMON_BASHLIB_PATH/frogsys.lib.bash
+# shellcheck source=./frogsys.lib.bash
+source "$_FROG_COMMON_BASHLIB_PATH"/frogl.lib.bash
+# shellcheck source=./frogsh.lib.bash
+source "$_FROG_COMMON_BASHLIB_PATH"/frogsh.lib.bash
+# shellcheck source=./frogsys.lib.bash
+source "$_FROG_COMMON_BASHLIB_PATH"/frogsys.lib.bash
 
 frog_tty "load lib"
