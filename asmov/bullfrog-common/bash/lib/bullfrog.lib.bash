@@ -80,12 +80,21 @@ frog_import_namespace () {
     local _filepath
     _filepath="$1"
 
-    #TODO
-    local _packageNamespace="common"
+    local _packageNamespace
+    # shellcheck disable=SC1090
+    _packageNamespace="$(source "$_filepath")"
+
+    local -a _namespaces
+    readarray -t _namespaces <<< "$(frog_get_value array "package")" ||
+        frog_error "$?" "Import config is invalid for" "$_filepath" "frog_import_namespace"
 
     _FROG_PACKAGES["$_packageNamespace"]="$(realpath "$(dirname "$_filepath")"/..)"
-    _FROG_NAMESPACES["common"]="$_packageNamespace"
-    _FROG_NAMESPACES["common.stats"]="$_packageNamespace"
+
+    for _namespace in "${_namespaces[@]}"; do
+      _FROG_NAMESPACES["$_namespace"]="$_packageNamespace"
+    done
+    #_FROG_NAMESPACES["common"]="$_packageNamespace"
+    #_FROG_NAMESPACES["common.stats"]="$_packageNamespace"
 }
 
 frog_import_builtin () {
@@ -191,8 +200,9 @@ frog_operation_cfg () {
     readarray -t _parameterNames <<< "$(frogcfg_get_value array "$_opPrefix.parameters")" ||
         frog_error 1 "Invalid operation" "$_namespace::$_operation"
 
+    #TODO
     local _opScript
-    _opScript=""
+    _opScript="${_FROG_PACKAGES["$_packageNamespace"]}/bash/module/"
 
     local _opFunction
     _opFunction=""
@@ -290,18 +300,17 @@ frog_exec_operation () {
     #$(${_opFunction} ${_parameters})
 }
 
-_FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"
-_FROG_COMMON_DIST_PATH="$(realpath "$_FROG_COMMON_PATH"/..)"
-_FROG_COMMON_BASH_PATH="$(realpath "$_FROG_COMMON_PATH"/bash)"
-_FROG_COMMON_BASHCFG_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/cfg)"  # namespace.cfg.min.json lives here
-_FROG_COMMON_BASHLIB_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/lib)"
-_FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.cfg.min.json lives here
-_FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"
-_FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"
+_FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"  # the base dirtory of the package
+_FROG_COMMON_DIST_PATH="$(realpath "$_FROG_COMMON_PATH"/..)"  # where other built-in packages may be installed
+_FROG_COMMON_BASH_PATH="$(realpath "$_FROG_COMMON_PATH"/bash)"  # bullfrog.bash in bash/bin
+_FROG_COMMON_BASHCFG_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/cfg)"  # namespace.cfg.bash lives here
+_FROG_COMMON_BASHLIB_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/lib)"  # bullfrog.lib.bash et al live here
+_FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.cfg.json in json/cfg
+_FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"  # namespace.cfg.schema.json in schema/cfg
+_FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"  # templates that mirror desired install path
 
 # shellcheck source=./builtins.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/builtins.lib.bash
-
 # shellcheck source=./frogcfg.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/frogcfg.lib.bash
 # shellcheck source=./frogsys.lib.bash

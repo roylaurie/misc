@@ -12,3 +12,5 @@ frogcfg_set_key string "package.common.namespaces.common.stats.operations.defaul
 frogcfg_set_key array "package.common.namespaces.common.stats.operations.default.parameters" ""
 frogcfg_set_key array "package.common.aliases" "cat dog" "mouse rabbit"
 frogcfg_set_key array "package.common.zaliases" "crt dog" "rouse rabbit"
+
+echo "common"
