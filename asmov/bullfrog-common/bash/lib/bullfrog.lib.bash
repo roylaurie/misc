@@ -34,6 +34,7 @@ set -o allexport -o errexit -o privileged -o pipefail -o nounset
 
 NL=$'\n'
 
+declare -A _FROG_IMPORTS
 _FROG_IMPORTS=()
 _FROG_ERROR_CODE=64
 
@@ -79,20 +80,19 @@ frog_import_namespace () {
     local _filepath
     _filepath="$1"
 
-    local _json
-    _json="$(jq -c 2>&1 < "$_filepath")" || frog_error $? "Unable to parse json file" "$_filepath" "jq> $_json"
-    _json="{ \"namespaceFilepath\": \"$_filepath\", \"import\": $_json }"
-    _json="$(echo "$_json" | jq -c 2>&1)" || frog_error $? "JSON parsing" "" "$_json"
-    
-    _FROG_IMPORTS+=("$_json")
+    #TODO
+    local _namespace="bullfrog.common"
+
+    _FROG_IMPORTS["$_namespace"]="$(basename realpath "$(dirname "$_filepath")/..")"
 }
 
 frog_import_builtin () {
     local _namespaceFilepath
 
     for _dirname in "${_FROG_COMMON_BUILTIN_PACKAGES[@]}"; do
-        _namespaceFilepath="$(realpath "$_FROG_COMMON_ROOT_PATH/$_dirname"/json/namespace.min.json 2>/dev/null)" || continue
-        [ -f "$_namespaceFilepath" ] && frog_import_namespace "$_namespaceFilepath" 
+        _namespaceFilepath="$(realpath "$_FROG_COMMON_ROOT_PATH/$_dirname"/json/namespace.json 2>/dev/null)" || continue
+        [[ -f "$_namespaceFilepath" ]] &&
+            frog_import_namespace "$_namespaceFilepath"
     done
 }
 
@@ -175,13 +175,9 @@ frog_parse_cmdline () {
     frog_jq "$_operationCfg" "" || frog_error $?
 }
 
-_frog_lastty="$(echo "$(date +%s).$(date +%N)" | bc)"
-
 frog_tty () {
-    local _a="$*" _t _d
+    local _a="$*" _t
     _t="$( echo "$(date +%s).$(date +%N)" | bc)"
-    _d="$(echo "$_t - $_frog_lastty" | bc)"
-    _frog_lastty="$_t"
     echo "[TTY $_t] $_a" > "$(tty)"
 }
 
@@ -200,7 +196,7 @@ frog_operation_cfg () {
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
 
-    [[ -z "${_FROG_IMPORTS[$_namespace]}" ]] &&
+    [[ -z "${_FROG_IMPORTS["$_namespace"]}" ]] &&
         frog_error 1 "Invalid namespace $_namespace"
 
     local _packagePrefix _opPrefix
