@@ -32,8 +32,10 @@
 #  - nounset: throw error on unset variable usage
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
-_FROG_IMPORTS=()
 NL=$'\n'
+
+_FROG_IMPORTS=()
+_FROG_ERROR_CODE=64
 
 frog_script_dir () {
      local _src _dir
@@ -97,8 +99,7 @@ frog_import_builtin () {
 frog_inarray () {
     local _search _array
     _search="$1"
-    shift
-    _array=("$@")
+    shift && _array=("$@")
     
     for _x in "${_array[@]}"; do
         [ "$_search" == "$_x" ] && return 0
@@ -192,16 +193,18 @@ frog_tty () {
 # @returns 0: json result, 1: operation config not found
 ##
 frog_operation_cfg () {
-    local _namespace _operation
+    local _namespace _operation _package=""
     _namespace="$1"
     _operation="$2"
 
+    [[ -z "$_namespace" ]] &&
+        frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
+
     for _import in "${_FROG_IMPORTS[@]}"; do
         local _opJson
-frog_tty "before big query"
-        _opJson="$(frog_jq "${_import}" ".import.namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")" 
-frog_tty "load big query"
+        _opJson="$(frog_jq "${_import}" ".import.namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")"
         if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
+            _package="$_namespace"
             local _namespaceFilepath _pkgRelPath _pkgPath _bashPath _scriptPath _result
             _namespaceFilepath="$(frog_jq "$_import" ".namespaceFilepath")" || frog_error $?
             _pkgRelPath="$(frog_jq "$_import" ".import.path")" || frog_error $?
@@ -209,13 +212,15 @@ frog_tty "load big query"
             _bashPath="$(realpath "$_pkgPath"/"$(frog_jq "$_import" ".import.bashPath")")" || frog_error $?
             _scriptPath="$(realpath "$_bashPath"/"$(frog_jq "$_import" ".import.namespaces[].modules[\"$_namespace\"].script")")" || frog_error $?
             _result="{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"path\": \"$_scriptPath\", \"operationCfg\": $_opJson }"
-frog_tty "load many query"
             echo "$_result"
             return 0
         fi
     done
 
-    frog_error 1 "Invalid namespace / operation" "${_namespace}::${_operation}"
+    [[ -z "$_package" ]] &&
+        frog_error 1 "Invalid namespace $_namespace"
+
+    frog_error 1 "Invalid operation" "${_namespace}::${_operation}"
 }
 
 frog_run_operation () {
@@ -229,8 +234,6 @@ frog_run_operation () {
     source "$_scriptPath"
     $_opFunc
 }
-
-_FROG_ERROR_CODE=64
 
 frog_error () {
     [[ "$1" -eq "$_FROG_ERROR_CODE" ]] && exit "$_FROG_ERROR_CODE"
@@ -325,5 +328,3 @@ source "$_FROG_COMMON_BASHLIB_PATH"/frogl.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/frogsh.lib.bash
 # shellcheck source=./frogsys.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/frogsys.lib.bash
-
-frog_tty "load lib"
