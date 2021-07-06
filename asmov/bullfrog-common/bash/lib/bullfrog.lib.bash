@@ -33,6 +33,7 @@
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
 _FROG_IMPORTS=()
+NL=$'\n'
 
 frog_script_dir () {
      local _src _dir
@@ -116,7 +117,7 @@ frog_jq () {
     local _json _query _result
     _json="$1"
     _query="$2"
-    _result="$(echo "$_json" | jq -rc "$_query" 2>&1)" || frog_error "$?" "Unable to parse js query" "$_query" "json> $_json\njq> $_result"
+    _result="$(echo "$_json" | jq -rc "$_query" 2>&1)" || frog_error "$?" "Unable to parse js query" "$_query" "json> $_json${NL}jq> $_result"
     echo "$_result"
 }
 
@@ -242,7 +243,11 @@ frog_error () {
 
     1>&2 echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}"
     [ -n "${_errorDetails}" ] && {
-        1>&2 echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_errorDetails}$(frog_color end)"
+        local -a _lines
+        mapfile -t _lines <<< "$_errorDetails"
+        for _line in "${_lines[@]}"; do
+          1>&2 echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_line}$(frog_color end)"
+        done
     }
 
     exit "$_FROG_ERROR_CODE"
