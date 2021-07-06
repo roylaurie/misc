@@ -28,7 +28,9 @@ main () {
     readarray -t _cmdline <<< "$(frog_parse_cmdline "$@")" ||
         frog_error "$?"
 
-    frog_run_operation "$_cmdline"
+    echo "out ${_cmdline[*]}"
+
+    frog_run_operation "${_cmdline[@]}"
 }
 
 main "$@"

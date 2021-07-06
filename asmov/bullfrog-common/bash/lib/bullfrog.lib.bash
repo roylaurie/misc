@@ -159,6 +159,7 @@ frog_parse_cmdline () {
 
     echo "$_namespace"
     echo "$_operation"
+    echo "" #TODO parameters
 }
 
 frog_tty () {
@@ -183,16 +184,15 @@ frog_operation_cfg () {
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
 
     local _packageNamespace
-    _packageNamespace="${_FROG_NAMESPACES["$_namespace"]:-}" ||
-        frog_error 1 "Invalid namespace $_namespace"
-
+    _packageNamespace="${_FROG_NAMESPACES["$_namespace"]:-}"
     [[ -z "$_packageNamespace" ]] &&
-        frog_error 1 "Invalid namespacse $_namespace"
+        frog_error 1 "Unknown namespace" "$_namespace" "frog_operation_cfg"
 
     local _packagePrefix _opPrefix
     _packagePrefix="package.$_packageNamespace"
     _opPrefix="$_packagePrefix.namespaces.$_namespace.operations.$_operation"
 
+    # test to see if the operation exists
     frogcfg_has_key "$_opPrefix.desc" ||
         frog_error 1 "Invalid operation" "$_namespace::$_operation"
 
@@ -200,12 +200,12 @@ frog_operation_cfg () {
     readarray -t _parameterNames <<< "$(frogcfg_get_value array "$_opPrefix.parameters")" ||
         frog_error 1 "Invalid operation" "$_namespace::$_operation"
 
-    #TODO
     local _opScript
-    _opScript="${_FROG_PACKAGES["$_packageNamespace"]}/bash/module/"
+    _opScript="$(frog_module_path "$_packagePrefix" "$_namespace")" ||
+        frog_error 1 "Module script does not exist for" "$_namespace" "frog_operation_cfg"
 
     local _opFunction
-    _opFunction=""
+    _opFunction="$(frog_module_function "$_namespace" "$_operation")"
 
     echo "$_namespace"  # 0
     echo "$_operation"  # 1
@@ -213,16 +213,58 @@ frog_operation_cfg () {
     echo "$_opFunction" # 3
 }
 
+##
+# Retrieves the .module.bash filepath for the given package path and namespace
+#
+# @param string packagePath
+# @param string namespace
+# @returns 0: string path, 1: error
+frog_module_path () {
+    local _packagePath _namespace
+    _packagePath="$1"
+    _namespace="$2"
+
+    local _namepath _filepath
+    _namepath="${$_namespace/\./\/}.module.bash"
+    _filepath="$_packagePath/bash/module/$_namepath"
+
+    [[ -f "$_filepath" ]] ||
+        frog_error 1 "Module script does not exist" "$_filepath" "frog_module_path"
+
+    echo "$_filepath"
+}
+
+##
+# Retrieves the .module.bash function name for the given namespace and operation
+#
+# @param string namespace
+# @param string operation
+# @returns 0: string functionName
+frog_module_function() {
+    local _namespace _operation
+    _namespace="$2"
+    _operation="$1"
+
+    echo "${$_namespace/\./_}_$_operation"
+}
+
 frog_run_operation () {
-    local _cmdCfg _scriptPath _opFunc
-    _cmdCfg="$1"
-    _scriptPath="$(frog_jq "$_cmdCfg" ".path")" || frog_error $?
-    _opFunc="$(frog_jq "$_cmdCfg" ".operationCfg.function")" || frog_error $?
-    #_params="$(frog_jq "$_cmdCfg" ".parameters")"
+    local _namespace _operation _parameters
+    _namespace="$1"
+    _operation="$2"
+    _parameters="${3:-}"
+
+    local -a _opCfg
+    readarray -t _opCfg <<< "$(frog_operation_cfg "$_namespace" "$_operation")" ||
+        frog_error "$?" "Unable to load config for" "$_namespace::$_operation" "frog_run_operation"
+
+    local _opScript _opFunction
+    _opScript="${_opCfg[2]}"
+    _opFunction="${_opCfg[3]}"
 
     # shellcheck disable=SC1090
-    source "$_scriptPath"
-    $_opFunc
+    source "$_opScript"
+    $_opFunction "$_parameters"
 }
 
 frog_error () {
