@@ -92,7 +92,7 @@ frog_import_builtin () {
     local _namespaceFilepath
 
     for _dirname in "${_FROG_COMMON_BUILTIN_PACKAGES[@]}"; do
-        _namespaceFilepath="$(realpath "$_FROG_COMMON_ROOT_PATH/$_dirname"/json/namespace.json 2>/dev/null)" || continue
+        _namespaceFilepath="$(realpath "$_FROG_COMMON_DIST_PATH/$_dirname"/json/namespace.json 2>/dev/null)" || continue
         [[ -f "$_namespaceFilepath" ]] &&
             frog_import_namespace "$_namespaceFilepath"
     done
@@ -291,13 +291,13 @@ frog_exec_operation () {
 }
 
 _FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"
+_FROG_COMMON_DIST_PATH="$(realpath "$_FROG_COMMON_PATH"/..)"
 _FROG_COMMON_BASH_PATH="$(realpath "$_FROG_COMMON_PATH"/bash)"
-_FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.min.json lives here
-_FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"
-_FROG_COMMON_ROOT_PATH="$(realpath "$_FROG_COMMON_PATH"/..)"
-
+_FROG_COMMON_BASHCFG_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/cfg)"  # namespace.cfg.min.json lives here
 _FROG_COMMON_BASHLIB_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/lib)"
+_FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.cfg.min.json lives here
 _FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"
+_FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"
 
 # shellcheck source=./builtins.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/builtins.lib.bash
