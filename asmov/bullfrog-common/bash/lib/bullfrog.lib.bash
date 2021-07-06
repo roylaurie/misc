@@ -193,34 +193,34 @@ frog_tty () {
 # @returns 0: json result, 1: operation config not found
 ##
 frog_operation_cfg () {
-    local _namespace _operation _package=""
+    local _namespace _operation
     _namespace="$1"
-    _operation="$2"
+    _operation="${2:-"default"}"
 
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
 
-    for _import in "${_FROG_IMPORTS[@]}"; do
-        local _opJson
-        _opJson="$(frog_jq "${_import}" ".import.namespaces[].modules[\"$_namespace\"].operations[\"$_operation\"]")"
-        if [ -n "$_opJson" ] && [[ "$_opJson" != "null" ]]; then
-            _package="$_namespace"
-            local _namespaceFilepath _pkgRelPath _pkgPath _bashPath _scriptPath _result
-            _namespaceFilepath="$(frog_jq "$_import" ".namespaceFilepath")" || frog_error $?
-            _pkgRelPath="$(frog_jq "$_import" ".import.path")" || frog_error $?
-            _pkgPath="$(realpath "$(dirname "$_namespaceFilepath")"/"$_pkgRelPath")" || frog_error $?
-            _bashPath="$(realpath "$_pkgPath"/"$(frog_jq "$_import" ".import.bashPath")")" || frog_error $?
-            _scriptPath="$(realpath "$_bashPath"/"$(frog_jq "$_import" ".import.namespaces[].modules[\"$_namespace\"].script")")" || frog_error $?
-            _result="{ \"namespace\": \"$_namespace\", \"operation\": \"$_operation\", \"path\": \"$_scriptPath\", \"operationCfg\": $_opJson }"
-            echo "$_result"
-            return 0
-        fi
-    done
-
-    [[ -z "$_package" ]] &&
+    [[ -z "${_FROG_IMPORTS[$_namespace]}" ]] &&
         frog_error 1 "Invalid namespace $_namespace"
 
-    frog_error 1 "Invalid operation" "${_namespace}::${_operation}"
+    local _packagePrefix _opPrefix
+    _packagePrefix="package.${_FROG_IMPORTS[$_namespace]}"
+    _opPrefix="$_packagePrefix.namespaces.$_namespace.operations.$_operation"
+
+    local -a _paramterNames
+    readarray -t _parameterNames <<< "$(frogcfg_get_value string "$_opPrefix.parameters")" ||
+        frog_error 1 "Invalid operation" "$_namespace::$_operation"
+
+    local _opScript
+    _opScript=""
+
+    local _opFunction
+    _opFunction=""
+
+    echo "$_namespace"  # 0
+    echo "$_operation"  # 1
+    echo "$_opScript"   # 2
+    echo "$_opFunction" # 3
 }
 
 frog_run_operation () {
