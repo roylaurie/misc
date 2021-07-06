@@ -37,8 +37,8 @@ frogcfg_key_index () {
     return 1
 }
 
-logtty () {
-  echo "$@" > "$(tty)"
+frogcfg_has_key () {
+  frogcfg_key_index "$1"
 }
 
 frogcfg_get_value() {
@@ -68,35 +68,14 @@ frogcfg_get_value() {
     fi
 }
 
-frog_error () {
-  echo "$@" > "$(tty)"
-  exit 1
-}
-
-frogcfg_set_key array "package.bullfrog.common.namespaces" "common" "common.stats"
-frogcfg_set_key string "package.bullfrog.common.namespaces.common.desc" "Runs a common bullfrog operation"
-frogcfg_set_key array "package.bullfrog.common.namespaces.common.operations" "version"
-frogcfg_set_key string "package.bullfrog.common.namespaces.common.operations.version.desc" "Displays bullfrog version"
-frogcfg_set_key string "package.bullfrog.common.namespaces.common.stats.desc" "Runs a common bullfrog operation"
-frogcfg_set_key array "package.bullfrog.common.namespaces.common.stats.operations" "default"
-frogcfg_set_key string "package.bullfrog.common.namespaces.common.stats.operations.default.desc" "General statistics"
-frogcfg_set_key array "package.bullfrog.common.namespaces.common.stats.operations.default.parameters" ""
-frogcfg_set_key array "package.bullfrog.common.aliases" "cat dog" "mouse rabbit"
-frogcfg_set_key array "package.bullfrog.common.zaliases" "crt dog" "rouse rabbit"
-
-echo "+++"
-
-declare -a v
-readarray -t v <<< "$(frogcfg_get_value array "package.bullfrog.common.namespaces")"
-echo "out ${v[*]}"
-echo "out1 ${v[1]}"
-
-readarray -t v <<< "$(frogcfg_get_value array "package.bullfrog.common.zaliases")"
-echo "out ${v[*]}"
-echo "out ${v[0]}"
-
-x="$(frogcfg_get_value string "package.bullfrog.common.namespaces.common.desc")"
-echo "x $x"
-
-x="$(frogcfg_get_value string "package.bullfrog.common.namespaces.common.stats.operations.default.desc")"
-echo "x $x"
+frogcfg_set_key array "package.common.namespaces" "common" "common.stats"
+frogcfg_set_key string "package.common.namespaces.common.desc" "Runs a common bullfrog operation"
+frogcfg_set_key array "package.common.namespaces.common.operations" "version"
+frogcfg_set_key string "package.common.namespaces.common.operations.version.desc" "Displays bullfrog version"
+frogcfg_set_key array "package.common.namespaces.common.operations.version.parameters" ""
+frogcfg_set_key string "package.common.namespaces.common.stats.desc" "Runs a common bullfrog operation"
+frogcfg_set_key array "package.common.namespaces.common.stats.operations" "default"
+frogcfg_set_key string "package.common.namespaces.common.stats.operations.default.desc" "General statistics"
+frogcfg_set_key array "package.common.namespaces.common.stats.operations.default.parameters" ""
+frogcfg_set_key array "package.common.aliases" "cat dog" "mouse rabbit"
+frogcfg_set_key array "package.common.zaliases" "crt dog" "rouse rabbit"

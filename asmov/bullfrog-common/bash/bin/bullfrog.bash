@@ -24,8 +24,9 @@ trap frog_error_trap EXIT
 frog_import_builtin
 
 main () {
-    local _cmdline
-    _cmdline=$(frog_parse_cmdline "$@") || frog_error "$?"
+    local -a _cmdline
+    readarray -t _cmdline <<< "$(frog_parse_cmdline "$@")" ||
+        frog_error "$?"
 
     frog_run_operation "$_cmdline"
 }

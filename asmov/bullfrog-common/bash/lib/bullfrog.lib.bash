@@ -34,8 +34,8 @@ set -o allexport -o errexit -o privileged -o pipefail -o nounset
 
 NL=$'\n'
 
-declare -A _FROG_IMPORTS
-_FROG_IMPORTS=()
+declare -A _FROG_PACKAGES
+declare -A _FROG_NAMESPACES
 _FROG_ERROR_CODE=64
 
 frog_script_dir () {
@@ -81,9 +81,11 @@ frog_import_namespace () {
     _filepath="$1"
 
     #TODO
-    local _namespace="bullfrog.common"
+    local _packageNamespace="common"
 
-    _FROG_IMPORTS["$_namespace"]="$(basename realpath "$(dirname "$_filepath")/..")"
+    _FROG_PACKAGES["$_packageNamespace"]="$(realpath "$(dirname "$_filepath")"/..)"
+    _FROG_NAMESPACES["common"]="$_packageNamespace"
+    _FROG_NAMESPACES["common.stats"]="$_packageNamespace"
 }
 
 frog_import_builtin () {
@@ -107,22 +109,6 @@ frog_inarray () {
 
     return 1
 }
-
-##
-# Uses the jq tool to query json for data
-# @param string json
-# @param string query
-# @returns string data
-##
-frog_jq () {
-    local _json _query _result
-    _json="$1"
-    _query="$2"
-    _result="$(echo "$_json" | jq -rc "$_query" 2>&1)" || frog_error "$?" "Unable to parse js query" "$_query" "json> $_json${NL}jq> $_result"
-    echo "$_result"
-}
-
-#$_FROG_CMDLINE_OPTIONS=("help")
 
 ##
 # Parses an entire command entered at the commandline 
@@ -162,17 +148,8 @@ frog_parse_cmdline () {
         _operation="default"
     fi
 
-    local _operationCfg
-    _operationCfg="$(frog_operation_cfg "$_namespace" "$_operation")" || frog_error $?
-
-    #local _parameterJson
-    #_parameterJson="$(frog_parse_parameters "$_operationCfg")"
-
-    #local _result
-    #merge _optionJson and _parameterJson into operationCfg
-    #echo "$_result"
-
-    frog_jq "$_operationCfg" "" || frog_error $?
+    echo "$_namespace"
+    echo "$_operation"
 }
 
 frog_tty () {
@@ -191,20 +168,27 @@ frog_tty () {
 frog_operation_cfg () {
     local _namespace _operation
     _namespace="$1"
-    _operation="${2:-"default"}"
+    _operation="$2"
 
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
 
-    [[ -z "${_FROG_IMPORTS["$_namespace"]}" ]] &&
+    local _packageNamespace
+    _packageNamespace="${_FROG_NAMESPACES["$_namespace"]:-}" ||
         frog_error 1 "Invalid namespace $_namespace"
 
+    [[ -z "$_packageNamespace" ]] &&
+        frog_error 1 "Invalid namespacse $_namespace"
+
     local _packagePrefix _opPrefix
-    _packagePrefix="package.${_FROG_IMPORTS[$_namespace]}"
+    _packagePrefix="package.$_packageNamespace"
     _opPrefix="$_packagePrefix.namespaces.$_namespace.operations.$_operation"
 
+    frogcfg_has_key "$_opPrefix.desc" ||
+        frog_error 1 "Invalid operation" "$_namespace::$_operation"
+
     local -a _paramterNames
-    readarray -t _parameterNames <<< "$(frogcfg_get_value string "$_opPrefix.parameters")" ||
+    readarray -t _parameterNames <<< "$(frogcfg_get_value array "$_opPrefix.parameters")" ||
         frog_error 1 "Invalid operation" "$_namespace::$_operation"
 
     local _opScript
@@ -318,6 +302,8 @@ _FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"
 # shellcheck source=./builtins.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/builtins.lib.bash
 
+# shellcheck source=./frogcfg.lib.bash
+source "$_FROG_COMMON_BASHLIB_PATH"/frogcfg.lib.bash
 # shellcheck source=./frogsys.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/frogl.lib.bash
 # shellcheck source=./frogsh.lib.bash

@@ -1,10 +1,10 @@
 #!/bin/bash
 set -o allexport -o errexit -o privileged -o pipefail -o nounset
 
-NC=$'\n'
-str="alpha${NC}bravo${NC}charlie"
-echo "${str}"
+declare -A arr
+foo="foobar"
+arr["$foo"]="cat"
 
-declare -a arr
-mapfile -t arr <<< "$str"
-echo "${#arr[@]}"
+[[ -z "${arr[$foo]}" ]] && echo "no exist"
+
+echo "${arr[$foo]}"
