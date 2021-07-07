@@ -1,27 +1,43 @@
 {
     "title": "config",
     "type": "object",
+    "additionalProperties": false,
     "properties": {
         "package": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
-                "title": { "type": "string" },
+                "name": { "type": "string" },
                 "namespaces": {
                     "type": "object",
+                    "propertyNames": {
+                        "pattern": "^[a-z0-9\\.]+$"
+                    },
                     "additionalProperties": {
                         "title": "namespace",
                         "type": "object",
+                        "additionalProperties": false,
                         "properties": {
                             "desc": { "type": "string" },
                             "operations": {
                                 "type": "object",
-                                "properties": {
-                                    "desc": { "type": "string" },
-                                    "parameters": {
-                                        "type": "object",
-                                        "additionalProperties": {
-                                            "title": "parameter",
-                                            "type": "string"
+                                "propertyNames": {
+                                    "pattern": "^[a-z0-9\\.]+$"
+                                },
+                                "additionalProperties": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "desc": { "type": "string" },
+                                        "parameters": {
+                                            "type": "object",
+                                            "propertyNames": {
+                                                "pattern": "^[a-z0-9\\.]+$"
+                                            },
+                                            "additionalProperties": {
+                                                "title": "parameter",
+                                                "type": "string"
+                                            }
                                         }
                                     }
                                 }

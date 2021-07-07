@@ -252,7 +252,7 @@ frog_module_function() {
     _namespace="$1"
     _operation="$2"
 
-    echo "op_${_namespace//\./_}_${_operation}"
+    echo "op_${_namespace//\./_}_${_operation//\./_}"
 }
 
 frog_run_operation () {

@@ -1,4 +1,4 @@
-'use strict';
+'use strict'; // ecma.version 2021
 
 import Ajv from 'ajv'
 
@@ -6,6 +6,7 @@ function main() {
     // script arguments: json schema filename, json data filename, bash output filename
 
     // load json schema into ajv
+    let ajv = new Ajv();
 
     // validate json data against ajv
 
