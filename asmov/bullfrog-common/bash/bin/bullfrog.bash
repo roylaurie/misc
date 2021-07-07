@@ -19,8 +19,6 @@ source "$( echo "$(
     _script_dir
 )" )"/../lib/bullfrog.lib.bash
 
-trap frog_error_trap EXIT
-
 frog_import_builtin
 
 main () {

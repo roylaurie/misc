@@ -206,7 +206,7 @@ frog_operation_cfg () {
     readarray -t _parameterNames <<< "$_result"
 
     local _packagePath
-    _packagePath="${_FROG_PACKAGES["$_namespace"]}"
+    _packagePath="${_FROG_PACKAGES["$_packageNamespace"]}"
 
     local _opScript
     _opScript="$(frog_module_path "$_packagePath" "$_namespace")" || frog_error
@@ -313,11 +313,7 @@ _frog_print_error () {
     }
 }
 
-frog_error_trap () {
-    exit 1
-}
-
-_FROG_COLOR_NAMES=( end black red green yellow blue magenta cyan lightgray gray lightred lightgreen lightyellow lightblue lightmagenta lightcyan white  ) 
+_FROG_COLOR_NAMES=( end black red green yellow blue magenta cyan lightgray gray lightred lightgreen lightyellow lightblue lightmagenta lightcyan white  )
 _FROG_COLORS=( 0 30 31 32 33 34 35 36 37 90 91 92 93 94 95 96 97 )
 _FROG_STYLE_NAMES=( normal bold faint italic underline )
 _FROG_STYLES=( 0 1 2 3 4 )
@@ -350,15 +346,6 @@ frog_color () {
     _style="${_style};"
 
     echo "\\e[${_style}${_color}m"
-}
-
-frog_exec_operation () {
-    local _namespace _operation
-    _namespace="$1"
-    _operation="$2"
-
-    #source file
-    #$(${_opFunction} ${_parameters})
 }
 
 _FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"  # the base dirtory of the package
