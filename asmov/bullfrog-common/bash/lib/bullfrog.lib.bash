@@ -32,6 +32,7 @@
 #  - nounset: throw error on unset variable usage
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
+# shellcheck disable=SC2034  # unused
 NL=$'\n'
 
 declare -A _FROG_PACKAGES
@@ -76,32 +77,35 @@ frog_common_skeleton_path () {
     echo "$_FROG_COMMON_SKELETON_PATH"
 }
 
+FROG_PACKAGE_NAMESPACE=""
+
 frog_import_namespace () {
     local _filepath
     _filepath="$1"
 
-    local _packageNamespace
+
     # shellcheck disable=SC1090
-    _packageNamespace="$(source "$_filepath")"
+    source "$_filepath"
+    local _packageNamespace="${FROG_PACKAGE_NAMESPACE:-}"
+    #unset FROG_PACKAGE_NAMESPACE
 
     local -a _namespaces
-    readarray -t _namespaces <<< "$(frog_get_value array "package")" ||
-        frog_error "$?" "Import config is invalid for" "$_filepath" "frog_import_namespace"
+    readarray -t _namespaces <<< "$(frogcfg_get_value array "package.$_packageNamespace.namespaces")"  # errors will be masked, but reported
+    [[ -z "$_namespaces" ]] &&
+        frog_error 1 "Import config is invalid for" "$_filepath" "frog_import_namespace"
 
-    _FROG_PACKAGES["$_packageNamespace"]="$(realpath "$(dirname "$_filepath")"/..)"
+    _FROG_PACKAGES["$_packageNamespace"]="$(realpath "$(dirname "$_filepath")"/../..)"
 
     for _namespace in "${_namespaces[@]}"; do
-      _FROG_NAMESPACES["$_namespace"]="$_packageNamespace"
+        _FROG_NAMESPACES["$_namespace"]="$_packageNamespace"
     done
-    #_FROG_NAMESPACES["common"]="$_packageNamespace"
-    #_FROG_NAMESPACES["common.stats"]="$_packageNamespace"
 }
 
 frog_import_builtin () {
     local _namespaceFilepath
 
     for _dirname in "${_FROG_COMMON_BUILTIN_PACKAGES[@]}"; do
-        _namespaceFilepath="$(realpath "$_FROG_COMMON_DIST_PATH/$_dirname"/json/namespace.json 2>/dev/null)" || continue
+        _namespaceFilepath="$(realpath "$_FROG_COMMON_DIST_PATH/$_dirname"/bash/cfg/namespace.cfg.bash 2>/dev/null)" || continue
         [[ -f "$_namespaceFilepath" ]] &&
             frog_import_namespace "$_namespaceFilepath"
     done
@@ -196,16 +200,19 @@ frog_operation_cfg () {
     frogcfg_has_key "$_opPrefix.desc" ||
         frog_error 1 "Invalid operation" "$_namespace::$_operation"
 
+    local _result
+    _result="$(frogcfg_get_value array "$_opPrefix.parameters")" || frog_error
     local -a _paramterNames
-    readarray -t _parameterNames <<< "$(frogcfg_get_value array "$_opPrefix.parameters")" ||
-        frog_error 1 "Invalid operation" "$_namespace::$_operation"
+    readarray -t _parameterNames <<< "$_result"
+
+    local _packagePath
+    _packagePath="${_FROG_PACKAGES["$_namespace"]}"
 
     local _opScript
-    _opScript="$(frog_module_path "$_packagePrefix" "$_namespace")" ||
-        frog_error 1 "Module script does not exist for" "$_namespace" "frog_operation_cfg"
+    _opScript="$(frog_module_path "$_packagePath" "$_namespace")" || frog_error
 
     local _opFunction
-    _opFunction="$(frog_module_function "$_namespace" "$_operation")"
+    _opFunction="$(frog_module_function "$_namespace" "$_operation")" || frog_error
 
     echo "$_namespace"  # 0
     echo "$_operation"  # 1
@@ -225,7 +232,7 @@ frog_module_path () {
     _namespace="$2"
 
     local _namepath _filepath
-    _namepath="${$_namespace/\./\/}.module.bash"
+    _namepath="${_namespace//\./\/}.module.bash"
     _filepath="$_packagePath/bash/module/$_namepath"
 
     [[ -f "$_filepath" ]] ||
@@ -242,10 +249,10 @@ frog_module_path () {
 # @returns 0: string functionName
 frog_module_function() {
     local _namespace _operation
-    _namespace="$2"
-    _operation="$1"
+    _namespace="$1"
+    _operation="$2"
 
-    echo "${$_namespace/\./_}_$_operation"
+    echo "op_${_namespace//\./_}_${_operation}"
 }
 
 frog_run_operation () {
@@ -254,9 +261,9 @@ frog_run_operation () {
     _operation="$2"
     _parameters="${3:-}"
 
-    local -a _opCfg
-    readarray -t _opCfg <<< "$(frog_operation_cfg "$_namespace" "$_operation")" ||
-        frog_error "$?" "Unable to load config for" "$_namespace::$_operation" "frog_run_operation"
+    local -a _result _opCfg
+    _result="$(frog_operation_cfg "$_namespace" "$_operation")"
+    readarray -t _opCfg <<< "$_result"
 
     local _opScript _opFunction
     _opScript="${_opCfg[2]}"
@@ -268,34 +275,46 @@ frog_run_operation () {
 }
 
 frog_error () {
-    [[ "$1" -eq "$_FROG_ERROR_CODE" ]] && exit "$_FROG_ERROR_CODE"
+    [[ -z "${1:-}" ]] &&
+        exit "$_FROG_ERROR_CODE"
 
-    local _exitCode _errorMessage _errorDetails="" _subject="" _subjectStr=""
+    # only frog_error() should throw its own error code, don't report twice
+    [[ "$1" -eq "$_FROG_ERROR_CODE" ]] &&
+        exit "$_FROG_ERROR_CODE"
+
+    local _exitCode _errorMessage _subject _errorDetails
     _exitCode="$1"
     _errorMessage="${2-}"
-    [[ -n "${3-}" ]] && _subject="$3" && _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
-    [[ -n "${4-}" ]] && _errorDetails="$4"
+    _subject="${3-}"
+    _errorDetails="${4-}"
 
-    1>&2 echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}"
+    _frog_print_error "$_exitCode" "$_errorMessage" "$_subject" "$_errorDetails"
+
+    exit "$_FROG_ERROR_CODE"
+}
+
+_frog_print_error () {
+    local _exitCode _errorMessage _subject _errorDetails
+    _exitCode="$1"
+    _errorMessage="${2-}"
+    _subject="${3-}"
+    _errorDetails="${4-}"
+
+    local _subjectStr
+    _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
+
+    echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}" >&2
     [ -n "${_errorDetails}" ] && {
         local -a _lines
         mapfile -t _lines <<< "$_errorDetails"
         for _line in "${_lines[@]}"; do
-          1>&2 echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_line}$(frog_color end)"
+          echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_line}$(frog_color end)" >&2
         done
     }
-
-    exit "$_FROG_ERROR_CODE"
-
 }
 
 frog_error_trap () {
-    local _exitCode="$?"
-    if [ "$_exitCode" -eq "0" ] || [ "$_exitCode" -eq "$_FROG_ERROR_CODE" ]; then
-        exit $_exitCode
-    fi
-
-    frog_error "$_exitCode" "exited with error code of" "$_exitCode"
+    exit 1
 }
 
 _FROG_COLOR_NAMES=( end black red green yellow blue magenta cyan lightgray gray lightred lightgreen lightyellow lightblue lightmagenta lightcyan white  ) 

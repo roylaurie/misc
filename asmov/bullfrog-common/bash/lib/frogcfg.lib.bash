@@ -38,7 +38,7 @@ frogcfg_key_index () {
 }
 
 frogcfg_has_key () {
-  frogcfg_key_index "$1"
+  frogcfg_key_index "$1" > /dev/null
 }
 
 frogcfg_get_value() {
@@ -47,14 +47,16 @@ frogcfg_get_value() {
     _key="$2"
 
     local _index _offset _valueType _start _size
-    _index="$(frogcfg_key_index "$_key")" || frog_error 1 "Cannot find config key" "$_key"
+    _index="$(frogcfg_key_index "$_key")" ||
+        frog_error 1 "Cannot find config key" "$_key" "frogcfg_get_value"
+
     read -r -a _offset <<< "${_FROGCFG_OFFSETS[$_index]}"
     _valueType="${_offset[0]}"
     _start="${_offset[1]}"
     _size="${_offset[2]}"
 
     [[ "$_type" != "$_valueType" ]] &&
-        frog_error 1 "Wrong data type specified for config key" "$_key" "$_type"
+        frog_error 1 "Wrong data type specified for config key/type " "$_key / $_type" "frogcfg_get_value"
 
     if [[ "$_type" = "array" ]]; then
         local -a _result
@@ -68,3 +70,8 @@ frogcfg_get_value() {
     fi
 }
 
+frogcfg_debug () {
+    frog_tty "frogCFG keys: ${_FROGCFG_KEYS[*]}"
+    frog_tty "frogCFG values: ${_FROGCFG_VALUES[*]}"
+    frog_tty "frogCFG offsets: ${_FROGCFG_OFFSETS[*]}"
+}

@@ -24,11 +24,10 @@ trap frog_error_trap EXIT
 frog_import_builtin
 
 main () {
+    local _result
+    _result="$(frog_parse_cmdline "$@")" || frog_error
     local -a _cmdline
-    readarray -t _cmdline <<< "$(frog_parse_cmdline "$@")" ||
-        frog_error "$?"
-
-    echo "out ${_cmdline[*]}"
+    readarray -t _cmdline <<< "$_result"
 
     frog_run_operation "${_cmdline[@]}"
 }
