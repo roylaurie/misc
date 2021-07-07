@@ -89,10 +89,10 @@ frog_import_namespace () {
     local _packageNamespace="${FROG_PACKAGE_NAMESPACE:-}"
     #unset FROG_PACKAGE_NAMESPACE
 
+    local _result
+    _result="$(frogcfg_get_value array "package.$_packageNamespace.namespaces")" || frog_error
     local -a _namespaces
-    readarray -t _namespaces <<< "$(frogcfg_get_value array "package.$_packageNamespace.namespaces")"  # errors will be masked, but reported
-    [[ -z "$_namespaces" ]] &&
-        frog_error 1 "Import config is invalid for" "$_filepath" "frog_import_namespace"
+    readarray -t _namespaces <<< "$_result"
 
     _FROG_PACKAGES["$_packageNamespace"]="$(realpath "$(dirname "$_filepath")"/../..)"
 
