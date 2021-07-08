@@ -105,14 +105,9 @@ function logobj(subject, obj) {
 }
 
 async function main() {
-    // script arguments: json schema filename, json data filename, bash output filename
-
     // validate json data against ajv
     const ajv = await loadSchema(SCHEMA_NAME, JSON_SCHEMA_FILEPATH);
     const data = await validateData(ajv, SCHEMA_NAME, JSON_DATA_FILEPATH);
-
-    // define a js object representation of the json schema using either ajv or json parsing
-    const schema = ajv.getSchema(SCHEMA_NAME).schema
 
     const packageNamespace = data.package.name;
     // build the key-value config based on data
