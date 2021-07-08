@@ -36,13 +36,22 @@
                                             },
                                             "additionalProperties": {
                                                 "title": "parameter",
-                                                "type": "string"
+                                                "type": "object",
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                    "desc": { "type": "string" },
+                                                    "required": { "type": "boolean" },
+                                                    "position": { "type": "number" }
+                                                },
+                                                "required": [ "desc", "required", "position" ]
                                             }
                                         }
-                                    }
+                                    },
+                                    "required": [ "desc", "parameters" ]
                                 }
                             }
-                        }
+                        },
+                        "required": [ "desc", "operations" ]
                     }
                 },
                 "aliases": {

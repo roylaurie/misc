@@ -1,6 +1,6 @@
 {
     "package": {
-        "name": "bullfrog.common",
+        "name": "common",
         "namespaces": {
             "common": {
                 "desc": "Runs a common bullfrog operation.",
@@ -8,14 +8,20 @@
                     "version": {
                         "desc": "Displays bullfrog version",
                         "parameters": {
+                            "format": {
+                                "desc": "Specifies the format",
+                                "required": false,
+                                "position": 0
+                            }
                         }
                     }
                 }
             },
             "common.stats": {
+                "desc": "Statistics and metrics",
                 "operations": {
                     "default": {
-                        "desc": "General statistics",
+                        "desc": "System statistics",
                         "parameters": {
                         }
                     }
