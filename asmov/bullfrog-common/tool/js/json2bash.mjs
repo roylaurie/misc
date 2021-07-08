@@ -3,11 +3,9 @@
 
 import fs from 'fs/promises';
 import util from 'util';
+import process from 'process';
 
 import Ajv from 'ajv';
-
-const JSON_SCHEMA_FILEPATH = '../../json/schema/cfg/namespace.cfg.schema.json'
-const JSON_DATA_FILEPATH = '../../json/cfg/namespace.cfg.json'
 
 const SCHEMA_NAME="namespace";
 
@@ -21,13 +19,13 @@ async function loadSchema(name, filepath) {
 }
 
 async function validateData(ajv, name, filepath) {
+    const jsonData = JSON.parse((await fs.readFile(filepath)).toString());
     const validateFunc = ajv.getSchema(name);
-    const jsondata = JSON.parse(await fs.readFile(filepath));
-    if (!validateFunc(jsondata)) {
+    if (!validateFunc(jsonData)) {
         throw new Error("Unable to parse invalid JSON. " + inspect(validateFunc.errors));
     }
 
-    return jsondata;
+    return jsonData;
 }
 
 function buildKV(data) {
@@ -58,8 +56,17 @@ function buildKV(data) {
                 const parameterData = operationData.parameters[parameter];
                 prefix += 'parameters.' + parameter + '.';
                 kv[prefix + 'desc'] = parameterData.desc;
-                kv[prefix + 'position'] = parameterData.position.toString();
                 kv[prefix + 'required'] = parameterData.required.toString();
+
+                if (typeof parameterData.position !== 'undefined') {
+                    kv[prefix + 'position'] = parameterData.position.toString();
+                }
+                if (typeof parameterData.default !== 'undefined') {
+                    kv[prefix + 'default'] = parameterData.default;
+                }
+                if (typeof parameterData.enum !== 'undefined') {
+                    kv[prefix + 'enum'] = parameterData.enum;
+                }
             }
         }
     }
@@ -105,9 +112,18 @@ function logobj(subject, obj) {
 }
 
 async function main() {
+    if (process.argv.length < 4) {
+        console.log('Usage: json2bash.mjs <json schema filepath> <json data filepath>')
+        process.exit(1);
+        return;
+    }
+
+    const jsonSchemaFilepath = process.argv[2];
+    const jsonDataFilepath = process.argv[3];
+
     // validate json data against ajv
-    const ajv = await loadSchema(SCHEMA_NAME, JSON_SCHEMA_FILEPATH);
-    const data = await validateData(ajv, SCHEMA_NAME, JSON_DATA_FILEPATH);
+    const ajv = await loadSchema(SCHEMA_NAME, jsonSchemaFilepath);
+    const data = await validateData(ajv, SCHEMA_NAME, jsonDataFilepath);
 
     const packageNamespace = data.package.name;
     // build the key-value config based on data

@@ -40,10 +40,21 @@
                                                 "additionalProperties": false,
                                                 "properties": {
                                                     "desc": { "type": "string" },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [ "string", "number", "boolean" ]
+                                                    },
+                                                    "enum": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    },
                                                     "required": { "type": "boolean" },
-                                                    "position": { "type": "number" }
+                                                    "position": { "type": "number" },
+                                                    "default": { "type": "string" }
                                                 },
-                                                "required": [ "desc", "required", "position" ]
+                                                "required": [ "type", "desc", "required" ]
                                             }
                                         }
                                     },
