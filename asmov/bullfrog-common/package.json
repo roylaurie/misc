@@ -4,8 +4,8 @@
   "description": "A library for creating bash command-line toolkits.",
   "main": "bash/bin/bullfrog.bash",
   "scripts": {
+    "compile": "./tool/bin/compile.bash",
     "build": "./tool/build.bash",
-    "frog": "./bash/bin/bullfrog.bash"
   },
   "files": [
     "dist/bullfrog-common/bash",

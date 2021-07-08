@@ -9,4 +9,8 @@ jq -c < ./json/schema/cfg/namespace.cfg.json > ./json/schema/cfg/namespace.cfg.s
 jq -c < ./json/cfg/namespace.cfg.json > ./json/cfg/namespace.cfg.min.json
 
 # validate the minified namespace configuration against the minified schema
-ajv -s ./json/schema/cfg/namespace.cfg.schema.min.json -d ./json/namespace.cfg.min.json
+ajv -s ./json/schema/cfg/namespace.cfg.schema.min.json -d ./json/cfg/namespace.cfg.min.json
+
+# convert json into the frogcfg bash script
+./tool/js/json2bash.mjs ./json/schema/cfg/namespace.cfg.schema.min.json ./json/cfg/namespace.cfg.min.json
+
