@@ -30,26 +30,7 @@ async function validateData(ajv, name, filepath) {
     return jsondata;
 }
 
-function inspect(obj) {
-    return util.inspect(obj, false, null, true);
-}
-
-function logobj(subject, obj) {
-    console.log(subject, util.inspect(obj, false, null, true));
-}
-
-async function main() {
-    // script arguments: json schema filename, json data filename, bash output filename
-
-    // validate json data against ajv
-    const ajv = await loadSchema(SCHEMA_NAME, JSON_SCHEMA_FILEPATH);
-    const data = await validateData(ajv, SCHEMA_NAME, JSON_DATA_FILEPATH);
-    //logobj('data', data);
-
-    // define a js object representation of the json schema using either ajv or json parsing
-    const schema = ajv.getSchema(SCHEMA_NAME).schema
-    //logobj('schema ', schema);
-
+function buildKV(data) {
     // define a key-value array that accepts either strings or arrays of strings as values. namespace is key.
     const kv = {};
 
@@ -84,9 +65,11 @@ async function main() {
     }
 
     //logobj('kv', kv);
+    return kv;
+}
 
-    // write the skeleton header to the output bash file
-    console.log('#!/bin/bash\nset -o allexport -o errexit -o privileged -o pipefail -o nounset\n');
+function printBashCfg(kv) {
+    const lines = [];
 
     // for each key-value pair: write a bash config statement to the bash output file, based on type
     for (const key in kv) {
@@ -104,11 +87,42 @@ async function main() {
 
         console.log(line);
     }
+}
 
-    // write the skeleton footer to the output bash file
+function printBashHeader() {
+    console.log('#!/bin/bash\nset -o allexport -o errexit -o privileged -o pipefail -o nounset\n');
+}
+
+function printBashFooter(packageNamespace) {
     console.log('\nFROG_PACKAGE_NAMESPACE="' + packageNamespace + '"');
+}
 
-    // end
+function inspect(obj) {
+    return util.inspect(obj, false, null, true);
+}
+
+function logobj(subject, obj) {
+    console.log(subject, util.inspect(obj, false, null, true));
+}
+
+async function main() {
+    // script arguments: json schema filename, json data filename, bash output filename
+
+    // validate json data against ajv
+    const ajv = await loadSchema(SCHEMA_NAME, JSON_SCHEMA_FILEPATH);
+    const data = await validateData(ajv, SCHEMA_NAME, JSON_DATA_FILEPATH);
+
+    // define a js object representation of the json schema using either ajv or json parsing
+    const schema = ajv.getSchema(SCHEMA_NAME).schema
+
+    const packageNamespace = data.package.name;
+    // build the key-value config based on data
+    const kv = buildKV(data);
+
+    // write bash src to output
+    printBashHeader();
+    printBashCfg(kv);
+    printBashFooter(packageNamespace);
 }
 
 main();
