@@ -3,4 +3,5 @@
 .idea
 dist
 bullfrog
+node_modules
 
