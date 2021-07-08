@@ -12,7 +12,7 @@ const JSON_DATA_FILEPATH = '../../json/cfg/namespace.cfg.json'
 const SCHEMA_NAME="namespace";
 
 async function loadSchema(name, filepath) {
-    const jsonSchema = JSON.parse(await fs.readFile(filepath));
+    const jsonSchema = JSON.parse((await fs.readFile(filepath)).toString());
 
     // load json schema into ajv
     const ajv = new Ajv();
@@ -64,7 +64,6 @@ function buildKV(data) {
         }
     }
 
-    //logobj('kv', kv);
     return kv;
 }
 
@@ -125,4 +124,4 @@ async function main() {
     printBashFooter(packageNamespace);
 }
 
-main();
+await main();
