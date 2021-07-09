@@ -148,14 +148,20 @@ frog_inarray () {
 #    3: tabarray parameter values }
 ##
 frog_parse_cmdline () {
+    local -A _options
+    _options[a]="common" # application package namespace
+    _options[c]="default" # config profile name
+    _options[f]="false" # force
+    _options[x]="false" # debug
+
     local _o
-    while getopts c:fs:x _o; do
+    while getopts a:c:fx _o; do
         case "$_o" in
-            c) ;;
-            f) ;;
-            s) ;;
-            x) ;;
-            [?]) frog_tty "targ $OPTARG";;
+            a) _options[a]="$OPTARG" ;;
+            c) _options[c]="$OPTARG" ;;
+            f) _options[f]="true" ;;
+            x) _options[x]="true" ;;
+            *) frog_error 1 "Invalid option" "$_o" "frog_parse_cmdline" ;;
         esac
     done
 
@@ -209,6 +215,28 @@ frog_parse_cmdline () {
     echo "$_operation"
     frog_join "${_parameterNames[@]}"
     frog_join "${_parameterValues[@]}"
+    frog_join "${!_options[@]}" # keys
+    frog_join "${_options[@]}" # values
+}
+
+frog_process_options () {
+    local _optionNames _optionValues
+    IFS=$'\t' read -ra _optionNames <<< "$1"
+    IFS=$'\t' read -ra _optionValues <<< "$2"
+
+    frogcfg_set_key array "options" "a" "c" "f" "x"
+
+    for (( i=0, n="${#_optionNames[@]}"; i < n; ++i )); do
+        local _opt="${_optionNames[$i]}"
+        local _val="${_optionValues[$i]}"
+        case "$_opt" in
+            a) frogcfg_set_key string "options.app" "$_val" ;;
+            c) frogcfg_set_key string "options.config" "$_val" ;;
+            f) frogcfg_set_key string "options.force" "true" ;;
+            x) frogcfg_set_key string "options.debug" "true" ;;
+            *) frog_error 1 "Unknown option" "$_opt" "frog_process_options" ;;
+        esac
+    done
 }
 
 ##
@@ -378,8 +406,9 @@ _frog_print_error () {
     _subject="${3-}"
     _errorDetails="${4-}"
 
-    local _subjectStr
-    _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
+    local _subjectStr=""
+    [[ -n "$_subject" ]] &&
+        _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
 
     echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}" >&2
     [ -n "${_errorDetails}" ] && {

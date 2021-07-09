@@ -18,12 +18,15 @@ main () {
     local -a _cmdline
     readarray -t _cmdline <<< "$_result"
 
-    local _namespace _operation _tabarrayParamNames _tabarrayParamValues
+    local _namespace _operation _tabarrayParamNames _tabarrayParamValues _tabarrayOptionNames _tabarrayOptionValues
     _namespace="${_cmdline[0]}"
     _operation="${_cmdline[1]}"
     _tabarrayParamNames="${_cmdline[2]:-}"
     _tabarrayParamValues="${_cmdline[3]:-}"
+    _tabarrayOptionNames="${_cmdline[4]:-}"
+    _tabarrayOptionValues="${_cmdline[5]:-}"
 
+    frog_process_options "$_tabarrayOptionNames" "$_tabarrayOptionValues"
     frog_run_operation "$_namespace" "$_operation" "$_tabarrayParamNames" "$_tabarrayParamValues"
 }
 
