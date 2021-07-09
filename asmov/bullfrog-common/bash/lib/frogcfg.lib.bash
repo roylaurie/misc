@@ -71,7 +71,17 @@ frogcfg_get_value() {
 }
 
 frogcfg_debug () {
-    frog_tty "frogCFG keys: ${_FROGCFG_KEYS[*]}"
-    frog_tty "frogCFG values: ${_FROGCFG_VALUES[*]}"
-    frog_tty "frogCFG offsets: ${_FROGCFG_OFFSETS[*]}"
+    frog_option_debug || return 0
+
+    for (( _i=0, _n=${#_FROGCFG_KEYS[@]} ; _i < _n ; ++_i )); do
+        local _key="${_FROGCFG_KEYS[$_i]}" _valueType
+        local -a _offset
+        read -ra _offset <<< "${_FROGCFG_OFFSETS[$_i]}"
+        _valueType="${_offset[0]}"
+
+        [[ "$_valueType" = "string" ]] &&
+            frog_debug "CFG" "$_key" "= $(frogcfg_get_value string "$_key")"
+    done
+
+    return 0
 }

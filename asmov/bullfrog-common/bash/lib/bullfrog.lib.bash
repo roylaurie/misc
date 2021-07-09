@@ -38,7 +38,7 @@ NL=$'\n'
 ##
 # Retrieves the real absolute directory path for the calling script.
 #
-# @returns 1: failure, 0: success { string dirpath }
+# @returns 1: error, 0: success { string dirpath }
 ##
 frog_script_dir () {
     realpath "$(dirname "${BASH_SOURCE[0]}")"
@@ -76,7 +76,7 @@ FROG_PACKAGE_NAMESPACE=""
 # The config script should re-define FROG_PACKAGE_NAMESPACE as well, for processing.
 #
 # @param string filepath The path of the namespace.cfg.bash file for this package.
-# @returns 1: failure, 0: success
+# @returns 1: error, 0: success
 ##
 frog_import_package () {
     local _filepath
@@ -101,7 +101,7 @@ frog_import_package () {
 ##
 # Finds any official bullfrog- packages installed in the same prefix and imports them, if possible.
 #
-# @returns 1: failure, 0: success
+# @returns 1: error, 0: success
 ##
 frog_import_builtins () {
     local _namespaceFilepath
@@ -141,7 +141,7 @@ frog_inarray () {
 # Performs basic data validation based on the operation's imported namespace configuration.
 #
 # @param ... cmdline The arguments as passed to the command-line ($@)
-# @returns 1: failure, 0: success {
+# @returns 1: error, 0: success {
 #    0: string namespace
 #    1: string operation
 #    2: tabarray parameter names
@@ -153,15 +153,18 @@ frog_parse_cmdline () {
     _options[c]="default" # config profile name
     _options[f]="false" # force
     _options[x]="false" # debug
+    _options[X]="false" # bash debug
 
     local _o
-    while getopts a:c:fx _o; do
+    while getopts a:c:fxX _o 2> /dev/null; do
         case "$_o" in
-            a) _options[a]="$OPTARG" ;;
-            c) _options[c]="$OPTARG" ;;
-            f) _options[f]="true" ;;
-            x) _options[x]="true" ;;
-            *) frog_error 1 "Invalid option" "$_o" "frog_parse_cmdline" ;;
+            a)  _options[a]="$OPTARG" ;;
+            c)  _options[c]="$OPTARG" ;;
+            f)  _options[f]="true" ;;
+            x)  _options[x]="true" ;;
+            X)  _options[X]="true" ;;
+            *)  local _last=$(( OPTIND - 1 ))
+                frog_error 1 "Illegal option" "${!_last}" "frog_parse_cmdline" ;;
         esac
     done
 
@@ -230,11 +233,17 @@ frog_process_options () {
         local _opt="${_optionNames[$i]}"
         local _val="${_optionValues[$i]}"
         case "$_opt" in
-            a) frogcfg_set_key string "options.app" "$_val" ;;
-            c) frogcfg_set_key string "options.config" "$_val" ;;
-            f) frogcfg_set_key string "options.force" "true" ;;
-            x) frogcfg_set_key string "options.debug" "true" ;;
-            *) frog_error 1 "Unknown option" "$_opt" "frog_process_options" ;;
+            a)  frogcfg_set_key string "options.app" "$_val"
+                _FROG_OPTION_APP="$_val" ;;
+            c)  frogcfg_set_key string "options.config" "$_val"
+                _FROG_OPTION_CONFIG="$_val" ;;
+            f)  frogcfg_set_key string "options.force" "$_val"
+                [[ "$_val" = "true" ]] && _FROG_OPTION_FORCE=1 ;;
+            x)  frogcfg_set_key string "options.debug" "$_val"
+                [[ "$_val" = "true" ]] && _FROG_OPTION_DEBUG=1 ;;
+            X)  frogcfg_set_key string "options.bash.debug" "$_val"
+                [[ "$_val" = "true" ]] && _FROG_OPTION_BASH_DEBUG=1 ;;
+            *)  frog_error 1 "Unknown option" "$_opt" "frog_process_options" ;;
         esac
     done
 }
@@ -245,7 +254,7 @@ frog_process_options () {
 # To split back into a normal array, use: IFS=$'\t' read -ar <<< "$tabarray"
 #
 # @param array data
-# @returns 1: failure, 0: success { tabarray }
+# @returns 1: error, 0: success { tabarray }
 ##
 frog_join () {
     local IFS=$'\t'
@@ -255,21 +264,31 @@ frog_join () {
 ##
 # Outputs a debugging message to the tty device (typically /dev/tty)
 #
+# @param string subject
 # @param ... values to be output
-# @returns 1: failure, 0: success
+# @returns 1: error, 0: success
 ##
-frog_tty () {
-    local _a="$*" _t
-    _t="$( echo "$(date +%s).$(date +%N)" | bc)"
-    echo "[TTY $_t] $_a" > "$(tty)"
+frog_debug () {
+    [[ $_FROG_OPTION_DEBUG -eq 0 ]] && return 0
+
+    local _time _tty _subject _params
+    _time="$( echo "$(date +%s).$(date +%N)" | bc)"
+    _tty="$(tty)"
+    _subject="$1"
+    shift && _params="$*"
+
+    echo -en "\\e[37m[DEBUG $_time]  \\e[36m" > "$_tty"
+    echo -n "$_params" > "$_tty"
+    echo -e "\\e[0m" > "$_tty"
 }
+
 
 ##
 # Retrieves pertinent configuration data for making calls to the namespace/operation specified.
 #
 # @param string namespace
 # @param string? operation
-# @returns 1: failure, 0: success {
+# @returns 1: error, 0: success {
 #    0: string namespace
 #    1: string operation
 #    2: string opScript The filepath to the module script for this operation
@@ -342,7 +361,7 @@ frog_module_path () {
 #
 # @param string namespace
 # @param string operation
-# @returns 1: failure, 0: success { string functionName }
+# @returns 1: error, 0: success { string functionName }
 frog_module_function() {
     local _namespace _operation
     _namespace="$1"
@@ -377,6 +396,7 @@ frog_run_operation () {
 
     # shellcheck disable=SC1090
     source "$_opScript"
+    frog_option_bash_debug && set -x
     $_opFunction "$_paramNames" "$_paramValues"
 }
 
@@ -455,6 +475,34 @@ frog_color () {
     echo "\\e[${_style}${_color}m"
 }
 
+frog_option_app() {
+    echo "$_FROG_OPTION_APP"
+}
+
+frog_option_config() {
+    echo "$_FROG_OPTION_CONFIG"
+}
+
+##
+# Determines whethere the -f[orce] option is enabled or not.
+#
+# @returns 1: force disabled, 0: force enabled
+##
+frog_option_force () {
+    [[ $_FROG_OPTION_FORCE -eq 1 ]] && return 0
+    return 1
+}
+
+frog_option_debug () {
+    [[ $_FROG_OPTION_DEBUG -eq 1 ]] && return 0
+    return 1
+}
+
+frog_option_bash_debug () {
+    [[ $_FROG_OPTION_BASH_DEBUG -eq 1 ]] && return 0
+    return 1
+}
+
 _FROG_ERROR_CODE=64
 
 _FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"  # the base dirtory of the package
@@ -468,6 +516,12 @@ _FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"  # templa
 
 _FROG_NAMESPACE_PATTERN='^([a-z0-9]+\.?)*[a-z0-9]+$'
 _FROG_PARAMETER_PATTERN='^--([a-z0-9]+\.?)*[a-z0-9]+$'
+
+_FROG_OPTION_APP="common"
+_FROG_OPTION_CONFIG="default"
+_FROG_OPTION_FORCE=0
+_FROG_OPTION_DEBUG=0
+_FROG_OPTION_BASH_DEBUG=0
 
 declare -A _FROG_PACKAGES
 declare -A _FROG_NAMESPACES
