@@ -7,11 +7,14 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "name": { "type": "string" },
+                "name": {
+                    "type": "string",
+                    "pattern": "^(?:[a-z0-9]+\\.?)*[a-z0-9]+$"
+                },
                 "namespaces": {
                     "type": "object",
                     "propertyNames": {
-                        "pattern": "^[a-z0-9\\.]+$"
+                        "pattern": "^(?:[a-z0-9]+\\.?)*[a-z0-9]+$"
                     },
                     "additionalProperties": {
                         "title": "namespace",
@@ -22,7 +25,7 @@
                             "operations": {
                                 "type": "object",
                                 "propertyNames": {
-                                    "pattern": "^[a-z0-9\\.]+$"
+                                    "pattern": "^(?:[a-z0-9]+\\.?)*[a-z0-9]+$"
                                 },
                                 "additionalProperties": {
                                     "type": "object",
@@ -32,7 +35,7 @@
                                         "parameters": {
                                             "type": "object",
                                             "propertyNames": {
-                                                "pattern": "^[a-z0-9\\.]+$"
+                                                "pattern": "^(?:[a-z0-9]+\\.?)*[a-z0-9]+$"
                                             },
                                             "additionalProperties": {
                                                 "title": "parameter",

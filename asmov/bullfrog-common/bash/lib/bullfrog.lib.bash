@@ -137,33 +137,72 @@ frog_inarray () {
 #               unknown namespace / operation, invalid values for options or parameters 
 ##
 frog_parse_cmdline () {
-    local _cmdline _forOption="" _namespace="" _operation=""
-    IFS=" " read -r -a _cmdline <<< "$@"
+    local _o
+    while getopts c:fs:x _o; do
+        case "$_o" in
+            c) ;;
+            f) ;;
+            s) ;;
+            x) ;;
+            [?]) frog_tty "targ $OPTARG";;
+        esac
+    done
 
-    for _token in "${_cmdline[@]}"; do
-        if [ -n "$_forOption" ]; then
-            continue
-        elif [ -n "$_operation" ]; then
-            continue
-            #if [[ "$_token" =~ ^--.+ ]]; then  # it's an option
-            #    _forOption="$_token"
-            #else
-            #   frog_error 1 "Invalid parameter token" "$_token" "frog_parse_cmdline"
-            #fi 
-        elif [ -n "$_namespace" ]; then
-            _operation="$_token"
+    shift $(( "$OPTIND" - 1 ))
+
+    local _namespace
+    _namespace="${1:-}"
+    [[ -z "$_namespace" ]] &&
+        frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
+    [[ "$_namespace" =~ $_FROG_NAMESPACE_PATTERN ]] ||
+        frog_error "1" "Improper formatting of namespace" "$_namespace" "frog_parse_cmdline"
+
+    shift 1
+
+    local _operation
+    _operation="${1:-}"
+    if [[ -z "$_operation" ]]; then
+        _operation="default"
+    elif [[ "$_operation" = "default" ]]; then
+        shift 1
+    elif [[ "$_operation" =~ $_FROG_NAMESPACE_PATTERN ]]; then
+        shift 1
+    else
+        frog_error "1" "Improperly formated operation" "$_operation" "frog_parse_cmdline"
+    fi
+
+    [[ "$_operation" = "default" && "$#" -gt 1 ]] &&
+        frog_error 1 "Parameters are not allowed with default operations" "frog_parse_cmdline"
+
+    local -a _parameterNames=() _parameterValues=()
+
+    for (( i=1, n="$#" ; i <= n ; ++i )); do
+        local _token _iskey
+        _token="${!i}"
+        _iskey="$(( i % 2))"
+
+        if [[ "$_iskey" -eq 1 ]]; then
+            [[ "$_token" =~ $_FROG_PARAMETER_PATTERN ]] ||
+                frog_error "1" "Improperly formatted parameter name" "$_token" "frog_parse_cmdline"
+
+            _parameterNames+=("$_token")
         else
-            _namespace="$_token"
+            _parameterValues+=("$_token")
         fi
     done
 
-    if [ -z "$_operation" ]; then
-        _operation="default"
-    fi
+    [[ "${#_parameterNames[@]}" -ne "${#_parameterValues[@]}" ]] &&
+        frog_error 1 "Missing value for parameter" "" "frog_parse_cmdline"
 
     echo "$_namespace"
     echo "$_operation"
-    echo "" #TODO parameters
+    frog_join "${_parameterNames[@]}"
+    frog_join "${_parameterValues[@]}"
+}
+
+frog_join () {
+    local IFS=$'\t'
+    echo "${*:1}"
 }
 
 frog_tty () {
@@ -256,10 +295,11 @@ frog_module_function() {
 }
 
 frog_run_operation () {
-    local _namespace _operation _parameters
+    local _namespace _operation _paramNames _paramValues
     _namespace="$1"
     _operation="$2"
-    _parameters="${3:-}"
+    _paramNames="$3"
+    _paramValues="$4"
 
     local -a _result _opCfg
     _result="$(frog_operation_cfg "$_namespace" "$_operation")"
@@ -271,7 +311,7 @@ frog_run_operation () {
 
     # shellcheck disable=SC1090
     source "$_opScript"
-    $_opFunction "$_parameters"
+    $_opFunction "$_paramNames" "$_paramValues"
 }
 
 frog_error () {
@@ -356,6 +396,9 @@ _FROG_COMMON_BASHLIB_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/lib)"  # bullfro
 _FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.cfg.json in json/cfg
 _FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"  # namespace.cfg.schema.json in schema/cfg
 _FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"  # templates that mirror desired install path
+
+_FROG_NAMESPACE_PATTERN='^([a-z0-9]+\.?)*[a-z0-9]+$'
+_FROG_PARAMETER_PATTERN='^--([a-z0-9]+\.?)*[a-z0-9]+$'
 
 # shellcheck source=./builtins.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/builtins.lib.bash

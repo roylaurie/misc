@@ -27,7 +27,8 @@ main () {
     local -a _cmdline
     readarray -t _cmdline <<< "$_result"
 
-    frog_run_operation "${_cmdline[@]}"
+    # 1: namespace, 2: operation, 3: param names tabarray, 4: param values tabarray
+    frog_run_operation "${_cmdline[0]}" "${_cmdline[1]}" "${_cmdline[2]}" "${_cmdline[3]}"
 }
 
 main "$@"

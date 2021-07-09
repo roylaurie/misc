@@ -2,9 +2,9 @@
 set -o errexit -o pipefail -o privileged -o nounset 
 
 op_common_version () {
-    echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v0.0.0$(frog_color end)"
-}
+    local -a _paramNames _paramValues
+    IFS=$'\t' read -ra _paramNames <<< "${1:-}"
+    IFS=$'\t' read -ra _paramValues <<< "${2:-}"
 
-op_common_stats_default () {
-    echo ""    
+    echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v0.0.0$(frog_color end)"
 }
