@@ -43,6 +43,19 @@ frogusr_init () {
 
     _FROGUSR_CONFIG_PATH="$(realpath "$_configdir")"
     _FROGUSR_DATA_PATH="$(realpath "$_datadir")"
+
+    [[ -f "$_FROGUSR_CONFIG_PATH/common.cfg.bash" ]] ||
+        _frogusr_init_commoncfg "$_FROGUSR_CONFIG_PATH/common.cfg.bash"
+
+    # shellcheck disable=SC1090
+    source "$(realpath "$_FROGUSR_CONFIG_PATH"/common.cfg.bash)"
+}
+
+_frogusr_init_commoncfg () {
+    local _filepath
+    _filepath="$1"
+
+    echo -e "#!/bin/bash${NL}set -o allexport -o errexit -o privileged -o pipefail -o nounset${NL}" > "$_filepath"
 }
 
 _FROGUSR_CONFIG_PATH=""
