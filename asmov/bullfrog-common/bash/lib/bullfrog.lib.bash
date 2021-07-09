@@ -35,22 +35,13 @@ set -o allexport -o errexit -o privileged -o pipefail -o nounset
 # shellcheck disable=SC2034  # unused
 NL=$'\n'
 
-declare -A _FROG_PACKAGES
-declare -A _FROG_NAMESPACES
-_FROG_ERROR_CODE=64
-
+##
+# Retrieves the real absolute directory path for the calling script.
+#
+# @returns 1: failure, 0: success { string dirpath }
+##
 frog_script_dir () {
-     local _src _dir
-     _src="${BASH_SOURCE[0]}"
-     # while _src is a symlink, resolve it
-     while [ -h "$_src" ]; do
-          _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
-          _src="$( readlink "$_src" )"
-          # if _src was a relative symlink (no '/' as prefix, resolve it relative to the symlink base directory
-          [[ $_src != /* ]] && _src="$_dir/$_src"
-     done
-     _dir="$( cd -P "$( dirname "$_src" )" && pwd )"
-     echo "$_dir"
+    realpath "$(dirname "${BASH_SOURCE[0]}")"
 }
 
 frog_common_path () {
@@ -77,17 +68,23 @@ frog_common_skeleton_path () {
     echo "$_FROG_COMMON_SKELETON_PATH"
 }
 
+# Used by each package's namespace.cfg.bash file to specify the package's root namespace is.
 FROG_PACKAGE_NAMESPACE=""
 
-frog_import_namespace () {
+##
+# Imports a package by sourcing its namespace.cfg.bash, which should make calls to frogcfg to configure itself.
+# The config script should re-define FROG_PACKAGE_NAMESPACE as well, for processing.
+#
+# @param string filepath The path of the namespace.cfg.bash file for this package.
+# @returns 1: failure, 0: success
+##
+frog_import_package () {
     local _filepath
     _filepath="$1"
-
 
     # shellcheck disable=SC1090
     source "$_filepath"
     local _packageNamespace="${FROG_PACKAGE_NAMESPACE:-}"
-    #unset FROG_PACKAGE_NAMESPACE
 
     local _result
     _result="$(frogcfg_get_value array "package.$_packageNamespace.namespaces")" || frog_error
@@ -101,16 +98,28 @@ frog_import_namespace () {
     done
 }
 
-frog_import_builtin () {
+##
+# Finds any official bullfrog- packages installed in the same prefix and imports them, if possible.
+#
+# @returns 1: failure, 0: success
+##
+frog_import_builtins () {
     local _namespaceFilepath
 
     for _dirname in "${_FROG_COMMON_BUILTIN_PACKAGES[@]}"; do
         _namespaceFilepath="$(realpath "$_FROG_COMMON_DIST_PATH/$_dirname"/bash/cfg/namespace.cfg.bash 2>/dev/null)" || continue
         [[ -f "$_namespaceFilepath" ]] &&
-            frog_import_namespace "$_namespaceFilepath"
+            frog_import_package "$_namespaceFilepath"
     done
 }
 
+##
+# Searches for an element within an array.
+#
+# @param string search
+# @param array array
+# @returns 1: not found, 0: found
+##
 frog_inarray () {
     local _search _array
     _search="$1"
@@ -131,10 +140,12 @@ frog_inarray () {
 #
 # Performs basic data validation based on the operation's imported namespace configuration.
 #
-# @param $@ _cmdline
-# @returns 0: cmdline json config to be executed.
-#       1: malformed command, unknown options or parameters, missing options or parameters,
-#               unknown namespace / operation, invalid values for options or parameters 
+# @param ... cmdline The arguments as passed to the command-line ($@)
+# @returns 1: failure, 0: success {
+#    0: string namespace
+#    1: string operation
+#    2: tabarray parameter names
+#    3: tabarray parameter values }
 ##
 frog_parse_cmdline () {
     local _o
@@ -155,7 +166,7 @@ frog_parse_cmdline () {
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
     [[ "$_namespace" =~ $_FROG_NAMESPACE_PATTERN ]] ||
-        frog_error "1" "Improper formatting of namespace" "$_namespace" "frog_parse_cmdline"
+        frog_error 1 "Improper formatting of namespace" "$_namespace" "frog_parse_cmdline"
 
     shift 1
 
@@ -200,11 +211,25 @@ frog_parse_cmdline () {
     frog_join "${_parameterValues[@]}"
 }
 
+##
+# Joins the specified array's elements together by the tab IFS character.
+# We call the product output a "tab-array". They are used to pass arrays between functions.
+# To split back into a normal array, use: IFS=$'\t' read -ar <<< "$tabarray"
+#
+# @param array data
+# @returns 1: failure, 0: success { tabarray }
+##
 frog_join () {
     local IFS=$'\t'
     echo "${*:1}"
 }
 
+##
+# Outputs a debugging message to the tty device (typically /dev/tty)
+#
+# @param ... values to be output
+# @returns 1: failure, 0: success
+##
 frog_tty () {
     local _a="$*" _t
     _t="$( echo "$(date +%s).$(date +%N)" | bc)"
@@ -212,11 +237,15 @@ frog_tty () {
 }
 
 ##
-# Searches all imported namespace configs and returns a json config for the specified namespace and operation names.
+# Retrieves pertinent configuration data for making calls to the namespace/operation specified.
 #
-# @param _namespace
-# @param _operation
-# @returns 0: json result, 1: operation config not found
+# @param string namespace
+# @param string? operation
+# @returns 1: failure, 0: success {
+#    0: string namespace
+#    1: string operation
+#    2: string opScript The filepath to the module script for this operation
+#    3: string opFunction The function name to call withing the module script }
 ##
 frog_operation_cfg () {
     local _namespace _operation
@@ -264,7 +293,7 @@ frog_operation_cfg () {
 #
 # @param string packagePath
 # @param string namespace
-# @returns 0: string path, 1: error
+# @returns 1: error, 0: success { string filepath }
 frog_module_path () {
     local _packagePath _namespace
     _packagePath="$1"
@@ -285,7 +314,7 @@ frog_module_path () {
 #
 # @param string namespace
 # @param string operation
-# @returns 0: string functionName
+# @returns 1: failure, 0: success { string functionName }
 frog_module_function() {
     local _namespace _operation
     _namespace="$1"
@@ -294,6 +323,15 @@ frog_module_function() {
     echo "op_${_namespace//\./_}_${_operation//\./_}"
 }
 
+##
+# Sources a module and runs an operation call, passing it parameters that have been parsed.
+#
+# @param string namespace
+# @param string operation
+# @param tabarray paramNames
+# @param tabarray paramValues
+# @returns 1: error, 0: success
+##
 frog_run_operation () {
     local _namespace _operation _paramNames _paramValues
     _namespace="$1"
@@ -388,6 +426,8 @@ frog_color () {
     echo "\\e[${_style}${_color}m"
 }
 
+_FROG_ERROR_CODE=64
+
 _FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"  # the base dirtory of the package
 _FROG_COMMON_DIST_PATH="$(realpath "$_FROG_COMMON_PATH"/..)"  # where other built-in packages may be installed
 _FROG_COMMON_BASH_PATH="$(realpath "$_FROG_COMMON_PATH"/bash)"  # bullfrog.bash in bash/bin
@@ -399,6 +439,9 @@ _FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"  # templa
 
 _FROG_NAMESPACE_PATTERN='^([a-z0-9]+\.?)*[a-z0-9]+$'
 _FROG_PARAMETER_PATTERN='^--([a-z0-9]+\.?)*[a-z0-9]+$'
+
+declare -A _FROG_PACKAGES
+declare -A _FROG_NAMESPACES
 
 # shellcheck source=./builtins.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/builtins.lib.bash
