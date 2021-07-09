@@ -475,6 +475,10 @@ frog_color () {
     echo "\\e[${_style}${_color}m"
 }
 
+frog_load_user () {
+    frogusr_init
+}
+
 frog_option_app() {
     echo "$_FROG_OPTION_APP"
 }
@@ -530,7 +534,9 @@ declare -A _FROG_NAMESPACES
 source "$_FROG_COMMON_BASHLIB_PATH"/builtins.lib.bash
 # shellcheck source=./frogcfg.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/frogcfg.lib.bash
-# shellcheck source=./frogsys.lib.bash
+# shellcheck source=./frogusr.lib.bash
+source "$_FROG_COMMON_BASHLIB_PATH"/frogusr.lib.bash
+# shellcheck source=./frogl.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/frogl.lib.bash
 # shellcheck source=./frogsh.lib.bash
 source "$_FROG_COMMON_BASHLIB_PATH"/frogsh.lib.bash

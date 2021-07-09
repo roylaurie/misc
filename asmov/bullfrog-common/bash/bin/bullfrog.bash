@@ -27,7 +27,7 @@ main () {
     _tabarrayOptionValues="${_cmdline[5]:-}"
 
     frog_process_options "$_tabarrayOptionNames" "$_tabarrayOptionValues"
-
+    frog_load_user
     frog_run_operation "$_namespace" "$_operation" "$_tabarrayParamNames" "$_tabarrayParamValues"
 }
 
