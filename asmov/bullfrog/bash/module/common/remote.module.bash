@@ -9,7 +9,7 @@ op_common_remote_default () {
 op_common_remote_install () {
     local _host _pkgFilename _pkgFilepath
     _host="$(frog_option_remote)"
-    _pkgFilename="bullfrog.$(frog_version).any.deb"
+    _pkgFilename="bullfrog-$(frog_version)-amd64.deb"
     _pkgFilepath="$(realpath "$(frog_common_path)/files/debian-package/$_pkgFilename")" ||
         frog_error 1 "Debian package file does not exist"
 

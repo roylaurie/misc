@@ -3,7 +3,7 @@ set -o errexit -o pipefail -o privileged -o nounset
 cd "$(npm prefix)"
 
 FROG_VERSION="$(cat config/frog-version.txt)"
-FROG_ARCH="any"
+FROG_ARCH="amd64"
 
 echo -e "building bullfrog ...\n"
 

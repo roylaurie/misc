@@ -2,7 +2,7 @@ Package: bullfrog
 Version: 2021.1.0
 Section: custom
 Priority: optional
-Architecture: any
+Architecture: amd64
 Essential: no
 Installed-Size: 1024
 Maintainer: asmov.software
