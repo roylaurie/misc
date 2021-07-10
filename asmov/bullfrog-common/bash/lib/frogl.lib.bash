@@ -2,26 +2,63 @@
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
 frogl_bullet () {
-        printf "${FROGL_GRN}|=== ${1}%s*|${FROG_NC}" " " $(eval length $1 - 82 - 1) 
+    local _title _titleLen
+    _title="$1"
+    _titleLen="${#_title}"
+
+    printf "$(frog_color green)|=== ${_title}%$((_FROGL_LINE_WIDTH - _titleLen - 6))s|$(frog_color end)\n"
 }
 
-function frogl_start {
-    echo
-    echo -e "${GRN}++---------------------------------------------------------------------------++${NC}"
-    echo -e "${GRN}+-------------------------- ${1} -------------------------+${NC}"
-    echo -e "${GRN}|                                                                             |${NC}"
+frogl_spacer () {
+    printf "$(frog_color green)|%$((_FROGL_LINE_WIDTH - 2))s|\n$(frog_color end)"
 }
 
-function frogl_header {
-        echo
+frogl_header () {
+    local _title _titleLen
+    _title="$1"
+    _titleLen="${#_title}"
+
+    printf "$(frog_color green)++%$((_FROGL_LINE_WIDTH - 4))s++\n" | tr ' ' '-'
+
+    local _len1=$(( (_FROGL_LINE_WIDTH - 2 - _titleLen) / 2 ))
+    local _len2=$(( (_FROGL_LINE_WIDTH - _len1 - _titleLen - 2) ))
+    printf "+%${_len1}s%s%${_len2}s+\n" "" "$_title" "" | tr ' ' '-'
+
+    printf "|%$((_FROGL_LINE_WIDTH - 2))s|\n$(frog_color end)"
 }
 
-function frogl_footer {
-        echo
+frogl_footer () {
+    local _title _titleLen
+    _title="${1:-eof}"
+    _titleLen="${#_title}"
+
+    printf "$(frog_color green)|%$((_FROGL_LINE_WIDTH - 2))s|\n"
+
+    local _len1=$(( (_FROGL_LINE_WIDTH - 2 - _titleLen) / 2 ))
+    local _len2=$(( (_FROGL_LINE_WIDTH - _len1 - _titleLen - 2) ))
+    printf "+%${_len1}s%s%${_len2}s+\n" "" "$_title" "" | tr ' ' '-'
+
+    printf "++%$((_FROGL_LINE_WIDTH - 4))s++\n$(frog_color end)" | tr ' ' '-'
 }
 
-function frogl_end {
-        echo
+frogl_print () {
+    local _txt _txtLen
+    _txt="$1"
+    _txtLen="${#_txt}"
+
+    printf "$(frog_color green)|$(frog_color end) ${_txt}%$((_FROGL_LINE_WIDTH - _txtLen - 3))s$(frog_color green)|$(frog_color end)\n"
 }
 
+frogl_print_data () {
+    local _title _titleLen _txt _txtLen _len
+    _title="$1"
+    _titleLen="${#_title}"
+    _txt="$2"
+    _txtLen="${#_txt}"
+    _len=$((_titleLen + _txtLen))
+
+    printf "$(frog_color green)|$(frog_color lightgray) ${_title}: $(frog_color end)${_txt}%$((_FROGL_LINE_WIDTH - _len - 5))s$(frog_color green)|$(frog_color end)\n"
+}
+
+_FROGL_LINE_WIDTH=84
 
