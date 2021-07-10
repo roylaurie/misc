@@ -1,11 +1,12 @@
 #!/bin/bash
-set -o errexit -o pipefail -o privileged -o nounset 
+set -o errexit -o pipefail -o privileged -o nounset
 
-op_common_stats_default () {
+
+op_common_sysinfo_default () {
     local _result _x
     local -a _results _xa
 
-    frogl_header "common.stats"
+    frogl_header "common.sysinfo"
 
     frogl_bullet "/etc/os-release"
 

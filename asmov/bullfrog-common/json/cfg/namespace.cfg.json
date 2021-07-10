@@ -25,11 +25,11 @@
                     }
                 }
             },
-            "common.stats": {
-                "desc": "Statistics and metrics",
+            "common.sysinfo": {
+                "desc": "Provides system information tools",
                 "operations": {
                     "default": {
-                        "desc": "System statistics",
+                        "desc": "Displays a general profile of the system",
                         "parameters": {
                         }
                     }
