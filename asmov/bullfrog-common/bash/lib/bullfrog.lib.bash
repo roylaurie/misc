@@ -176,7 +176,7 @@ frog_parse_cmdline () {
     _options[X]="false" # bash debug
 
     local _o
-    while getopts a:c:fxX _o 2> /dev/null; do
+    while getopts a:c:fr:xX _o 2> /dev/null; do
         case "$_o" in
             a)  _options[a]="$OPTARG" ;;
             c)  _options[c]="$OPTARG" ;;
