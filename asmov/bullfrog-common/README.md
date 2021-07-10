@@ -1,4 +1,5 @@
 # bullfrog
+*A bash command-line toolkit for building bash command-line toolkits!*
 
 ![bullfrog common.stats screenshot](doc/image/screenshot-common.stats.png)
 
