@@ -42,30 +42,30 @@ function buildKV(data) {
 
     for (const namespace in data.package.namespaces) {
         const namespaceData = data.package.namespaces[namespace];
-        let prefix = packagePrefix + 'namespaces.' + namespace + '.';
-        kv[prefix + 'desc'] = namespaceData.desc;
-        kv[prefix + 'operations'] = Object.keys(namespaceData.operations);
+        const namespacePrefix = packagePrefix + 'namespaces.' + namespace + '.';
+        kv[namespacePrefix + 'desc'] = namespaceData.desc;
+        kv[namespacePrefix + 'operations'] = Object.keys(namespaceData.operations);
 
         for (const operation in namespaceData.operations) {
             const operationData = namespaceData.operations[operation];
-            prefix += 'operations.' + operation + '.';
-            kv[prefix + 'desc'] = operationData.desc;
-            kv[prefix + 'parameters'] = Object.keys(operationData.parameters);
+            const opPrefix = namespacePrefix + 'operations.' + operation + '.';
+            kv[opPrefix + 'desc'] = operationData.desc;
+            kv[opPrefix + 'parameters'] = Object.keys(operationData.parameters);
 
             for (const parameter in operationData.parameters) {
                 const parameterData = operationData.parameters[parameter];
-                prefix += 'parameters.' + parameter + '.';
-                kv[prefix + 'desc'] = parameterData.desc;
-                kv[prefix + 'required'] = parameterData.required.toString();
+                const paramPrefix = opPrefix + 'parameters.' + parameter + '.';
+                kv[paramPrefix + 'desc'] = parameterData.desc;
+                kv[paramPrefix + 'required'] = parameterData.required.toString();
 
                 if (typeof parameterData.position !== 'undefined') {
-                    kv[prefix + 'position'] = parameterData.position.toString();
+                    kv[paramPrefix + 'position'] = parameterData.position.toString();
                 }
                 if (typeof parameterData.default !== 'undefined') {
-                    kv[prefix + 'default'] = parameterData.default;
+                    kv[paramPrefix + 'default'] = parameterData.default;
                 }
                 if (typeof parameterData.enum !== 'undefined') {
-                    kv[prefix + 'enum'] = parameterData.enum;
+                    kv[paramPrefix + 'enum'] = parameterData.enum;
                 }
             }
         }
