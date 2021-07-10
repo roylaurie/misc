@@ -27,7 +27,7 @@ Names consist of one or more lowercase *a-z* and *0-9* characters and may be sep
 # module structure
 Each bullfrog package provides a namespace configuration that links multiple fully qualified namespaces to their respective module bash scripts.
   
-The module script requested by namespace is sourced by bullfrog on startup. The operation specified is linked to a function in said module, which is then called.
+The module script specified by namespace is sourced by bullfrog on startup. The following operation specified is linked to a function in said module, which is then called.
   
 Any parameters provided are pre-validated based on packae configuration and passed to the operation function.
 
