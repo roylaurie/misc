@@ -17,6 +17,5 @@ op_common_remote_install () {
 
     ssh "$_host" 'mkdir -p ~/tmp'
     scp "$_pkgFilepath" "${_host}:~/tmp" 1> /dev/null
-    ssh "$_host" "sudo -S dpkg -i ~/tmp/$_pkgFilename"
-
+    ssh "$_host" "sudo apt install sysinstall ; sudo dpkg -i ~/tmp/$_pkgFilename"
 }
