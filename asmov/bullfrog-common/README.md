@@ -1,5 +1,6 @@
 # bullfrog
----
+
+![bullfrog common.stats screenshot](doc/image/screenshot-common.stats.png)
 
 # usage
 `bullfrog [-options] <name.space> <operation> [--parameters]`
