@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o allexport -o errexit -o privileged -o pipefail -o nounset
 
-frogcfg_set_key array "package.common.namespaces" "common" "common.sysinfo"
+frogcfg_set_key array "package.common.namespaces" "common" "common.sysinfo" "common.remote"
 frogcfg_set_key string "package.common.namespaces.common.desc" "Runs a common bullfrog operation."
 frogcfg_set_key array "package.common.namespaces.common.operations" "version"
 frogcfg_set_key string "package.common.namespaces.common.operations.version.desc" "Displays bullfrog version"
@@ -17,5 +17,11 @@ frogcfg_set_key string "package.common.namespaces.common.sysinfo.desc" "Provides
 frogcfg_set_key array "package.common.namespaces.common.sysinfo.operations" "default"
 frogcfg_set_key string "package.common.namespaces.common.sysinfo.operations.default.desc" "Displays a general profile of the system"
 frogcfg_set_key array "package.common.namespaces.common.sysinfo.operations.default.parameters"
+frogcfg_set_key string "package.common.namespaces.common.remote.desc" "Runs bullfrog commands remotely via SSH"
+frogcfg_set_key array "package.common.namespaces.common.remote.operations" "default" "install"
+frogcfg_set_key string "package.common.namespaces.common.remote.operations.default.desc" "Displays the current remote host"
+frogcfg_set_key array "package.common.namespaces.common.remote.operations.default.parameters"
+frogcfg_set_key string "package.common.namespaces.common.remote.operations.default.operations.install.desc" "Installs bullfrog on the remote machine"
+frogcfg_set_key array "package.common.namespaces.common.remote.operations.default.operations.install.parameters"
 
 FROG_PACKAGE_NAMESPACE="common"

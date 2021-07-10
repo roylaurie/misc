@@ -34,6 +34,21 @@
                         }
                     }
                 }
+            },
+            "common.remote": {
+                "desc": "Runs bullfrog commands remotely via SSH",
+                "operations": {
+                    "default": {
+                        "desc": "Displays the current remote host",
+                        "parameters": {
+                        }
+                    },
+                    "install": {
+                        "desc": "Installs bullfrog on the remote machine",
+                        "parameters": {
+                        }
+                    }
+                }
             }
         },
         "aliases": {

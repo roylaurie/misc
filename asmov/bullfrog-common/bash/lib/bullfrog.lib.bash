@@ -333,7 +333,8 @@ frog_operation_cfg () {
     local _packagePrefix _opPrefix
     _packagePrefix="package.$_packageNamespace"
     _opPrefix="$_packagePrefix.namespaces.$_namespace.operations.$_operation"
-
+frogcfg_debug
+frog_debug "opPrefix" "$_opPrefix"
     # test to see if the operation exists
     frogcfg_has_key "$_opPrefix.desc" ||
         frog_error 1 "Invalid operation" "$_namespace::$_operation"
