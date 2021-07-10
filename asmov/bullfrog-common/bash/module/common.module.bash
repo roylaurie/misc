@@ -7,5 +7,6 @@ op_common_version () {
     IFS=$'\t' read -ra _paramValues <<< "${2:-}"
 
 
-    echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v0.0.0$(frog_color end)"
+    #TODO version extraction
+    echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v2021.1.0$(frog_color end)"
 }
