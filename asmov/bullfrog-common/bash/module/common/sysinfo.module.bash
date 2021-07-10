@@ -63,27 +63,27 @@ op_common_sysinfo_default () {
     frogl_bullet "nodejs"
 
     frogl_print_data "Version" \
-        "$(_result="$(node -v)" && echo "${_result[@]:1}")"
+        "$(which node > /dev/null && { _result="$(node -v)" && echo "${_result[@]:1}"; } || echo "not installed")"
     frogl_print_data "V8 Version" \
-        "$(node -p process.versions.v8 | sed -e 's/\.[0-9]*\-.*$//' )"
+        "$(which node > /dev/null && { node -p process.versions.v8 | sed -e 's/\.[0-9]*\-.*$//'; } || echo "not installed" )"
 
     frogl_spacer
     frogl_bullet "python"
 
     frogl_print_data "Version" \
-        "$(python3 --version | awk '{ print $2 }')"
+        "$(which python3 > /dev/null && { python3 --version | awk '{ print $2 }'; } || echo "not installed" )"
 
     frogl_spacer
     frogl_bullet "rust"
 
     frogl_print_data "Version" \
-        "$(rustc --version | awk '{ print $2 }')"
+        "$(which rustc > /dev/null && { rustc --version | awk '{ print $2 }'; } || echo "not installed")"
 
     frogl_spacer
     frogl_bullet "java"
 
     frogl_print_data "Version" \
-        "$(java --version | head -1 | awk '{ print $2 }')"
+        "$(which java > /dev/null && { java --version | head -1 | awk '{ print $2 }'; } || echo "not installed")"
 
 
 
