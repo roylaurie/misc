@@ -25,11 +25,9 @@ Namespaces, operations, and parameter names all adhere to the same validation ru
 Names consist of one or more lowercase *a-z* and *0-9* characters and may be separated by a single **.** (dot) character.
  
 # module structure
-Each bullfrog package provides a namespace configuration that links multiple fully qualified namespaces to their respective module bash scripts.
+Each bullfrog package provides a namespace configuration that links multiple fully qualified namespaces to their respective bash scripts, known as modules.
   
-The module script specified by namespace is sourced by bullfrog on startup. The following operation specified is linked to a function in said module, which is then called.
-  
-Any parameters provided are pre-validated based on packae configuration and passed to the operation function.
+The module script for the provided namespace is sourced by bullfrog on startup. Bullfrog calls the appropriate function within that module script for the operation specified by the user. Any parameters provided are pre-validated based on the package's configuration and passed to the operation function.
 
 ----
 
