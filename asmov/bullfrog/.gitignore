@@ -1,7 +1,7 @@
 .swp
 .swo
 .idea
-dist
-bullfrog
 node_modules
+dist
+files/debian-package/*.deb
 
