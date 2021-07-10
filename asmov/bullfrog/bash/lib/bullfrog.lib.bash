@@ -540,6 +540,14 @@ frog_option_bash_debug () {
     return 1
 }
 
+frog_version () {
+    echo "$_FROG_VERSION"
+}
+
+frog_arch () {
+    echo "$HOSTTYPE"
+}
+
 _FROG_ERROR_CODE=64
 
 _FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"  # the base dirtory of the package
@@ -549,7 +557,10 @@ _FROG_COMMON_BASHCFG_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/cfg)"  # namespa
 _FROG_COMMON_BASHLIB_PATH="$(realpath "$_FROG_COMMON_PATH"/bash/lib)"  # bullfrog.lib.bash et al live here
 _FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.cfg.json in json/cfg
 _FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"  # namespace.cfg.schema.json in schema/cfg
-_FROG_COMMON_SKELETON_PATH="$(realpath "$_FROG_COMMON_PATH"/skeleton)"  # templates that mirror desired install path
+_FROG_COMMON_FILES_PATH="$(realpath "$_FROG_COMMON_PATH"/FILES)"  # templates that mirror desired install path
+
+# shellcheck source=./../../config/frog-version.txt
+_FROG_VERSION=$(cat "$_FROG_COMMON_PATH/config/frog-version.txt")
 
 _FROG_NAMESPACE_PATTERN='^([a-z0-9]+\.?)*[a-z0-9]+$'
 _FROG_PARAMETER_PATTERN='^--([a-z0-9]+\.?)*[a-z0-9]+$'

@@ -13,8 +13,8 @@ mkdir -p \
     json/cfg \
     json/schema \
     json/schema/cfg \
-    skeleton \
-    skeleton/_CUSTOM_ \
+    files \
+    files/_CUSTOM_ \
     test \
     tool
 
@@ -45,6 +45,6 @@ touch \
     json/cfg/.gitignore \
     json/schema/.gitignore \
     json/schema/cfg/.gitignore \
-    skeleton/.gitignore \
+    files/.gitignore \
     test/.gitignore \
     tool/.gitignore

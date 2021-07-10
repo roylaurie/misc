@@ -7,15 +7,15 @@ op_common_remote_default () {
 }
 
 op_common_remote_install () {
-    local _host
+    local _host _pkgFilename _pkgFilepath
     _host="$(frog_option_remote)"
-    _pkgFilename="bullfrog-common-2021.1.0.amd64.deb"
-    _pkgFilepath="$(realpath "$(frog_common_path)/dist/$_pkgFilename")" ||
+    _pkgFilename="bullfrog.$(frog_version).any.deb"
+    _pkgFilepath="$(realpath "$(frog_common_path)/files/debian-package/$_pkgFilename")" ||
         frog_error 1 "Debian package file does not exist"
 
     [[ "$_host" = "localhost" ]] && frog_error 1 "-r[emote host] not set" "" "op_common_remote_install"
 
     ssh "$_host" 'mkdir -p ~/tmp'
     scp "$_pkgFilepath" "${_host}:~/tmp" 1> /dev/null
-    ssh "$_host" "sudo apt install -y sysinstall ; sudo dpkg -i ~/tmp/$_pkgFilename && bullfrog common.sysinfo"
+    ssh "$_host" "sudo dpkg -i ~/tmp/$_pkgFilename && bullfrog common.sysinfo"
 }

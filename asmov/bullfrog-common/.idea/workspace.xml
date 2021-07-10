@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5ea643ff-3242-43df-be26-a66d25e4a96f" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/COPYING.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/COPYING.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/bin/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/bin/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/bin/bullfrog.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/bin/bullfrog.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/cfg/namespace.cfg.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/cfg/namespace.cfg.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/builtins.lib.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/builtins.lib.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/bullfrog.lib.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/bullfrog.lib.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/frogcfg.lib.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/frogcfg.lib.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/frogl.lib.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/frogl.lib.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/frogsh.lib.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/frogsh.lib.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/frogsys.lib.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/frogsys.lib.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/lib/frogusr.lib.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/lib/frogusr.lib.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/module/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/module/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/module/common.module.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/module/common.module.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/module/common/remote.module.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/module/common/remote.module.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bash/module/common/sysinfo.module.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/bash/module/common/sysinfo.module.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/config/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/doc/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/LICENSE.GPLv3.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/doc/LICENSE.GPLv3.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/design/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/doc/design/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/image/screenshot-common.stats.png" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/doc/image/screenshot-common.stats.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/json/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/cfg/namespace.cfg.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/json/cfg/namespace.cfg.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/cfg/namespace.cfg.min.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/json/cfg/namespace.cfg.min.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/schema/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/json/schema/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/schema/cfg/namespace.cfg.schema.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/json/schema/cfg/namespace.cfg.schema.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/json/schema/cfg/namespace.cfg.schema.min.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/json/schema/cfg/namespace.cfg.schema.min.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/skeleton/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/skeleton/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/test/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/bash/test.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/test/bash/test.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/bash/bin/build.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/bash/bin/build.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/bash/bin/compile.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/bash/bin/compile.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/bash/bin/lint.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/bash/bin/lint.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/bash/bin/package.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/bash/bin/package.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/bash/bin/package/debian.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/bash/bin/package/debian.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/bash/bin/skeleton-init.bash" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/bash/bin/skeleton-init.bash" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/js/json2bash.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/js/json2bash.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tool/skeleton/package/debian/DEBIAN/control" beforeDir="false" afterPath="$PROJECT_DIR$/../bullfrog/tool/skeleton/package/debian/DEBIAN/control" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="ek7ga0pf" />
+  </component>
+  <component name="ProjectId" id="1upP7WWAzjoBIMm8LphYSX4Xr85" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="javascript.nodejs.core.library.configured.version" value="15.14.0" />
+    <property name="javascript.nodejs.core.library.typings.version" value="15.14.0" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bullfrog" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.smartKeys" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/bash/module/common" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/bash/module" />
+      <recent name="$PROJECT_DIR$/json/schema/cfg" />
+      <recent name="$PROJECT_DIR$/json/cfg" />
+      <recent name="$PROJECT_DIR$/tool/bash/bin/package" />
+      <recent name="$PROJECT_DIR$/tool/skeleton/package/debian" />
+    </key>
+  </component>
+  <component name="RunManager" selected="BashSupport Pro.bullfrog.bash">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="build.bash" type="BashProRunConfiguration" temporary="true">
+      <option name="scriptPath" value="$PROJECT_DIR$/tool/bash/bin/build.bash" />
+      <method v="2" />
+    </configuration>
+    <configuration name="bullfrog.bash" type="BashProRunConfiguration">
+      <option name="scriptParameters" value="-x -r redhand.dev common.sysinfo" />
+      <option name="scriptPath" value="$PROJECT_DIR$/bash/bin/bullfrog.bash" />
+      <RunnerSettings bashdbVersion="Automatic" bashPathMapper="Automatic" RunnerId="pro.bashsupport.shDebugRunner" />
+      <method v="2" />
+    </configuration>
+    <configuration name="frogcfg.lib.bash" type="BashProRunConfiguration" temporary="true">
+      <option name="scriptPath" value="$PROJECT_DIR$/bash/lib/frogcfg.lib.bash" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test.bash" type="BashProRunConfiguration">
+      <option name="scriptPath" value="$PROJECT_DIR$/test/bash/test.bash" />
+      <RunnerSettings bashdbVersion="Automatic" bashPathMapper="Automatic" RunnerId="pro.bashsupport.shDebugRunner" />
+      <method v="2" />
+    </configuration>
+    <configuration name="json2bash.mjs" type="NodeJSConfigurationType" temporary="true" application-parameters="../../json/schema/cfg/namespace.cfg.schema.json ../../json/cfg/namespace.cfg.json" nameIsGenerated="true" path-to-js-file="json2bash.mjs" working-dir="$PROJECT_DIR$/tool/js">
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="BashSupport Pro.test.bash" />
+      <item itemvalue="BashSupport Pro.bullfrog.bash" />
+      <item itemvalue="BashSupport Pro.frogcfg.lib.bash" />
+      <item itemvalue="BashSupport Pro.build.bash" />
+      <item itemvalue="Node.js.json2bash.mjs" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="BashSupport Pro.build.bash" />
+        <item itemvalue="Node.js.json2bash.mjs" />
+        <item itemvalue="BashSupport Pro.frogcfg.lib.bash" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5ea643ff-3242-43df-be26-a66d25e4a96f" name="Default Changelist" comment="" />
+      <created>1625359390022</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1625359390022</updated>
+      <workItem from="1625359391580" duration="116000" />
+      <workItem from="1625359517744" duration="55987000" />
+      <workItem from="1625639608824" duration="6780000" />
+      <workItem from="1625692364557" duration="4000" />
+      <workItem from="1625692974224" duration="605000" />
+      <workItem from="1625766374658" duration="77050000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

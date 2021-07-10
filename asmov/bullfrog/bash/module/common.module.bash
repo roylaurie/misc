@@ -8,5 +8,5 @@ op_common_version () {
 
 
     #TODO version extraction
-    echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v2021.1.0$(frog_color end)"
+    echo -e "$(frog_color lightgreen)bullfrog $(frog_color lightgray)v$(frog_version)$(frog_color end)"
 }
