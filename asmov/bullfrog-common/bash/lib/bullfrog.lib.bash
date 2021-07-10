@@ -152,6 +152,7 @@ frog_parse_cmdline () {
     _options[a]="common" # application package namespace
     _options[c]="default" # config profile name
     _options[f]="false" # force
+    _options[r]="localhost" # the ssh host to run bullfrog commands on. localhost is local, but 127.0.0.1 is remote ssh.
     _options[x]="false" # debug
     _options[X]="false" # bash debug
 
@@ -161,6 +162,7 @@ frog_parse_cmdline () {
             a)  _options[a]="$OPTARG" ;;
             c)  _options[c]="$OPTARG" ;;
             f)  _options[f]="true" ;;
+            r)  _options[r]="${OPTARG:-localhost}" ;;
             x)  _options[x]="true" ;;
             X)  _options[X]="true" ;;
             *)  local _last=$(( OPTIND - 1 ))
@@ -239,6 +241,8 @@ frog_process_options () {
                 _FROG_OPTION_CONFIG="$_val" ;;
             f)  frogcfg_set_key string "options.force" "$_val"
                 [[ "$_val" = "true" ]] && _FROG_OPTION_FORCE=1 ;;
+            r)  frogcfg_set_key string "options.remote" "$_val"
+                _FROG_OPTION_REMOTE="$_val" ;;
             x)  frogcfg_set_key string "options.debug" "$_val"
                 [[ "$_val" = "true" ]] && _FROG_OPTION_DEBUG=1 ;;
             X)  frogcfg_set_key string "options.bash.debug" "$_val"
@@ -497,6 +501,16 @@ frog_option_force () {
     return 1
 }
 
+##
+# Retrieves the remote host to run the bullfrog command on via SSH.
+# The default "localhost" value is ignored, while any IP or any other hostname, including 127.0.0.1, will run remotely.
+#
+# @returns 1: error, 0: success { sting remoteHost }
+##
+frog_option_remote () {
+    echo "$_FROG_OPTION_REMOTE"
+}
+
 frog_option_debug () {
     [[ $_FROG_OPTION_DEBUG -eq 1 ]] && return 0
     return 1
@@ -524,6 +538,7 @@ _FROG_PARAMETER_PATTERN='^--([a-z0-9]+\.?)*[a-z0-9]+$'
 _FROG_OPTION_APP="common"
 _FROG_OPTION_CONFIG="default"
 _FROG_OPTION_FORCE=0
+_FROM_OPTION_REMOTE=0
 _FROG_OPTION_DEBUG=0
 _FROG_OPTION_BASH_DEBUG=0
 
