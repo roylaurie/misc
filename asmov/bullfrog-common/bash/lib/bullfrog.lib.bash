@@ -300,7 +300,7 @@ frog_debug () {
     _subject="$1"
     shift && _params="$*"
 
-    echo -en "\\e[37m[DEBUG $_time]  \\e[36m" > "$_tty"
+    echo -en "\\e[37m[DEBUG $_time] $_subject  \\e[36m" > "$_tty"
     echo -n "$_params" > "$_tty"
     echo -e "\\e[0m" > "$_tty"
 }
