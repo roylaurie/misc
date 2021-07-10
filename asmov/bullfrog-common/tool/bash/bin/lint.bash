@@ -7,4 +7,4 @@ find ./bash -name '*.bash' | xargs shellcheck -P ./bash -P ./bash/lib > /dev/nul
     echo "bash lint failed" &&
     exit 1
 
-ajv -s ./json/schema/cfg/namespace.cfg.schema.json -d ./json/namespace.cfg.json
+ajv -s ./json/schema/cfg/namespace.cfg.schema.json -d ./json/cfg/namespace.cfg.json
