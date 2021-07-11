@@ -2,79 +2,79 @@
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
 frogsh_mkdir () {
-    $(mkdir -p "$1")
+    mkdir -p "$1"
 }
 
 frogsh_sudo_mkdir () {
-    $(sudo mkdir -p "$1")
+    sudo mkdir -p "$1"
 }
 
 frogsh_rmdir () {
-    $(rmdir "$1")
+    rmdir "$1"
 }
 
 frogsh_sudo_rmdir () {
-    $(sudo rmdir "$1")
+    sudo rmdir "$1"
 }
 
 frogsh_rmdir_recurse () {
-    $(rm -rf "$1")
+    rm -rf "$1"
 }
 
 frogsh_sudo_rmdir_recurse () {
-    $(sudo rm -rf "$1")
+    sudo rm -rf "$1"
 }
 
 frogsh_rm () {
-    $(rmdir -f "$1")
+    rmdir -f "$1"
 }
 
 frogsh_sudo_rm () {
-    $(sudo rm -f "$1")
+    sudo rm -f "$1"
 }
 
 frogsh_rm_recurse () {
-    $(rm -rf "$1")
+    rm -rf "$1"
 }
 
 frogsh_sudo_rm_recurse () {
-    $(sudo rm -rf "$1")
+    sudo rm -rf "$1"
 }
 
 frogsh_cd () {
-    $(cd "$1")
+    cd "$1"
 }
 
-frogsh_sudo_cd () {
-    $(sudo cd "$1")
-}
+#frogsh_sudo_cd () {
+#    cd "$1"
+#}
 
 frogsh_chmod () {
-    $(chmod "$1" "$2")
+    chmod "$1" "$2"
 }
 
 frogsh_sudo_chmod () {
-    $(sudo chmod "$1" "$2")
+    sudo chmod "$1" "$2"
 }
 
 frogsh_chmod_recurse () {
-    $(chmod -R "$1" "$2")
+    chmod -R "$1" "$2"
 }
 
 frogsh_sudo_chmod_recurse () {
-    $(sudo chmod -R "$1" "$2")
+    chmod -R "$1" "$2"
 }
 
 frogsh_sudo_chown () {
-    $(sudo chown "$1":"$2" "$3")
+    chown "$1":"$2" "$3"
 }
 
 frogsh_chown_recurse () {
-    $(chown -R "$1":"$2" "$3")
+    chown -R "$1":"$2" "$3"
 }
 
 frogsh_sudo_chown_recurse () {
-    $(sudo chown -R "$1":"$2" "$3")
+    sudo chown -R "$1":"$2" "$3"
 }
 
 ##
@@ -96,18 +96,18 @@ frogsh_sudo_ch () {
 }
 
 frogsh_cp () {
-    $(cp "$1" "$2")
+    cp "$1" "$2"
 }
 
 frogsh_sudo_cp () {
-    $(sudo cp "$1" "$2")
+    sudo cp "$1" "$2"
 }
 
 frogsh_mv () {
-    $(mv "$1" "$2")
+    mv "$1" "$2"
 }
 
 frogsh_sudo_mv () {
-    $(sudo mv "$1" "$2")
+    sudo mv "$1" "$2"
 }
 

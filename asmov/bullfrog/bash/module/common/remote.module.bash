@@ -3,7 +3,7 @@ set -o errexit -o pipefail -o privileged -o nounset
 
 
 op_common_remote_default () {
-    echo "$(frog_option_remote)"
+    frog_option_remote
 }
 
 op_common_remote_install () {
@@ -17,5 +17,6 @@ op_common_remote_install () {
 
     ssh "$_host" 'mkdir -p ~/tmp'
     scp "$_pkgFilepath" "${_host}:~/tmp" 1> /dev/null
+    # shellcheck disable=SC2029
     ssh "$_host" "sudo dpkg -i ~/tmp/$_pkgFilename && bullfrog common.sysinfo"
 }

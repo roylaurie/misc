@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "./tool/bash/bin/lint.bash",
     "compile": "./tool/bash/bin/compile.bash",
-    "build": "./tool/bash/bin/build.bash"
+    "build": "./tool/bash/bin/build.bash",
+    "buildall": "npm run lint && npm run compile && npm run build"
   },
   "files": [
     "dist/bullfrog/bash",

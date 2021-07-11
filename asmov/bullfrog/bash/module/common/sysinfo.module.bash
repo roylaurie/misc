@@ -3,51 +3,48 @@ set -o errexit -o pipefail -o privileged -o nounset
 
 
 op_common_sysinfo_default () {
-    local _result _x
-    local -a _results _xa
+    local _str
+    local -a _arr _xa
 
     frogl_header "common.sysinfo"
 
-    frogl_bullet "/etc/os-release"
+    frogl_bullet "OS"
 
-    _results="$(cat /etc/os-release | head -2 | sed -re 's/^.*"(.+)".*$/\1/g' | tr '\n' ' ')"
+    _arr="$(head -2 /etc/os-release | sed -re 's/^.*"(.+)".*$/\1/g' | tr '\n' ' ')"
 
-    frogl_print_data "OS" "$_results"
+    frogl_print_data "Name" "$_arr"
 
-    frogl_spacer
-    frogl_bullet "iostat"
-
-    _results=($(echo "$(iostat)" | head -1))
-
-    frogl_print_data "Kernel" "${_results[1]/%[!0-9.]*}"
-    frogl_print_data "Arch" "${_results[4]:1:-1}"
-    frogl_print_data "Hostname" "${_results[2]:1:-1}"
+    _str="$(uname -r)"
+    frogl_print_data "Kernel" "${_str/[!0-9.]*}"
+    frogl_print_data "Arch" "$(uname -p)"
 
     frogl_spacer
-    frogl_bullet "/proc"
+    frogl_bullet "Hardware"
 
-    _result="$(cat /proc/cpuinfo | grep '^model name' | head -1 | sed -e 's/^.*: //g')"
-    frogl_print_data "CPU" "$_result"
+    _str="$(grep '^model name' /proc/cpuinfo | head -1 | sed -e 's/^.*: //g')"
+    frogl_print_data "CPU" "$_str"
 
-    _result="$(cat /proc/meminfo | grep '^MemTotal' | sed -re 's/^.*:\s*//g' -e 's/ kB//g')"
-    _result="$(echo "$_result / 1000000" | bc) gb"
-    frogl_print_data "RAM" "$_result"
-
-    frogl_spacer
-    frogl_bullet "df"
-
-    mapfile -t _results <<< "$(df -h | grep "\/$" | awk '{ print $2 ; print $4 }')"
-    frogl_print_data "Root" "${_results[1]:0:-1} gb (free) / ${_results[0]:0:-1} gb (total)"
+    _str="$(grep '^MemTotal' /proc/meminfo | sed -re 's/^.*:\s*//g' -e 's/ kB//g')"
+    _str="$(echo "$_str / 1000000" | bc) gb"
+    frogl_print_data "RAM" "$_str"
 
     frogl_spacer
-    frogl_bullet "ip"
+    frogl_bullet "Storage"
 
-    mapfile -t _results <<< \
+    mapfile -t _arr <<< "$(df -h | grep "\/$" | awk '{ print $2 ; print $4 }')"
+    frogl_print_data "Root" "${_arr[1]:0:-1} gb (free) / ${_arr[0]:0:-1} gb (total)"
+
+    frogl_spacer
+    frogl_bullet "Network"
+
+    frogl_print_data "Hostname" "$(hostname)"
+
+    mapfile -t _arr <<< \
         "$(ip address show | grep ' scope global ' | awk '{ sub(/\/.*$/, "", $2) ; print $2 " " $NF }')"
 
-    for _r in "${_results[@]}"; do
-      _xa=($_r)
-      frogl_print_data "${_xa[1]}" "${_xa[0]}"
+    for _r in "${_arr[@]}"; do
+        read -ra _xa <<< "$_r"
+        frogl_print_data "${_xa[1]}" "${_xa[0]}"
     done
 
     frogl_print_data "inet" \
@@ -55,6 +52,7 @@ op_common_sysinfo_default () {
 
     frogl_spacer
     frogl_bullet "bash"
+
     frogl_print_data "Version" "${BASH_VERSION/%[!0-9.]*}"
     frogl_print_data "OS Type" "$OSTYPE"
     frogl_print_data "extglob" "$(shopt extglob | awk '{ print $2 }')"
@@ -63,30 +61,27 @@ op_common_sysinfo_default () {
     frogl_bullet "nodejs"
 
     frogl_print_data "Version" \
-        "$(which node > /dev/null && { _result="$(node -v)" && echo "${_result[@]:1}"; } || echo "not installed")"
+        "$(command -v node > /dev/null && { _str="$(node -v)" && echo "${_str[@]:1}"; } || echo "not installed")"
     frogl_print_data "V8 Version" \
-        "$(which node > /dev/null && { node -p process.versions.v8 | sed -e 's/\.[0-9]*\-.*$//'; } || echo "not installed" )"
+        "$(command -v node > /dev/null && { node -p process.versions.v8 | sed -e 's/\.[0-9]*\-.*$//'; } || echo "not installed" )"
 
     frogl_spacer
     frogl_bullet "python"
 
     frogl_print_data "Version" \
-        "$(which python3 > /dev/null && { python3 --version | awk '{ print $2 }'; } || echo "not installed" )"
+        "$(command -v python3 > /dev/null && { python3 --version | awk '{ print $2 }'; } || echo "not installed" )"
 
     frogl_spacer
     frogl_bullet "rust"
 
     frogl_print_data "Version" \
-        "$(which rustc > /dev/null && { rustc --version | awk '{ print $2 }'; } || echo "not installed")"
+        "$(command -v rustc > /dev/null && { rustc --version | awk '{ print $2 }'; } || echo "not installed")"
 
     frogl_spacer
     frogl_bullet "java"
 
     frogl_print_data "Version" \
-        "$(which java > /dev/null && { java --version | head -1 | awk '{ print $2 }'; } || echo "not installed")"
-
-
-
+        "$(command -v java > /dev/null && { java --version | head -1 | awk '{ print $2 }'; } || echo "not installed")"
 
     frogl_footer
 }
