@@ -39,16 +39,18 @@ op_common_sysinfo_default () {
 
     frogl_print_data "Hostname" "$(hostname)"
 
+    frogl_print_data "IP" \
+        "$(dig +short myip.opendns.com @resolver1.opendns.com)"
+
+    frogl_print_data "Interfaces" ""
+
     mapfile -t _arr <<< \
         "$(ip address show | grep ' scope global ' | awk '{ sub(/\/.*$/, "", $2) ; print $2 " " $NF }')"
 
     for _r in "${_arr[@]}"; do
         read -ra _xa <<< "$_r"
-        frogl_print_data "${_xa[1]}" "${_xa[0]}"
+        frogl_print_data "   ${_xa[1]}" "${_xa[0]}"
     done
-
-    frogl_print_data "inet" \
-        "$(dig +short myip.opendns.com @resolver1.opendns.com)"
 
     frogl_spacer
     frogl_bullet "bash"
