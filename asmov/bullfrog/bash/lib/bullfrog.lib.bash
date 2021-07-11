@@ -98,16 +98,15 @@ FROG_PACKAGE_NAMESPACE=""
 # @returns 1: error, 0: success
 ##
 frog_import_package () {
-    local _filepath
-    _filepath="$1"
+    local _filepath ; _filepath="$1"
 
     # shellcheck disable=SC1090
     source "$_filepath"
-    local _packageNamespace="${FROG_PACKAGE_NAMESPACE:-}"
+    local _packageNamespace ; _packageNamespace="${FROG_PACKAGE_NAMESPACE:-}"
 
     local _result
-    _result="$(frogcfg_get_value array "package.$_packageNamespace.namespaces")" || frog_error
     local -a _namespaces
+    _result="$(frogcfg_get_value array "package.$_packageNamespace.namespaces")" || frog_error
     readarray -t _namespaces <<< "$_result"
 
     _FROG_PACKAGES["$_packageNamespace"]="$(realpath "$(dirname "$_filepath")"/../..)"
@@ -140,12 +139,13 @@ frog_import_builtins () {
 # @returns 1: not found, 0: found
 ##
 frog_inarray () {
-    local _search _array
+    local _search
+    local -a _array
     _search="$1"
     shift && _array=("$@")
     
-    for _x in "${_array[@]}"; do
-        [ "$_search" == "$_x" ] && return 0
+    for x in "${_array[@]}"; do
+        [[ "$_search" == "$x" ]] && return 0
     done
 
     return 1
@@ -189,10 +189,9 @@ frog_parse_cmdline () {
         esac
     done
 
-    shift $(( "$OPTIND" - 1 ))
+    shift $(( OPTIND - 1 ))
 
-    local _namespace
-    _namespace="${1:-}"
+    local _namespace ; _namespace="${1:-}"
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
     [[ "$_namespace" =~ $_FROG_NAMESPACE_PATTERN ]] ||
@@ -200,8 +199,7 @@ frog_parse_cmdline () {
 
     shift 1
 
-    local _operation
-    _operation="${1:-}"
+    local _operation ; _operation="${1:-}"
     if [[ -z "$_operation" ]]; then
         _operation="default"
     elif [[ "$_operation" = "default" ]]; then
@@ -218,10 +216,9 @@ frog_parse_cmdline () {
     local -a _parameterNames=() _parameterValues=()
 
     for (( i=1, n="$#" ; i <= n ; ++i )); do
-        local _token _iskey _ispos
-        _token="${!i}"
-        _iskey="$(( i % 2))"
-        _ispos=1
+        local _token="${!i}"
+        local -i _iskey=$(( i % 2))
+        local -i _ispos=1
 
         if [[ "$_iskey" -eq 1 ]]; then
             if [[ "$_token" =~ $_FROG_PARAMETER_PATTERN ]]; then
@@ -414,9 +411,10 @@ frog_run_operation () {
     _tabParamNames="$3"
     _tabParamValues="$4"
 
-    local -a _result _opCfg
-    _result="$(frog_operation_cfg "$_namespace" "$_operation")"
-    readarray -t _opCfg <<< "$_result"
+    local _str
+    local -a _opCfg
+    _str="$(frog_operation_cfg "$_namespace" "$_operation")"
+    readarray -t _opCfg <<< "$_str"
 
     local _opScript _opFunction _opCfgPrefix
     _opScript="${_opCfg[0]}"
@@ -435,14 +433,17 @@ frog_run_operation () {
 }
 
 frog_process_parameters () {
-    local _opCfgPrefix ; _opCfgPrefix="$1"
-    local _paramNames ; IFS=$'\t' read -ar _paramNames <<< "$2"
-    local _paramValues ; IFS=$'\t' read -ar _paramValues <<< "$3"
+    local _opCfgPrefix _paramNames _paramValues
+    _opCfgPrefix="$1"
+    IFS=$'\t' read -ar _paramNames <<< "$2"
+    IFS=$'\t' read -ar _paramValues <<< "$3"
 
     # retrieve expected param names
-    local _paramCfgPrefix ; _paramCfgPrefix="$_opCfgPrefix.parameters"
-    local _str ; _str="$(frogcfg_get_value array "$_paramCfgPrefix")"
-    local -a _cfgParamNames ; readarray -t _cfgParamNames <<< "$_str"
+    local _paramCfgPrefix _str
+    local -a _cfgParamNames
+    _paramCfgPrefix="$_opCfgPrefix.parameters"
+    _str="$(frogcfg_get_value array "$_paramCfgPrefix")"
+    readarray -t _cfgParamNames <<< "$_str"
 
     # the index of _cfgParamNames acts as [k] in the following:
     local -a _requiredNames  # [] := k
@@ -453,8 +454,10 @@ frog_process_parameters () {
 
     # loop through parameter config for each param name; compiling rules
     for (( i=0, n="${#_cfgParamNames[@]}" ; i < n ; ++i )) do
-        local _cfgParamName="${_cfgParamNames[i]}"
-        local _paramPrefix ; _paramPrefix="$_paramCfgPrefix.$_cfgParamName"
+        local _cfgParamName _paramPrefix
+        _cfgParamName="${_cfgParamNames[i]}"
+        _paramPrefix="$_paramCfgPrefix.$_cfgParamName"
+
         local -A _paramCfg
         _paramCfg["type"]="$(frogcfg_get_value string "$_paramPrefix.type")"
         _paramCfg["required"]="$(frogcfg_get_value string "$_paramPrefix.required")"
@@ -534,7 +537,7 @@ frog_color () {
     local _colorName _styleName _color="" _style="0"
     _colorName="$1"
     _styleName="${2:-normal}"
-    
+
     for i in "${!_FROG_COLOR_NAMES[@]}"; do
        if [[ "${_FROG_COLOR_NAMES[$i]}" = "$_colorName" ]]; then
             _color="${_FROG_COLORS[$i]}"

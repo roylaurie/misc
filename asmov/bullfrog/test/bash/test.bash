@@ -10,4 +10,9 @@ join () {
     echo "${*:2}"
 }
 
-echo $HOME
+f () {
+    local -r foo
+    foo="cat"
+}
+
+f
