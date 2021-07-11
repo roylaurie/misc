@@ -1,7 +1,7 @@
 # bullfrog
 *A bash command-line toolkit for building bash command-line toolkits!*
 
-![bullfrog common.stats screenshot](doc/image/screenshot-common.stats.png)
+![bullfrog common.sysinfo screenshot](doc/image/screenshot-bullfrog-common-sysinfo.png)
 
 # usage
 `bullfrog [-options] <name.space> <operation> [--parameters]`
