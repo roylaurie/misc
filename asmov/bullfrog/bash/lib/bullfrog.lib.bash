@@ -218,15 +218,21 @@ frog_parse_cmdline () {
     local -a _parameterNames=() _parameterValues=()
 
     for (( i=1, n="$#" ; i <= n ; ++i )); do
-        local _token _iskey
+        local _token _iskey _ispos
         _token="${!i}"
         _iskey="$(( i % 2))"
+        _ispos=1
 
         if [[ "$_iskey" -eq 1 ]]; then
-            [[ "$_token" =~ $_FROG_PARAMETER_PATTERN ]] ||
-                frog_error "1" "Improperly formatted parameter name" "$_token"
+            if [[ "$_token" =~ $_FROG_PARAMETER_PATTERN ]]; then
+                _parameterNames+=("$_token")
+                _ispos=0
+            else
+                [[ "$_ispos" -eq 0 || "$_token" = --* ]] &&
+                    frog_error 1 "Improperly formatted parameter name" "$_token"
 
-            _parameterNames+=("$_token")
+                _parameterNames+=("$i")
+            fi
         else
             _parameterValues+=("$_token")
         fi
@@ -438,10 +444,16 @@ frog_process_parameters () {
     local _str ; _str="$(frogcfg_get_value array "$_paramCfgPrefix")"
     local -a _cfgParamNames ; readarray -t _cfgParamNames <<< "$_str"
 
-    local -a _requiredNames _positionNames
+    # the index of _cfgParamNames acts as [k] in the following:
+    local -a _requiredNames  # [] := k
+    local -a _positionNames  # [pos] := k
+    local -a _nameDefaults   # [k] := string
+    local -a _nameTypes      # [k] := string
+    local -a _nameEnums      # [k] := string-array
 
-    # loop through parameter config for each param name; compiling info
-    for _cfgParamName in "${_cfgParamNames[@]}"; do
+    # loop through parameter config for each param name; compiling rules
+    for (( i=0, n="${#_cfgParamNames[@]}" ; i < n ; ++i )) do
+        local _cfgParamName="${_cfgParamNames[i]}"
         local _paramPrefix ; _paramPrefix="$_paramCfgPrefix.$_cfgParamName"
         local -A _paramCfg
         _paramCfg["type"]="$(frogcfg_get_value string "$_paramPrefix.type")"
@@ -450,16 +462,22 @@ frog_process_parameters () {
         _paramCfg["default"]="$(frogcfg_get_value string "$_paramPrefix.default" "")"
         _paramCfg["enum"]="$(frogcfg_get_value array "$_paramPrefix.enum" "")"
 
+        _nameTypes[$i]="$(frogcfg_get_value string "$_paramPrefix.type")"
+
         [[ "${_paramCfg["required"]}" = "true" ]] &&
-            _requiredNames+=("$_cfgParamName")
+            _requiredNames+=("$i")
 
         [[ -n "${_paramCfg["position"]}" ]] &&
-            _positionNames["${_paramCfg["position"]}"]="$_cfgParamName"
+            _positionNames["${_paramCfg["position"]}"]="$i"
 
+        [[ -n "${_paramCfg["default"]}" ]] &&
+            _nameDefaults[$i]="${_paramCfg["default"]}"
+
+        [[ -n "${_paramCfg["enum"]}" ]] &&
+            _nameEnums[$i]="${_paramCfg["enum"]}"
     done
 
-
-
+    # loop through the parameters provided and enforce schema
 
 }
 
