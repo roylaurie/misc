@@ -1,9 +1,9 @@
 #!/bin/bash
 set -o errexit -o pipefail -o privileged -o nounset
 
-_FROGCFG_KEYS=()
-_FROGCFG_VALUES=()
-_FROGCFG_OFFSETS=()
+declare -a _FROGCFG_KEYS=()
+declare -a _FROGCFG_VALUES=()
+declare -a _FROGCFG_OFFSETS=()
 
 ##
 # Stores a configuration setting in the FrogCFG key-value registry.
@@ -29,17 +29,19 @@ _FROGCFG_OFFSETS=()
 # @exits 1
 ##
 frogcfg_set_key() {
-    local _type ; _type="$1"
-    local _key ; _key="$2"
-    local _value ; shift 2 && _value=("$@")
+    local _type _key _value
+    _type="$1"
+    _key="$2"
+    shift 2 && _value=("$@")
 
     [[ "$_type" != "string" && "$_type" != "array" ]] &&
         frog_error 1 "Invalid data type for config key" "$_key" "$_type"
 
     #TODO prevent duplicate sets against the same key
 
-    local _start ; _start="${#_FROGCFG_VALUES[@]}"
-    local _size ; _size="${#_value[@]}"
+    local -i _start _size
+    _start="${#_FROGCFG_VALUES[@]}"
+    _size="${#_value[@]}"
 
     [[ "$_size" -gt 1 && "$_type" = "string" ]] &&
         frog_error 1 "Cannot convert string to array for config key" "$_key"
@@ -103,7 +105,7 @@ frogcfg_get_value() {
     _key="$2"
     _default="${3:-}"
 
-    local _index _offset _valueType _start _size
+    local -i _index
     _index="$(frogcfg_key_index "$_key")" || {
        if [[ -z "${3+null}" ]]; then
             frog_error 1 "Cannot find config key" "$_key"
@@ -113,6 +115,9 @@ frogcfg_get_value() {
         fi
     }
 
+    local -a _offset
+    local _valueType
+    local -i _start _size
     read -r -a _offset <<< "${_FROGCFG_OFFSETS[$_index]}"
     _valueType="${_offset[0]}"
     _start="${_offset[1]}"
@@ -142,7 +147,8 @@ frogcfg_debug () {
     frog_option_debug || return 0
 
     for (( _i=0, _n=${#_FROGCFG_KEYS[@]} ; _i < _n ; ++_i )); do
-        local _key="${_FROGCFG_KEYS[$_i]}" _valueType
+        local _key _valueType
+        _key="${_FROGCFG_KEYS[$_i]}" _valueType
         local -a _offset
         read -ra _offset <<< "${_FROGCFG_OFFSETS[$_i]}"
         _valueType="${_offset[0]}"

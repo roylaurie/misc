@@ -11,8 +11,11 @@ join () {
 }
 
 f () {
-    local -r foo
+    local foo
     foo="cat"
+    local -r foo
+    foo="tar"
+    echo $foo
 }
 
 f

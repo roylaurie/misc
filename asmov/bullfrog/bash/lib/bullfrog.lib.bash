@@ -52,7 +52,7 @@
 set -o allexport -o errexit -o privileged -o pipefail -o nounset 
 
 # shellcheck disable=SC2034  # unused
-NL=$'\n'
+declare -r NL=$'\n'
 
 ##
 # Retrieves the real absolute directory path for the calling script.
@@ -528,10 +528,10 @@ _frog_print_error () {
     }
 }
 
-_FROG_COLOR_NAMES=( end black red green yellow blue magenta cyan lightgray gray lightred lightgreen lightyellow lightblue lightmagenta lightcyan white  )
-_FROG_COLORS=( 0 30 31 32 33 34 35 36 37 90 91 92 93 94 95 96 97 )
-_FROG_STYLE_NAMES=( normal bold faint italic underline )
-_FROG_STYLES=( 0 1 2 3 4 )
+declare -ar _FROG_COLOR_NAMES=( end black red green yellow blue magenta cyan lightgray gray lightred lightgreen lightyellow lightblue lightmagenta lightcyan white  )
+declare -ar _FROG_COLORS=( 0 30 31 32 33 34 35 36 37 90 91 92 93 94 95 96 97 )
+declare -ar _FROG_STYLE_NAMES=( normal bold faint italic underline )
+declare -ar _FROG_STYLES=( 0 1 2 3 4 )
 
 frog_color () {
     local _colorName _styleName _color="" _style="0"
@@ -613,7 +613,7 @@ frog_arch () {
     echo "$HOSTTYPE"
 }
 
-_FROG_ERROR_CODE=64
+declare -ir _FROG_ERROR_CODE=64
 
 _FROG_COMMON_PATH="$(realpath "$(frog_script_dir)"/../..)"  # the base dirtory of the package
 _FROG_COMMON_DIST_PATH="$(realpath "$_FROG_COMMON_PATH"/..)"  # where other built-in packages may be installed
@@ -624,11 +624,22 @@ _FROG_COMMON_JSON_PATH="$(realpath "$_FROG_COMMON_PATH"/json)"  # namespace.cfg.
 _FROG_COMMON_JSON_SCHEMA_PATH="$(realpath "$_FROG_COMMON_PATH"/json/schema)"  # namespace.cfg.schema.json in schema/cfg
 _FROG_COMMON_FILES_PATH="$(realpath "$_FROG_COMMON_PATH"/FILES)"  # templates that mirror desired install path
 
+declare -r \
+    _FROG_COMMON_PATH \
+    _FROG_COMMON_DIST_PATH \
+    _FROG_COMMON_BASH_PATH \
+    _FROG_COMMON_BASHCFG_PATH \
+    _FROG_COMMON_BASHLIB_PATH \
+    _FROG_COMMON_JSON_PATH \
+    _FROG_COMMON_JSON_SCHEMA_PATH \
+    _FROG_COMMON_FILES_PATH
+
 # shellcheck source=./../../config/frog-version.txt
 _FROG_VERSION=$(cat "$_FROG_COMMON_PATH/config/frog-version.txt")
+declare -r _FROG_VERSION
 
-_FROG_NAMESPACE_PATTERN='^([a-z0-9]+\.?)*[a-z0-9]+$'
-_FROG_PARAMETER_PATTERN='^--([a-z0-9]+\.?)*[a-z0-9]+$'
+declare -r _FROG_NAMESPACE_PATTERN='^([a-z0-9]+\.?)*[a-z0-9]+$'
+declare -r _FROG_PARAMETER_PATTERN='^--([a-z0-9]+\.?)*[a-z0-9]+$'
 
 _FROG_OPTION_APP="common"
 _FROG_OPTION_CONFIG="default"
