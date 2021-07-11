@@ -429,33 +429,32 @@ frog_run_operation () {
 }
 
 frog_process_parameters () {
-    local _opCfgPrefix _paramNames _paramValues
-    _opCfgPrefix="$1"
-    IFS=$'\t' read -ar _paramNames <<< "$2"
-    IFS=$'\t' read -ar _paramValues <<< "$3"
+    local _opCfgPrefix ; _opCfgPrefix="$1"
+    local _paramNames ; IFS=$'\t' read -ar _paramNames <<< "$2"
+    local _paramValues ; IFS=$'\t' read -ar _paramValues <<< "$3"
 
     # retrieve expected param names
-    local _paramCfgPrefix="$_opCfgPrefix.parameters"
-    local -a _cfgParamNames
-    readarray -t _cfgParamNames <<< "$(frogcfg_get_value array "$_paramCfgPrefix")"
+    local _paramCfgPrefix ; _paramCfgPrefix="$_opCfgPrefix.parameters"
+    local _str ; _str="$(frogcfg_get_value array "$_paramCfgPrefix")"
+    local -a _cfgParamNames ; readarray -t _cfgParamNames <<< "$_str"
 
     local -a _requiredNames _positionNames
 
     # loop through parameter config for each param name; compiling info
     for _cfgParamName in "${_cfgParamNames[@]}"; do
-        local _paramPrefix="$_paramCfgPrefix.$_cfgParamName"
+        local _paramPrefix ; _paramPrefix="$_paramCfgPrefix.$_cfgParamName"
         local -A _paramCfg
         _paramCfg["type"]="$(frogcfg_get_value string "$_paramPrefix.type")"
         _paramCfg["required"]="$(frogcfg_get_value string "$_paramPrefix.required")"
         _paramCfg["position"]="$(frogcfg_get_value string "$_paramPrefix.position" "")"
         _paramCfg["default"]="$(frogcfg_get_value string "$_paramPrefix.default" "")"
         _paramCfg["enum"]="$(frogcfg_get_value array "$_paramPrefix.enum" "")"
-#TODO frogcfg_get_value access a default value as the third parameter, does not throw error if provided
+
         [[ "${_paramCfg["required"]}" = "true" ]] &&
             _requiredNames+=("$_cfgParamName")
 
-        [[ "${_paramCfg["position"]}" = "true" ]] &&
-            _requiredNames+=("$_cfgParamName")
+        [[ -n "${_paramCfg["position"]}" ]] &&
+            _positionNames["${_paramCfg["position"]}"]="$_cfgParamName"
 
     done
 
