@@ -26,11 +26,21 @@ rsync -a ./tool/files/package/debian/DEBIAN ./dist/debian/bullfrog $_rsyncExclud
 rsync -a ./dist/bullfrog ./dist/debian/bullfrog/usr/local/lib $_rsyncExcludes
 ln -s ../lib/bullfrog/bash/bin/bullfrog.bash ./dist/debian/bullfrog/usr/local/bin/bullfrog
 
-dpkg-deb --build ./dist/debian/bullfrog
-
 dpkgFilename="bullfrog-${FROG_VERSION}-${FROG_ARCH}.deb"
+
+dpkg-deb --build ./dist/debian/bullfrog
 mv ./dist/debian/bullfrog.deb ./dist/$dpkgFilename
 cp -f ./dist/$dpkgFilename ./files/debian-package
+cp -f ./dist/$dpkgFilename ./dist/bullfrog/files/debian-package
+cp -f ./dist/$dpkgFilename ./dist/debian/bullfrog/usr/local/lib/bullfrog/files/debian-package
+
+# run a second time to include a copy of the deb file
+dpkg-deb --build ./dist/debian/bullfrog
+mv ./dist/debian/bullfrog.deb ./dist/$dpkgFilename
+cp -f ./dist/$dpkgFilename ./files/debian-package
+cp -f ./dist/$dpkgFilename ./dist/bullfrog/files/debian-package
+cp -f ./dist/$dpkgFilename ./dist/debian/bullfrog/usr/local/lib/bullfrog/files/debian-package
+
 rm -rf ./dist/debian
 
 echo
