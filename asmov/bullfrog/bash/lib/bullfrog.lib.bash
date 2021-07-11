@@ -352,8 +352,6 @@ frog_operation_cfg () {
     local _opFunction
     _opFunction="$(frog_module_function "$_namespace" "$_operation")" || frog_error
 
-    echo "$_namespace"  # 0
-    echo "$_operation"  # 1
     echo "$_opScript"   # 2
     echo "$_opFunction" # 3
     echo "$_opPrefix"   # 4
@@ -404,24 +402,66 @@ frog_module_function() {
 # @returns 1: error, 0: success
 ##
 frog_run_operation () {
-    local _namespace _operation _paramNames _paramValues
+    local _namespace _operation _tabParamNames _tabParamValues
     _namespace="$1"
     _operation="$2"
-    _paramNames="$3"
-    _paramValues="$4"
+    _tabParamNames="$3"
+    _tabParamValues="$4"
 
     local -a _result _opCfg
     _result="$(frog_operation_cfg "$_namespace" "$_operation")"
     readarray -t _opCfg <<< "$_result"
 
-    local _opScript _opFunction
-    _opScript="${_opCfg[2]}"
-    _opFunction="${_opCfg[3]}"
+    local _opScript _opFunction _opCfgPrefix
+    _opScript="${_opCfg[0]}"
+    _opFunction="${_opCfg[1]}"
+    _opCfgPrefix="${_opCfg[2]}"
+
+    #_result="$(frog_process_parameters $_tabParamNames" "$_tabParamValues")" || frog_error
+    #readarray -t _results <<< "$_result"
+    #_tabParamNames="${_results[0]}"
+    #_tabParamValues="${_results[1]}"
 
     # shellcheck disable=SC1090
     source "$_opScript"
     frog_option_bash_debug && set -x
-    $_opFunction "$_paramNames" "$_paramValues"
+    $_opFunction "$_tabParamNames" "$_tabParamValues"
+}
+
+frog_process_parameters () {
+    local _opCfgPrefix _paramNames _paramValues
+    _opCfgPrefix="$1"
+    IFS=$'\t' read -ar _paramNames <<< "$2"
+    IFS=$'\t' read -ar _paramValues <<< "$3"
+
+    # retrieve expected param names
+    local _paramCfgPrefix="$_opCfgPrefix.parameters"
+    local -a _cfgParamNames
+    readarray -t _cfgParamNames <<< "$(frogcfg_get_value array "$_paramCfgPrefix")"
+
+    local -a _requiredNames _positionNames
+
+    # loop through parameter config for each param name; compiling info
+    for _cfgParamName in "${_cfgParamNames[@]}"; do
+        local _paramPrefix="$_paramCfgPrefix.$_cfgParamName"
+        local -A _paramCfg
+        _paramCfg["type"]="$(frogcfg_get_value string "$_paramPrefix.type")"
+        _paramCfg["required"]="$(frogcfg_get_value string "$_paramPrefix.required")"
+        _paramCfg["position"]="$(frogcfg_get_value string "$_paramPrefix.position" "")"
+        _paramCfg["default"]="$(frogcfg_get_value string "$_paramPrefix.default" "")"
+        _paramCfg["enum"]="$(frogcfg_get_value array "$_paramPrefix.enum" "")"
+#TODO frogcfg_get_value access a default value as the third parameter, does not throw error if provided
+        [[ "${_paramCfg["required"]}" = "true" ]] &&
+            _requiredNames+=("$_cfgParamName")
+
+        [[ "${_paramCfg["position"]}" = "true" ]] &&
+            _requiredNames+=("$_cfgParamName")
+
+    done
+
+
+
+
 }
 
 frog_error () {
