@@ -83,8 +83,8 @@ frog_common_json_schema_path () {
     echo "$_FROG_COMMON_JSON_SCHEMA_PATH"
 }
 
-frog_common_skeleton_path () {
-    echo "$_FROG_COMMON_SKELETON_PATH"
+frog_common_files_path () {
+    echo "$_FROG_COMMON_FILES_PATH"
 }
 
 # Used by each package's namespace.cfg.bash file to specify the package's root namespace is.
@@ -185,7 +185,7 @@ frog_parse_cmdline () {
             x)  _options[x]="true" ;;
             X)  _options[X]="true" ;;
             *)  local _last=$(( OPTIND - 1 ))
-                frog_error 1 "Illegal option" "${!_last}" "frog_parse_cmdline" ;;
+                frog_error 1 "Illegal option" "${!_last}" ;;
         esac
     done
 
@@ -196,7 +196,7 @@ frog_parse_cmdline () {
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
     [[ "$_namespace" =~ $_FROG_NAMESPACE_PATTERN ]] ||
-        frog_error 1 "Improper formatting of namespace" "$_namespace" "frog_parse_cmdline"
+        frog_error 1 "Improper formatting of namespace" "$_namespace"
 
     shift 1
 
@@ -209,11 +209,11 @@ frog_parse_cmdline () {
     elif [[ "$_operation" =~ $_FROG_NAMESPACE_PATTERN ]]; then
         shift 1
     else
-        frog_error "1" "Improperly formated operation" "$_operation" "frog_parse_cmdline"
+        frog_error "1" "Improperly formated operation" "$_operation"
     fi
 
     [[ "$_operation" = "default" && "$#" -gt 1 ]] &&
-        frog_error 1 "Parameters are not allowed with default operations" "frog_parse_cmdline"
+        frog_error 1 "Parameters are not allowed with default operations"
 
     local -a _parameterNames=() _parameterValues=()
 
@@ -224,7 +224,7 @@ frog_parse_cmdline () {
 
         if [[ "$_iskey" -eq 1 ]]; then
             [[ "$_token" =~ $_FROG_PARAMETER_PATTERN ]] ||
-                frog_error "1" "Improperly formatted parameter name" "$_token" "frog_parse_cmdline"
+                frog_error "1" "Improperly formatted parameter name" "$_token"
 
             _parameterNames+=("$_token")
         else
@@ -233,7 +233,7 @@ frog_parse_cmdline () {
     done
 
     [[ "${#_parameterNames[@]}" -ne "${#_parameterValues[@]}" ]] &&
-        frog_error 1 "Missing value for parameter" "" "frog_parse_cmdline"
+        frog_error 1 "Missing value for parameter"
 
     echo "$_namespace"
     echo "$_operation"
@@ -266,7 +266,7 @@ frog_process_options () {
                 [[ "$_val" = "true" ]] && _FROG_OPTION_DEBUG=1 ;;
             X)  frogcfg_set_key string "options.bash.debug" "$_val"
                 [[ "$_val" = "true" ]] && _FROG_OPTION_BASH_DEBUG=1 ;;
-            *)  frog_error 1 "Unknown option" "$_opt" "frog_process_options" ;;
+            *)  frog_error 1 "Unknown option" "$_opt" ;;
         esac
     done
 }
@@ -328,7 +328,7 @@ frog_operation_cfg () {
     local _packageNamespace
     _packageNamespace="${_FROG_NAMESPACES["$_namespace"]:-}"
     [[ -z "$_packageNamespace" ]] &&
-        frog_error 1 "Unknown namespace" "$_namespace" "frog_operation_cfg"
+        frog_error 1 "Unknown namespace" "$_namespace"
 
     local _packagePrefix _opPrefix
     _packagePrefix="package.$_packageNamespace"
@@ -356,6 +356,7 @@ frog_operation_cfg () {
     echo "$_operation"  # 1
     echo "$_opScript"   # 2
     echo "$_opFunction" # 3
+    echo "$_opPrefix"   # 4
 }
 
 ##
@@ -374,7 +375,7 @@ frog_module_path () {
     _filepath="$_packagePath/bash/module/$_namepath"
 
     [[ -f "$_filepath" ]] ||
-        frog_error 1 "Module script does not exist" "$_filepath" "frog_module_path"
+        frog_error 1 "Module script does not exist" "$_filepath"
 
     echo "$_filepath"
 }
@@ -431,29 +432,33 @@ frog_error () {
     [[ "$1" -eq "$_FROG_ERROR_CODE" ]] &&
         exit "$_FROG_ERROR_CODE"
 
-    local _exitCode _errorMessage _subject _errorDetails
+    local _exitCode _errorMessage _subject _errorDetails _errFunc
     _exitCode="$1"
     _errorMessage="${2-}"
     _subject="${3-}"
     _errorDetails="${4-}"
+    _errFunc="${FUNCNAME[1]}"
 
-    _frog_print_error "$_exitCode" "$_errorMessage" "$_subject" "$_errorDetails"
+    _frog_print_error "$_exitCode" "$_errFunc" "$_errorMessage" "$_subject" "$_errorDetails"
 
     exit "$_FROG_ERROR_CODE"
 }
 
 _frog_print_error () {
-    local _exitCode _errorMessage _subject _errorDetails
+    local _exitCode _errFunc _errorMessage _subject _errorDetails
     _exitCode="$1"
-    _errorMessage="${2-}"
-    _subject="${3-}"
-    _errorDetails="${4-}"
+    _errFunc="$2"
+    _errorMessage="${3-}"
+    _subject="${4-}"
+    _errorDetails="${5-}"
 
     local _subjectStr=""
     [[ -n "$_subject" ]] &&
         _subjectStr=" '$(frog_color lightcyan)${_subject}$(frog_color end)'"
 
     echo -e "$(frog_color red)bullfrog error($(frog_color lightgray)${_exitCode}$(frog_color red)):$(frog_color end) ${_errorMessage}${_subjectStr}" >&2
+    echo -e "$(frog_color red)::$(frog_color end)  $(frog_color lightgray)${_errFunc}$(frog_color end)" >&2
+
     [ -n "${_errorDetails}" ] && {
         local -a _lines
         mapfile -t _lines <<< "$_errorDetails"
@@ -480,7 +485,7 @@ frog_color () {
        fi
     done 
 
-    [[ -n "$_color" ]] || frog_error 1 "Invalid color" "$_colorName" "frog_color"
+    [[ -n "$_color" ]] || frog_error 1 "Invalid color" "$_colorName"
     [[ "$_color" = "0" ]] && {
         echo '\e[0m'
         return 0

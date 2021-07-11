@@ -13,7 +13,7 @@ op_common_remote_install () {
     _pkgFilepath="$(realpath "$(frog_common_path)/files/debian-package/$_pkgFilename")" ||
         frog_error 1 "Debian package file does not exist"
 
-    [[ "$_host" = "localhost" ]] && frog_error 1 "-r[emote host] not set" "" "op_common_remote_install"
+    [[ "$_host" = "localhost" ]] && frog_error 1 "-r[emote host] not set"
 
     ssh "$_host" 'mkdir -p ~/tmp'
     scp "$_pkgFilepath" "${_host}:~/tmp" 1> /dev/null

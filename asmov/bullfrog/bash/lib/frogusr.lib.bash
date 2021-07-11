@@ -22,12 +22,12 @@ _frogusr_data_dir () {
 }
 
 frogusr_config_path () {
-    [[ -z "$_FROGUSR_CONFIG_PATH" ]] && frog_error 1 "Accessing frogusr_path before frogusr_init" "frogusr_path"
+    [[ -z "$_FROGUSR_CONFIG_PATH" ]] && frog_error 1 "Accessing frogusr_path before frogusr_init"
     echo "$_FROGUSR_CONFIG_PATH"
 }
 
 frogusr_data_path () {
-    [[ -z "$_FROGUSR_DATA_PATH" ]] && frog_error 1 "Accessing frogusr_data_path before frogusr_init" "frogusr_data_path"
+    [[ -z "$_FROGUSR_DATA_PATH" ]] && frog_error 1 "Accessing frogusr_data_path before frogusr_init"
     echo "$_FROGUSR_DATA_PATH"
 }
 

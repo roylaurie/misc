@@ -19,7 +19,7 @@ frogcfg_set_key() {
     _size="${#_value[@]}"
 
     [[ "$_size" -gt 1 && "$_type" = "string" ]] &&
-        frog_error 1 "Cannot convert string to array for config key" "$_key" "frogcfg_get_value"
+        frog_error 1 "Cannot convert string to array for config key" "$_key"
 
     _FROGCFG_KEYS+=("$_key")
     _FROGCFG_VALUES+=("${_value[@]}")
@@ -48,7 +48,7 @@ frogcfg_get_value() {
 
     local _index _offset _valueType _start _size
     _index="$(frogcfg_key_index "$_key")" ||
-        frog_error 1 "Cannot find config key" "$_key" "frogcfg_get_value"
+        frog_error 1 "Cannot find config key" "$_key"
 
     read -r -a _offset <<< "${_FROGCFG_OFFSETS[$_index]}"
     _valueType="${_offset[0]}"
@@ -56,7 +56,7 @@ frogcfg_get_value() {
     _size="${_offset[2]}"
 
     [[ "$_type" != "$_valueType" ]] &&
-        frog_error 1 "Wrong data type specified for config key/type " "$_key / $_type" "frogcfg_get_value"
+        frog_error 1 "Wrong data type specified for config key/type " "$_key / $_type"
 
     if [[ "$_type" = "array" ]]; then
         local -a _result
