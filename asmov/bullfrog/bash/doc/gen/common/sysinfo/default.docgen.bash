@@ -3,40 +3,40 @@ set -o errexit -o pipefail -o privileged -o nounset
 
 docgen_common_sysinfo_default () {
     frogdoc_header "common.sysinfo"
-    frogdoc_bullet "OS"
-    frogdoc_print_data "Name" "os.name"
-    frogdoc_print_data "Kernel" "os.kernel"
-    frogdoc_print_data "Arch" "os.arch"
-    frogdoc_spacer
-    frogdoc_bullet "Hardware"
-    frogdoc_print_data "CPU" "hardware.cpu"
-    frogdoc_print_data "RAM" "hardware.ram"
-    frogdoc_spacer
-    frogdoc_bullet "Storage"
-    frogdoc_print_data "Root" "%{storage.free}% gb (free) / %{storage.free}% gb (total)"
-    frogdoc_spacer
-    frogdoc_bullet "Network"
-    frogdoc_print_data "Hostname" "network.hostname"
-    frogdoc_print_data "IP" "network.ip"
-    frogdoc_print_data "Interfaces" ""
-    frogdoc_print_data_array "network.interfaces"
-    frogdoc_spacer
-    frogdoc_bullet "bash"
-    frogdoc_print_data "Version" "bash.verison"
-    frogdoc_print_data "OS Type" "bash.ostype"
-    frogdoc_print_data "extglob" "bash.extglob"
-    frogdoc_spacer
-    frogdoc_bullet "nodejs"
-    frogdoc_print_data "Version" "nodejs.verison"
-    frogdoc_print_data "V8 Version" "node.v8.version"
-    frogdoc_spacer
-    frogdoc_bullet "python"
-    frogdoc_print_data "Version" "python.version"
-    frogdoc_spacer
-    frogdoc_bullet "rust"
-    frogdoc_print_data "Version" "rust.version"
-    frogdoc_spacer
-    frogdoc_bullet "java"
-    frogdoc_print_data "Version" "java.version"
+    frogdoc_title "OS"
+    frogdoc_field "Name" "os.name"
+    frogdoc_field "Kernel" "os.kernel"
+    frogdoc_field "Arch" "os.arch"
+    frogdoc_newline
+    frogdoc_title "Hardware"
+    frogdoc_field "CPU" "hardware.cpu"
+    frogdoc_field "RAM" "hardware.ram"
+    frogdoc_newline
+    frogdoc_title "Storage"
+    frogdoc_field "Root" "%{storage.free}% gb (free) / %{storage.free}% gb (total)"
+    frogdoc_newline
+    frogdoc_title "Network"
+    frogdoc_field "Hostname" "network.hostname"
+    frogdoc_field "IP" "network.ip"
+    frogdoc_field "Interfaces" ""
+    frogdoc_field_kv "network.interfaces.names" "network.interfaces.values"
+    frogdoc_newline
+    frogdoc_title "bash"
+    frogdoc_field "Version" "bash.verison"
+    frogdoc_field "OS Type" "bash.ostype"
+    frogdoc_field "extglob" "bash.extglob"
+    frogdoc_newline
+    frogdoc_title "nodejs"
+    frogdoc_field "Version" "nodejs.verison"
+    frogdoc_field "V8 Version" "node.v8.version"
+    frogdoc_newline
+    frogdoc_title "python"
+    frogdoc_field "Version" "python.version"
+    frogdoc_newline
+    frogdoc_title "rust"
+    frogdoc_field "Version" "rust.version"
+    frogdoc_newline
+    frogdoc_title "java"
+    frogdoc_field "Version" "java.version"
     frogdoc_footer
 }
