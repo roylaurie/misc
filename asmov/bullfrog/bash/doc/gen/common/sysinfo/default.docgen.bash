@@ -18,7 +18,7 @@ docgen_common_sysinfo_default () {
     frogdoc_title "Network"
     frogdoc_field "Hostname" "network.hostname"
     frogdoc_field "IP" "network.ip"
-    frogdoc_field "Interfaces" ""
+    frogdoc_field_title "Interfaces"
     frogdoc_field_kv "network.interfaces.names" "network.interfaces.values"
     frogdoc_newline
     frogdoc_title "bash"
