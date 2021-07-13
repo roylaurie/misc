@@ -167,83 +167,84 @@ frog_inarray () {
 #    3: tabarray parameter values }
 ##
 frog_parse_cmdline () {
-    local -A _options
-    _options[a]="common" # application package namespace
-    _options[c]="default" # config profile name
-    _options[f]="false" # force
-    _options[r]="localhost" # the ssh host to run bullfrog commands on. localhost is local, but 127.0.0.1 is remote ssh.
-    _options[x]="false" # debug
-    _options[X]="false" # bash debug
+    local -n _optionsRef _namespaceRef _operationRef _parametersRef
+    _optionsRef="$1"
+    _namespaceRef="$2"
+    _operationRef="$3"
+    _parametersRef="$4"
+    shift 4
+
+    _optionsRef[a]="common" # application package namespace
+    _optionsRef[c]="default" # config profile name
+    _optionsRef[f]="false" # force
+    _optionsRef[r]="localhost" # the ssh host to run bullfrog commands on. localhost is local, but 127.0.0.1 is remote ssh.
+    _optionsRef[x]="false" # debug
+    _optionsRef[X]="false" # bash debug
 
     local _o
     while getopts a:c:fr:xX _o 2> /dev/null; do
         case "$_o" in
-            a)  _options[a]="$OPTARG" ;;
-            c)  _options[c]="$OPTARG" ;;
-            f)  _options[f]="true" ;;
-            r)  _options[r]="${OPTARG:-localhost}" ;;
-            x)  _options[x]="true" ;;
-            X)  _options[X]="true" ;;
-            *)  local _last=$(( OPTIND - 1 ))
+            a)  _optionsRef[a]="$OPTARG" ;;
+            c)  _optionsRef[c]="$OPTARG" ;;
+            f)  _optionsRef[f]="true" ;;
+            r)  _optionsRef[r]="${OPTARG:-localhost}" ;;
+            x)  _optionsRef[x]="true" ;;
+            X)  _optionsRef[X]="true" ;;
+            *)  local -r _last=$(( OPTIND - 1 ))
                 frog_error 1 "Illegal option" "${!_last}" ;;
         esac
     done
 
     shift $(( OPTIND - 1 ))
 
-    local _namespace ; _namespace="${1:-}"
-    [[ -z "$_namespace" ]] &&
+    _namespaceRef="${1:-}"
+    [[ -z "$_namespaceRef" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
-    [[ "$_namespace" =~ $_FROG_NAMESPACE_PATTERN ]] ||
-        frog_error 1 "Improper formatting of namespace" "$_namespace"
+    [[ "$_namespaceRef" =~ $_FROG_NAMESPACE_PATTERN ]] ||
+        frog_error 1 "Improper formatting of namespace" "$_namespaceRef"
 
     shift 1
 
-    local _operation ; _operation="${1:-}"
-    if [[ -z "$_operation" ]]; then
-        _operation="default"
-    elif [[ "$_operation" = "default" ]]; then
+    _operationRef="${1:-}"
+    if [[ -z "$_operationRef" ]]; then
+        _operationRef="default"
+    elif [[ "$_operationRef" = "default" ]]; then
         shift 1
-    elif [[ "$_operation" =~ $_FROG_NAMESPACE_PATTERN ]]; then
+    elif [[ "$_operationRef" =~ $_FROG_NAMESPACE_PATTERN ]]; then
         shift 1
     else
-        frog_error "1" "Improperly formated operation" "$_operation"
+        frog_error "1" "Improperly formated operation" "$_operationRef"
     fi
 
-    [[ "$_operation" = "default" && "$#" -gt 1 ]] &&
+    [[ "$_operationRef" = "default" && "$#" -gt 1 ]] &&
         frog_error 1 "Parameters are not allowed with default operations"
-
-    local -a _parameterNames=() _parameterValues=()
 
     for (( i=1, n="$#" ; i <= n ; ++i )); do
         local _token="${!i}"
         local -i _iskey=$(( i % 2))
         local -i _ispos=1
+        local _lastKey=""
 
         if [[ "$_iskey" -eq 1 ]]; then
+            _lastKey="$_token"
+
             if [[ "$_token" =~ $_FROG_PARAMETER_PATTERN ]]; then
-                _parameterNames+=("$_token")
                 _ispos=0
+                _parameters["$_token"]=""
             else
                 [[ "$_ispos" -eq 0 || "$_token" = --* ]] &&
                     frog_error 1 "Improperly formatted parameter name" "$_token"
 
-                _parameterNames+=("$i")
+                _parameters["$i"]=""
             fi
         else
-            _parameterValues+=("$_token")
+            _parameters["$_lastKey"]="$_token"
         fi
     done
 
+    #TODO
     [[ "${#_parameterNames[@]}" -ne "${#_parameterValues[@]}" ]] &&
         frog_error 1 "Missing value for parameter"
-
-    echo "$_namespace"
-    echo "$_operation"
-    frog_join "${_parameterNames[@]}"
-    frog_join "${_parameterValues[@]}"
-    frog_join "${!_options[@]}" # keys
-    frog_join "${_options[@]}" # values
 }
 
 frog_process_options () {
@@ -324,6 +325,8 @@ frog_operation_cfg () {
     local _namespace _operation
     _namespace="$1"
     _operation="$2"
+    local -n _resultRef
+    _resultRef="$3"
 
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
@@ -341,10 +344,10 @@ frog_operation_cfg () {
     frogcfg_has_key "$_opPrefix.desc" ||
         frog_error 1 "Invalid operation" "$_namespace::$_operation"
 
-    local _result
-    _result="$(frogcfg_get_value array "$_opPrefix.parameters")" || frog_error
+    local _str
+    _str="$(frogcfg_get_value array "$_opPrefix.parameters")" || frog_error
     local -a _paramterNames
-    readarray -t _parameterNames <<< "$_result"
+    readarray -t _parameterNames <<< "$_str"
 
     local _packagePath
     _packagePath="${_FROG_PACKAGES["$_packageNamespace"]}"
@@ -355,9 +358,9 @@ frog_operation_cfg () {
     local _opFunction
     _opFunction="$(frog_module_function "$_namespace" "$_operation")" || frog_error
 
-    echo "$_opScript"   # 2
-    echo "$_opFunction" # 3
-    echo "$_opPrefix"   # 4
+    _resultRef["scriptPath"]="$_opScript"
+    _resultRef["functionName"]="$_opFunction"
+    _resultRef["cfgPrefix"]="$_opPrefix"
 }
 
 ##
@@ -405,31 +408,23 @@ frog_module_function() {
 # @returns 1: error, 0: success
 ##
 frog_run_operation () {
-    local _namespace _operation _tabParamNames _tabParamValues
+    local _namespace _operation
     _namespace="$1"
     _operation="$2"
-    _tabParamNames="$3"
-    _tabParamValues="$4"
+    local -n _rawParamsRef
+    _rawParamsRef="$3"
 
-    local _str
-    local -a _opCfg
-    _str="$(frog_operation_cfg "$_namespace" "$_operation")"
-    readarray -t _opCfg <<< "$_str"
+    local -A _opCfg=( [scriptPath]="" [functionName]="" [cfgPrefix]="" )
+    frog_operation_cfg _opCfg "$_namespace" "$_operation"
 
-    local _opScript _opFunction _opCfgPrefix
-    _opScript="${_opCfg[0]}"
-    _opFunction="${_opCfg[1]}"
-    _opCfgPrefix="${_opCfg[2]}"
-
-    #_result="$(frog_process_parameters $_tabParamNames" "$_tabParamValues")" || frog_error
-    #readarray -t _results <<< "$_result"
-    #_tabParamNames="${_results[0]}"
-    #_tabParamValues="${_results[1]}"
+    #local -A __parameters
+    #frog_read_parameters __parameters _rawParams
+    declare -r __parameters
 
     # shellcheck disable=SC1090
-    source "$_opScript"
+    source "${_opCfg[scriptPath]}"
     frog_option_bash_debug && set -x
-    $_opFunction "$_tabParamNames" "$_tabParamValues"
+    ${_opCfg[functionName]} __parameters
 }
 
 frog_process_parameters () {

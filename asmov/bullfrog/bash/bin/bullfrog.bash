@@ -30,23 +30,11 @@ frog_import_builtins
 # @returns 1: error, 0: success
 ##
 main () {
-    local _result
-    local -a _results
-    _result="$(frog_parse_cmdline "$@")" || frog_error
-    readarray -t _results <<< "$_result"
-
-    local _namespace _operation _tabarrayParamNames _tabarrayParamValues _tabarrayOptionNames _tabarrayOptionValues
-    _namespace="${_results[0]}"
-    _operation="${_results[1]}"
-    _tabarrayParamNames="${_results[2]:-}"
-    _tabarrayParamValues="${_results[3]:-}"
-    _tabarrayOptionNames="${_results[4]:-}"
-    _tabarrayOptionValues="${_results[5]:-}"
-
-    frog_process_options "$_tabarrayOptionNames" "$_tabarrayOptionValues"
-
+    local -A _options _namespace _operation _parameters
+    frog_read_cmdline _options _namespace _operation _parameters "$@"
+    frog_process_options _options
     frog_load_user
-    frog_run_operation "$_namespace" "$_operation" "$_tabarrayParamNames" "$_tabarrayParamValues"
+    frog_run_operation "$_namespace" "$_operation" _parameters
 }
 
 main "$@"

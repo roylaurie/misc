@@ -11,11 +11,26 @@ join () {
 }
 
 f () {
-    local foo
-    foo="cat"
-    local -r foo
-    foo="tar"
-    echo $foo
+    local origin='this is a value'
+    j origin
+
+    local -ra origins=('this' 'is a' 'value')
+    k origins
+
+    echo "newref $origin"
+}
+
+j () {
+    local -n reference
+    reference="$1"
+    echo "VALUE $reference"
+    reference="f"
+}
+
+k () {
+    local -n reference=$1
+    echo "VALUES ${reference[*]}"
+    echo "VALUES ${reference[1]}"
 }
 
 f
