@@ -5,6 +5,7 @@ docgen_common_sysinfo_default () {
     frogdoc_header "common.sysinfo"
     frogdoc_section "OS"
     frogdoc_field "Name" "os.name"
+    frogdoc_field "Heritage" "os.heritage"
     frogdoc_field "Kernel" "os.kernel"
     frogdoc_field "Arch" "os.arch"
     frogdoc_section "Hardware"

@@ -4,14 +4,24 @@ set -o errexit -o pipefail -o privileged -o nounset
 
 op_common_sysinfo_default () {
     local -a _arr _arr2
-    local _str
+    local _str _str2
 
     frogl_header "common.sysinfo"
 
     frogl_bullet "OS"
 
-    _str="$(grep -e '^PRETTY_NAME' /etc/os-release | sed -r -e "s/^.+=['\"]//g" -e "s/['\"]$//g")"
+    _str="$(grep -e '^PRETTY_NAME=' /etc/os-release | sed -r -e "s/^.+=['\"]?//g" -e "s/['\"]?$//g")"
     frogl_print_data "Name" "$_str"
+
+    _str="$(grep -e '^ID=' /etc/os-release | sed -r -e "s/^.+=['\"]?//g" -e "s/['\"]?$//g")"
+    _str2="$(grep -e '^ID_LIKE=' /etc/os-release | sed -r -e "s/^.+=['\"]?//g" -e "s/['\"]?$//g")"
+
+    case "$_str2" in
+        "ubuntu") _str="$_str :: $_str2 :: debian" ;;
+        *) ;;
+    esac
+
+    frogl_print_data "Heritage" "$_str"
 
     _str="$(uname -r)"
     frogl_print_data "Kernel" "${_str/[!0-9.]*}"
