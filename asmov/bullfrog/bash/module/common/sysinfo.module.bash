@@ -3,16 +3,15 @@ set -o errexit -o pipefail -o privileged -o nounset
 
 
 op_common_sysinfo_default () {
+    local -a _arr _arr2
     local _str
-    local -a _arr _xa
 
     frogl_header "common.sysinfo"
 
     frogl_bullet "OS"
 
-    _arr="$(head -2 /etc/os-release | sed -re 's/^.*"(.+)".*$/\1/g' | tr '\n' ' ')"
-
-    frogl_print_data "Name" "$_arr"
+    _str="$(grep -e '^PRETTY_NAME' /etc/os-release | sed -r -e "s/^.+=['\"]//g" -e "s/['\"]$//g")"
+    frogl_print_data "Name" "$_str"
 
     _str="$(uname -r)"
     frogl_print_data "Kernel" "${_str/[!0-9.]*}"
@@ -47,9 +46,9 @@ op_common_sysinfo_default () {
     mapfile -t _arr <<< \
         "$(ip address show | grep ' scope global ' | awk '{ sub(/\/.*$/, "", $2) ; print $2 " " $NF }')"
 
-    for _r in "${_arr[@]}"; do
-        read -ra _xa <<< "$_r"
-        frogl_print_data "   ${_xa[1]}" "${_xa[0]}"
+    for _str in "${_arr[@]}"; do
+        read -ra _arr2 <<< "$_str"
+        frogl_print_data "   ${_arr2[1]}" "${_arr2[0]}"
     done
 
     frogl_spacer
