@@ -131,6 +131,7 @@ frogcfg_read_value() {
     if [[ "$_type" = "array" ]]; then
         _resultRef=("${_FROGCFG_VALUES[@]:$_start:$_size}")
     else
+        # shellcheck disable=SC2178
         _resultRef="${_FROGCFG_VALUES[$_start]}"
     fi
 }
