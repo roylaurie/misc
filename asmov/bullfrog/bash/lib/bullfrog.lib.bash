@@ -440,7 +440,7 @@ frog_read_parameters () {
     _paramCfgPrefix="$_opCfgPrefix.parameters"
 
     local _cfgParamNames
-    frogcfg_read_values _cfgParamNames "$_paramCfgPrefix"
+    frogcfg_read_value _cfgParamNames array "$_paramCfgPrefix"
 
     # the index of _cfgParamNames acts as [k] in the following:
     local -a _requiredNames  # [] := k

@@ -20,7 +20,6 @@ set -o errexit -o pipefail -o privileged -o nounset
 
 # shellcheck source=./../lib/bullfrog.lib.bash
 source "$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"/..)"/lib/bullfrog.lib.bash
-
 frog_import_builtins
 
 ##

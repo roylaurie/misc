@@ -100,7 +100,9 @@ frogcfg_has_key () {
 # @exits 1: key not found
 ##
 frogcfg_read_value() {
-    local _resultRef _key _default
+    local -n _resultRef
+    _resultRef="$1"
+    local _type _key _default
     _type="$2"
     _key="$3"
     _default="${4:-}"
