@@ -99,6 +99,61 @@ frogcfg_has_key () {
 # @exits 1: value type mismatch
 # @exits 1: key not found
 ##
+frogcfg_read_value() {
+    local _resultRef _key _default
+    _type="$2"
+    _key="$3"
+    _default="${4:-}"
+
+    local -i _index
+    _index="$(frogcfg_key_index "$_key")" || {
+       if [[ -z "${3+null}" ]]; then
+            frog_error 1 "Cannot find config key" "$_key"
+        else
+            echo "$_default"
+            return 0
+        fi
+    }
+
+    local -a _offset
+    local _valueType
+    local -i _start _size
+    read -r -a _offset <<< "${_FROGCFG_OFFSETS[$_index]}"
+    _valueType="${_offset[0]}"
+    _start="${_offset[1]}"
+    _size="${_offset[2]}"
+
+    [[ "$_type" != "$_valueType" ]] &&
+        frog_error 1 "Wrong data type specified for config key/type " "$_key / $_type"
+
+    if [[ "$_type" = "array" ]]; then
+        _resultRef=("${_FROGCFG_VALUES[@]:$_start:$_size}")
+    else
+        _resultRef="${_FROGCFG_VALUES[$_start]}"
+    fi
+}
+
+##
+# Retrieves a value from the FrogCFG key-value registry.
+#
+# === Example
+# ---
+# # Retrieves a string with error handling
+# local my1 ; my1="$(frogcfg_get_value "my.str.value")" ||
+#     frog_error 1 "Could not find my favorite string"
+# ---
+# # Retrieves an array string with error handling, then splits the result into an array.
+# local str="$(frogcfg_get_value array "my.str.array")" ||
+#     frog_error 1 "Could not find my favorite array"
+# local -a my2 ; read -ra my2 <<< "$str"
+#
+# @param enum("string" "array") valueType The expected type of the return value.
+# @param string key The config key.
+# @param ?string default The default value to return if the key does not exist. Prevents error on key not found.
+# @returns 1: error ; 0: success { string value }
+# @exits 1: value type mismatch
+# @exits 1: key not found
+##
 frogcfg_get_value() {
     local _type _key _default
     _type="$1"

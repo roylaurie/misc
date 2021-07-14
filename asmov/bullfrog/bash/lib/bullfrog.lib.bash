@@ -166,7 +166,7 @@ frog_inarray () {
 #    2: tabarray parameter names
 #    3: tabarray parameter values }
 ##
-frog_parse_cmdline () {
+frog_read_cmdline () {
     local -n _optionsRef _namespaceRef _operationRef _parametersRef
     _optionsRef="$1"
     _namespaceRef="$2"
@@ -219,44 +219,42 @@ frog_parse_cmdline () {
     [[ "$_operationRef" = "default" && "$#" -gt 1 ]] &&
         frog_error 1 "Parameters are not allowed with default operations"
 
+    local _lastKey=""
     for (( i=1, n="$#" ; i <= n ; ++i )); do
         local _token="${!i}"
         local -i _iskey=$(( i % 2))
         local -i _ispos=1
-        local _lastKey=""
 
         if [[ "$_iskey" -eq 1 ]]; then
             _lastKey="$_token"
 
             if [[ "$_token" =~ $_FROG_PARAMETER_PATTERN ]]; then
                 _ispos=0
-                _parameters["$_token"]=""
+                _parametersRef["$_token"]=""
             else
                 [[ "$_ispos" -eq 0 || "$_token" = --* ]] &&
                     frog_error 1 "Improperly formatted parameter name" "$_token"
 
-                _parameters["$i"]=""
+                _parametersRef["$i"]=""
             fi
         else
-            _parameters["$_lastKey"]="$_token"
+            _parametersRef["$_lastKey"]="$_token"
         fi
     done
 
     #TODO
-    [[ "${#_parameterNames[@]}" -ne "${#_parameterValues[@]}" ]] &&
-        frog_error 1 "Missing value for parameter"
+    #[[ "${#_parameterNames[@]}" -ne "${#_parameterValues[@]}" ]] &&
+    #    frog_error 1 "Missing value for parameter"
 }
 
 frog_process_options () {
-    local _optionNames _optionValues
-    IFS=$'\t' read -ra _optionNames <<< "$1"
-    IFS=$'\t' read -ra _optionValues <<< "$2"
+    local -n _optionsRef
+    _optionsRef="$1"
 
-    frogcfg_set_key array "options" "a" "c" "f" "x"
+    frogcfg_set_key array "options" "a" "c" "f" "r" "x" "X"
 
-    for (( i=0, n="${#_optionNames[@]}"; i < n; ++i )); do
-        local _opt="${_optionNames[$i]}"
-        local _val="${_optionValues[$i]}"
+    for _opt in "${!_optionsRef[@]}"; do
+        local _val="${_optionsRef[$_opt]}"
         case "$_opt" in
             a)  frogcfg_set_key string "options.app" "$_val"
                 _FROG_OPTION_APP="$_val" ;;
@@ -322,11 +320,11 @@ frog_debug () {
 #    3: string opFunction The function name to call withing the module script }
 ##
 frog_operation_cfg () {
-    local _namespace _operation
-    _namespace="$1"
-    _operation="$2"
     local -n _resultRef
-    _resultRef="$3"
+    _resultRef="$1"
+    local _namespace _operation
+    _namespace="$2"
+    _operation="$3"
 
     [[ -z "$_namespace" ]] &&
         frog_error 1 "usage: bullfrog [-options] <name.space> <operation> [--parameters]"
@@ -414,7 +412,8 @@ frog_run_operation () {
     local -n _rawParamsRef
     _rawParamsRef="$3"
 
-    local -A _opCfg=( [scriptPath]="" [functionName]="" [cfgPrefix]="" )
+    local -A _opCfg
+    _opCfg=( [scriptPath]="" [functionName]="" [cfgPrefix]="" )
     frog_operation_cfg _opCfg "$_namespace" "$_operation"
 
     #local -A __parameters
@@ -424,21 +423,24 @@ frog_run_operation () {
     # shellcheck disable=SC1090
     source "${_opCfg[scriptPath]}"
     frog_option_bash_debug && set -x
-    ${_opCfg[functionName]} __parameters
+    #${_opCfg[functionName]} __parameters
+    ${_opCfg[functionName]} _rawParamsRef
 }
 
-frog_process_parameters () {
-    local _opCfgPrefix _paramNames _paramValues
-    _opCfgPrefix="$1"
-    IFS=$'\t' read -ar _paramNames <<< "$2"
-    IFS=$'\t' read -ar _paramValues <<< "$3"
+frog_read_parameters () {
+    local -n _parametersRef _rawParamsRef
+    _parametersRef="$1"
+    _rawParamsRef="$2"
+    local _opCfgPrefix
+    _opCfgPrefix="$3"
 
     # retrieve expected param names
     local _paramCfgPrefix _str
     local -a _cfgParamNames
     _paramCfgPrefix="$_opCfgPrefix.parameters"
-    _str="$(frogcfg_get_value array "$_paramCfgPrefix")"
-    readarray -t _cfgParamNames <<< "$_str"
+
+    local _cfgParamNames
+    frogcfg_read_values _cfgParamNames "$_paramCfgPrefix"
 
     # the index of _cfgParamNames acts as [k] in the following:
     local -a _requiredNames  # [] := k
